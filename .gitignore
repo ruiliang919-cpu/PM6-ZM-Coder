@@ -1,0 +1,41 @@
+# ===== 构建产物 =====
+server/*/target/
+server/target/
+web/dist/
+web/dist_electron/
+web/node_modules/
+
+# ===== IDE 配置 =====
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+
+# ===== 归档 (不进入版本控制) =====
+archive/
+releases/
+
+# ===== 部署包（全部排除，准备重写） =====
+deploy/windows/*
+
+# ===== 旧部署包路径（兼容） =====
+deploy/windows/jdk8.msi
+deploy/windows/mysql.msi
+deploy/windows/ruoyi-admin.zip
+deploy/windows/前端.zip
+
+# ===== 日志 =====
+*.log
+logs/
+
+# ===== 运行时数据 =====
+*.pid
+*.rdb
+dump.rdb
+temp-*.rdb
+
+# ===== 临时文件 =====
+.umi/
+nul

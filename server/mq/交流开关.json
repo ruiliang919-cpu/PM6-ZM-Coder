@@ -1,0 +1,79 @@
+{
+  "ip": "99",
+  "addr": "0XAF1E",
+  "acSwitchNum": 1,
+  "data": [
+    {
+      "frameId": 1,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 2,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 3,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 4,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 5,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 6,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 7,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 8,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    }
+  ]
+}

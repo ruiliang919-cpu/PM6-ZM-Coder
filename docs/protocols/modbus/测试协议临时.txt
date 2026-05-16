@@ -1,0 +1,889 @@
+{
+  "ip": "99", 
+  "addr": "0XB715",
+  "data": {
+    "timeModule": "simple",
+    "handModule": "loop",
+    "illuminanceSensorModule": true,
+    "infraredSensorModule": true
+  }
+}
+
+
+
+{
+  "ip": "99", 
+  "data": {
+    "online": true,
+    "version": "1.2.6",
+    "time": 1749805188
+  }
+}
+
+
+{
+  "ip": "99", 
+  "addr": "0XAF1E",
+  "acSwitchNum": 1,
+  "data": [
+    {
+      "frameId": 1,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 2,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 3,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 4,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 5,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 6,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 7,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    },
+    {
+      "frameId": 8,
+      "switchStatus": 1,
+      "enable": 0,
+      "stimeHour": 23,
+      "stimeMin": 0,
+      "etimeHour": 3,
+      "etimeMin": 0
+    }
+  ]
+}
+
+{
+  "ip": "99", 
+  "addr": "0x0026",
+  "num": 10,
+  "data": [
+    {
+      "no": 1,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    }
+  ]
+}
+
+{
+  "ip": "99", 
+  "addr": "0x0027",
+  "num": 6,
+  "data": [
+    {
+      "no": 1,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    },
+    {
+      "no": 2,
+      "voltage": "123.1",
+      "current": "123.1"
+    }
+  ]
+}
+
+{
+  "ip": "193", 
+  "addr": "0xA5AE",
+  "data": [
+    {
+      "id": 1,
+      "no": 3
+    },
+    {
+      "id": 2,
+      "no": 4
+    }
+  ]
+}
+
+{
+  "ip": "99", 
+  "addr": "0XA80A",
+  "controlId":2,
+  "enabled": true,
+  "data1": [
+    {
+      "controlId": 2,
+      "frameId": 1,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 2,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 3,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 4,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 5,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 6,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 7,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 2,
+      "frameId": 8,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"10:00",
+      "etime":"00:10"
+    }
+  ],
+  "data2": [
+    {
+      "groupId":1,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":2,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":3,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":4,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":5,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":6,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":7,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":8,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":9,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":10,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":11,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":12,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":13,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":14,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":15,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    },
+    {
+      "groupId":16,
+      "selectStatus":1,
+      "groupName":"站厅A1端公共区广告01"
+    }
+  ]
+}
+
+
+
+```
+{"ip":"30","addr":"0x00CB","time":1753222200,"data":[{"no":1,"value1":"12.00","value2":"22.00","value3":"32.00","value4":"42.00","value5":"52.00","unit":"kWh"},{"no":2,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":3,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":4,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":5,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":6,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":7,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":8,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":9,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":10,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":11,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":12,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":13,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":14,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":15,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":16,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":17,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":18,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":19,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":20,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":21,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":22,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":23,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":24,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":25,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":26,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":27,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":28,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":29,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":30,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":31,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":32,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":33,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":34,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":35,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":36,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":37,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":38,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":39,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"},{"no":40,"value1":"0.00","value2":"0.00","value3":"0.00","value4":"0.00","value5":"0.00","unit":"kWh"}]}
+```
+
+{
+  "ip": "99", 
+  "addr": "0x2100",
+  "select": 1,
+  "data": [
+    {
+      "sensorId": 1,
+      "illuminanceLux": 360,
+      "outControlStatus": true,
+      "outControlChannel": "1",
+      "outControlAddr": "100"
+    },
+    {
+      "sensorId": 2,
+      "illuminanceLux": 270,
+      "outControlStatus": false,
+      "outControlChannel": "3",
+      "outControlAddr": "101"
+    },
+    {
+      "sensorId": 3,
+      "illuminanceLux": 170,
+      "outControlStatus": false,
+      "outControlChannel": "3",
+      "outControlAddr": "101"
+    },
+    {
+      "sensorId": 4,
+      "illuminanceLux": 570,
+      "outControlStatus": false,
+      "outControlChannel": "3",
+      "outControlAddr": "101"
+    },
+    {
+      "sensorId": 5,
+      "illuminanceLux": 470,
+      "outControlStatus": false,
+      "outControlChannel": "3",
+      "outControlAddr": "101"
+    }
+  ]
+}
+
+{
+  "ip": "99", 
+  "data": {
+    "online": true,
+    "version": "1.2.6",
+    "time": 1749805188
+  }
+}
+
+{
+  "ip": "99", 
+  "addr": "0XAE8F",
+  "select": 1,
+  "data": [
+    {
+      "sensorId": 1,
+      "constantIlluminanceLux": 0,
+      "hysteresisLux": 0,
+      "adjustmentTimeSeconds": 0,
+      "enabled": 1,
+      "outControlStatus": 1
+    },{
+      "sensorId": 2,
+      "constantIlluminanceLux": 0,
+      "hysteresisLux": 0,
+      "adjustmentTimeSeconds": 0,
+      "enabled": 1,
+      "outControlStatus": 1
+    },
+    {
+      "sensorId": 3,
+      "constantIlluminanceLux": 0,
+      "hysteresisLux": 0,
+      "adjustmentTimeSeconds": 0,
+      "enabled": 1,
+      "outControlStatus": 1
+    },
+    {
+      "sensorId": 4,
+      "constantIlluminanceLux": 0,
+      "hysteresisLux": 0,
+      "adjustmentTimeSeconds": 0,
+      "enabled": 1,
+      "outControlStatus": 1
+    },
+    {
+      "sensorId": 5,
+      "constantIlluminanceLux": 0,
+      "hysteresisLux": 0,
+      "adjustmentTimeSeconds": 0,
+      "enabled": 1,
+      "outControlStatus": 1
+    }
+  ],
+  "data1": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data2": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data3": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data4": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data5": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0]
+}
+
+{
+  "ip": "99", 
+  "addr": "0XAE7A",
+  "select": 1,
+  "data": [
+    {
+      "sensorId": 1,
+      "enabled": 1,
+      "inductiveLux": 0,
+      "inductiveSwitchStatus": 0,
+      "uninductionLux": 0,
+      "uninductionSwitchStatus": 1,
+      "delayedTime": 0
+    },
+    {
+      "sensorId": 2,
+      "enabled": 1,
+      "inductiveLux": 0,
+      "inductiveSwitchStatus": 0,
+      "uninductionLux": 0,
+      "uninductionSwitchStatus": 1,
+      "delayedTime": 0
+    },
+    {
+      "sensorId": 3,
+      "enabled": 1,
+      "inductiveLux": 0,
+      "inductiveSwitchStatus": 0,
+      "uninductionLux": 0,
+      "uninductionSwitchStatus": 1,
+      "delayedTime": 0
+    }
+  ],
+  "data1": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data2": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data3": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0]
+}
+
+{
+  "ip": "99", 
+  "addr": "0xA80A",
+  "controlId":1,
+  "enabled": true,
+  "data1": [
+    {
+      "controlId": 1,
+      "frameId": 1,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 2,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 3,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 4,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 5,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 6,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 7,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    },{
+      "controlId": 1,
+      "frameId": 8,
+      "lux": 0,
+      "switchStatus": 0,
+      "enabledStatus": 0,
+      "stime":"00:00",
+      "etime":"00:00"
+    }
+  ],
+  "data2": [
+    {
+      "groupId":1,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":2,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":3,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":4,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":5,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":6,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":7,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":8,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":9,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":10,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":11,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":12,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":13,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":14,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":15,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    },{
+      "groupId":16,
+      "selectStatus":0,
+      "groupName":"站厅A1端公共区广告01"
+    }
+  ]
+}
+
+{
+  "addr": "0XAE8F",
+  "enabled": true,
+  "data": [
+    {
+      "sensorId": 2,
+      "constantIlluminanceLux": 10,
+      "hysteresisLux": 20,
+      "adjustmentTimeSeconds": 30,
+      "enabled": 1,
+      "outControlStatus": 1,
+    }
+  ],
+  "data1": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+}
+
+{
+  "ip": "99", 
+  "addr": "0XAE8F",
+  "select": 5,
+  "data": [
+    {
+      "sensorId": 1,
+      "constantIlluminanceLux": 220,
+      "hysteresisLux": 330,
+      "adjustmentTimeSeconds": 440,
+      "enabled": 1,
+      "outControlStatus": 1
+    },    {
+      "sensorId": 2,
+      "constantIlluminanceLux": 210,
+      "hysteresisLux": 320,
+      "adjustmentTimeSeconds": 140,
+      "enabled": 1,
+      "outControlStatus": 1
+    },    {
+      "sensorId": 3,
+      "constantIlluminanceLux": 30,
+      "hysteresisLux": 20,
+      "adjustmentTimeSeconds": 10,
+      "enabled": 1,
+      "outControlStatus": 1
+    },    {
+      "sensorId": 4,
+      "constantIlluminanceLux": 20,
+      "hysteresisLux": 30,
+      "adjustmentTimeSeconds": 10,
+      "enabled": 1,
+      "outControlStatus": 1
+    },    {
+      "sensorId": 5,
+      "constantIlluminanceLux": 10,
+      "hysteresisLux": 30,
+      "adjustmentTimeSeconds": 20,
+      "enabled": 1,
+      "outControlStatus": 1
+    }
+  ],
+  "data1": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data2": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data3": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data4": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0],
+  "data5": [1,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0]
+}
+
+{
+  "addr": "0XB710",
+  "data": {
+    "no": 1,
+    "value": 0
+  }
+}
+
+{
+  "ip": "99", 
+  "addr": "0x23F5",
+  "data": [
+    {
+      "groupId": 1,
+      "name": "分1",
+      "value": [1, 3, 5, 17 ,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0],
+      "loopNum": 4
+    },
+    {
+      "groupId": 2,
+      "name": "分2",
+      "value": [2, 4, 6, 18 ,..., 0],
+      "loopNum": 4
+    }
+  ]
+}
+
+
+
+{
+  "ip": "99", 
+  "addr": "0xA483",
+  "data": [
+    {
+      "sceneId": 1,
+      "name": "场景01",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 2,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 3,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 4,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 5,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 6,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 7,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 8,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 9,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    },
+    {
+      "sceneId": 10,
+      "name": "场景02",
+      "groupIds": [1, 2, 3, 4, 5, 6, 0, 0,0,0,0,0,0,0,0,0],
+      "luxArr": [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],
+      "switchArr": [true,true,false,true,false,false,true,true,true,false,true,true,true,false,false,true]
+    }
+  ]
+}

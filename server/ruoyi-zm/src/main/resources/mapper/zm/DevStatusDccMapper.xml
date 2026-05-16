@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.zm.mapper.DevStatusDccMapper">
+
+    <resultMap type="com.ruoyi.zm.domain.DevStatusDcc" id="DevStatusDccResult">
+        <result property="id" column="id"/>
+        <result property="deviceId" column="device_id"/>
+        <result property="no" column="no"/>
+        <result property="runStatus" column="run_status"/>
+        <result property="onlineStatus" column="online_status"/>
+        <result property="onOffStatus" column="on_off_status"/>
+        <result property="outputVoltage" column="output_voltage"/>
+        <result property="outputCurrent" column="output_current"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+    </resultMap>
+
+
+</mapper>

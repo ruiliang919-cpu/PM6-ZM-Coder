@@ -1,0 +1,267 @@
+# 系统版本号
+version: V0.3.1-mqtt
+
+server:
+  compression:
+    enabled: true
+    mime-types: application/json
+  port: 8081
+  servlet: # 应用的访问路径
+      context-path: /
+  undertow: # HTTP post内容的最大大小。当值为-1时，默认值为大小是无限的
+      max-http-post-size: -1
+      buffer-size: 512
+      # 是否分配的直接内存
+      direct-buffers: true
+      threads:
+        # 设置IO线程数
+        io: 10
+        # 阻塞任务线程池
+        worker: 200
+  address: 0.0.0.0
+
+# 项目相关配置
+ruoyi:
+  # 名称
+  name:
+  # 版本
+  version:
+  # 版权年份
+  copyrightYear:
+  # 实例演示开关
+  demoEnabled: false
+  # 获取ip地址开关
+  addressEnabled: true
+  # 缓存懒加载
+  cacheLazy: true
+
+captcha:
+  # 页面 <参数设置> 可开启关闭 验证码校验
+  type: MATH
+  # line 线段干扰 circle 圆圈干扰 shear 扭曲干扰
+  category: CIRCLE
+  # 数字验证码位数
+  numberLength: 1
+  # 字符验证码长度
+  charLength: 4
+
+# 开发环境配置
+
+# 日志配置
+logging:
+  level:
+    com.ruoyi: debug
+    org.springframework: warn
+  config: classpath:logback-plus.xml
+
+# 用户配置
+user:
+  password:
+    # 密码最大错误次数
+    maxRetryCount: 999
+    # 密码锁定时间（默认10分钟）
+    lockTime: 1
+
+# Spring配置
+spring:
+  application:
+    name: ${ruoyi.name}
+  # 资源信息
+  messages:
+    # 国际化资源文件路径
+    basename: i18n/messages
+  profiles:
+#    active: create
+    active: prod
+  # 文件上传
+  servlet:
+    multipart:
+      # 单个文件大小
+      max-file-size: 10MB
+      # 设置总上传的文件大小
+      max-request-size: 20MB
+  # 服务模块
+  devtools:
+    restart:
+      enabled: false
+  mvc:
+    format:
+      date-time: yyyy-MM-dd HH:mm:ss
+  jackson:
+    # 日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    serialization:
+      # 格式化输出
+      indent_output: false
+      # 忽略无法转换的对象
+      fail_on_empty_beans: false
+    deserialization:
+      # 允许对象忽略json中不存在的属性
+      fail_on_unknown_properties: false
+  main:
+    # 关闭 Spring 默认的 banner 显示
+    banner-mode: off
+    # 关闭启动日志打印
+    log-startup-info: false
+
+# Sa-Token配置
+sa-token:
+  # token名称 (同时也是cookie名称)
+  token-name: Authorization
+  # token有效期 设为一天 (必定过期) 单位: 秒
+  timeout: -1
+  # 多端不同 token 有效期 可查看 LoginHelper.loginByDevice 方法自定义
+  active-timeout: -1
+  # 是否允许同一账号并发登录 (为true时允许一起登录, 为false时新登录挤掉旧登录)
+  is-concurrent: true
+  # 在多人登录同一账号时，是否共用一个token (为true时所有登录共用一个token, 为false时每次登录新建一个token)
+  is-share: false
+  # 是否尝试从header里读取token
+  is-read-header: true
+  # 是否尝试从cookie里读取token
+  is-read-cookie: false
+  # token前缀
+  token-prefix: "Bearer"
+  # jwt秘钥
+  jwt-secret-key: abcdefghijklmnopqrstuvwxyz
+  is-print: off
+
+# security配置
+security:
+  # 排除路径
+  excludes:
+    # 静态资源
+    - /*.html
+    - /**/*.html
+    - /**/*.css
+    - /**/*.js
+    # 公共路径
+    - /favicon.ico
+    - /error
+    # swagger 文档配置
+    - /*/api-docs
+    - /*/api-docs/**
+    # actuator 监控配置
+    - /actuator
+    - /actuator/**
+    - /t/modbus/**
+
+# MyBatisPlus配置
+# https://baomidou.com/config/
+mybatis-plus:
+  # 不支持多包, 如有需要可在注解配置 或 提升扫包等级
+  mapperPackage: com.ruoyi.**.mapper
+  # 对应的 XML 文件位置
+  mapperLocations: classpath*:mapper/**/*Mapper.xml
+  # 实体扫描，多个package用逗号或者分号分隔
+  typeAliasesPackage: com.ruoyi.**.domain
+  # 启动时是否检查 MyBatis XML 文件的存在，默认不检查
+  checkConfigLocation: false
+  configuration:
+    # 自动驼峰命名规则（camel case）映射
+    mapUnderscoreToCamelCase: true
+    # MyBatis 自动映射策略
+    autoMappingBehavior: PARTIAL
+    # MyBatis 自动映射时未知列或未知属性处理策
+    autoMappingUnknownColumnBehavior: NONE
+    logImpl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+  global-config:
+    # 是否打印 Logo banner
+    banner: false
+    dbConfig:
+      # 主键类型
+      idType: AUTO
+      # 逻辑已删除值
+      logicDeleteValue: 2
+      # 逻辑未删除值
+      logicNotDeleteValue: 0
+      # 字段验证策略之 insert,在 insert 的时候的字段验证策略
+      insertStrategy: NOT_NULL
+      updateStrategy: NOT_NULL
+      where-strategy: NOT_NULL
+
+mybatis-encryptor:
+  enable: false
+  algorithm: BASE64
+  encode: BASE64
+  password:
+  publicKey:
+  privateKey:
+
+springdoc:
+  api-docs:
+    enabled: false
+  info:
+    # 标题
+    title: ''
+    # 描述
+    description: ''
+    # 版本
+    version: ''
+    # 作者信息
+    contact:
+      name:
+      email:
+      url:
+  components:
+    # 鉴权方式配置
+    security-schemes:
+      apiKey:
+        type: APIKEY
+        in: HEADER
+        name: ${sa-token.token-name}
+  group-configs:
+    - group: 1.演示模块
+      packages-to-scan: com.ruoyi.demo
+    - group: 2.系统模块
+      packages-to-scan: com.ruoyi.web
+    - group: 3.代码生成模块
+      packages-to-scan: com.ruoyi.generator
+
+# 防止XSS攻击
+xss:
+  enabled: true
+  excludes: /system/notice
+  urlPatterns: /system/*,/monitor/*,/tool/*
+
+thread-pool:
+  enabled: true
+  queueCapacity: 300
+  keepAliveSeconds: 300
+
+lock4j:
+  acquire-timeout: 5000
+  expire: 5000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+  endpoint:
+    health:
+      show-details: ALWAYS
+    logfile:
+      external-file: ./logs/sys-console.log
+log4j:
+  logger:
+    com:
+      intelligt:
+        modbus:
+          jlib=DEBUG:
+
+---
+spring:
+  task:
+    scheduling:
+      pool:
+        size: 20
+  jmx:
+    enabled: false
+
+init:
+  zoneInit: false
+  sceneInit: false
+  slave: true
+#  addr2025520: true
+  lightZoneInit20251024: true
