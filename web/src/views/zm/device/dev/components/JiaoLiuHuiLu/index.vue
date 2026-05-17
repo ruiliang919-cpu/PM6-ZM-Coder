@@ -78,11 +78,13 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.stopTimer()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
           this.startTimer()
         } else {
+          this.stopTimer()
           this.loading = false
         }
       },
@@ -93,7 +95,7 @@ export default {
     // this.getList()
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this.stopTimer()
   },
   methods: {
     /** 查询测试单表列表 */
@@ -109,10 +111,16 @@ export default {
       })
     },
     startTimer() {
-      clearInterval(this.timer)
+      this.stopTimer()
       this.timer = setInterval(() => {
         this._get()
       }, 5000)
+    },
+    stopTimer() {
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     },
     handleRowStyle(row) {
       //   console.log(row);

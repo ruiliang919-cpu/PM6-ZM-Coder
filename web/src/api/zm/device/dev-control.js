@@ -11,8 +11,7 @@ export function lightControlList(data = {
   return request({
     url: '/zm/process/lightControlList',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -27,8 +26,7 @@ export function moduleControlList(data = {
   return request({
     url: '/zm/process/moduleControlList',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -44,8 +42,7 @@ export function intoScene(data = {
   return request({
     url: '/zm/write/intoScene',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -61,8 +58,7 @@ export function updateAcDc(data = {
   return request({
     url: '/zm/write/updateAcDc',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -78,8 +74,7 @@ export function updateDcDc(data = {
   return request({
     url: '/zm/write/updateDcDc',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -95,8 +90,7 @@ export function systemSwitch(data = {
   return request({
     url: '/zm/write/systemSwitch',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 
@@ -112,8 +106,7 @@ export function workModule(data = {
   return request({
     url: '/zm/write/workModule',
     method: 'GET',
-    params: data,
-    data: data
+    params: data
   })
 }
 

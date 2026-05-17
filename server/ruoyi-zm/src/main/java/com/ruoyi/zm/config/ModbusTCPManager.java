@@ -12,6 +12,7 @@ import com.serotonin.modbus4j.ModbusFactory;
 import com.serotonin.modbus4j.ModbusMaster;
 import com.serotonin.modbus4j.ip.IpParameters;
 import com.serotonin.modbus4j.msg.ReadCoilsRequest;
+import com.serotonin.modbus4j.msg.ReadCoilsResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -46,17 +47,28 @@ public class ModbusTCPManager {
     private final ModbusProperties modbusProperties;
 
     private final ConcurrentHashMap<Integer, ModbusMaster> masterPool = new ConcurrentHashMap<>();
+    /** 每个 slaveId 独立的锁对象，避免在 ConcurrentHashMap.compute() 内执行耗时 I/O */
+    private final ConcurrentHashMap<Integer, Object> slaveIdLocks = new ConcurrentHashMap<>();
 
     public ModbusMaster getSlave(int slaveId) {
-        return masterPool.compute(slaveId, (key, existing) -> {
-            if (existing != null && isMasterValid(key, existing)) {
+        // 使用 per-key 锁代替 compute()，避免在 ConcurrentHashMap 内部持锁期间执行阻塞网络 I/O
+        Object lock = slaveIdLocks.computeIfAbsent(slaveId, k -> new Object());
+        synchronized (lock) {
+            ModbusMaster existing = masterPool.get(slaveId);
+            if (existing != null && isMasterValid(slaveId, existing)) {
                 return existing;
             }
             if (existing != null) {
                 destroyConnection(existing);
             }
-            return createNewMaster(key);
-        });
+            ModbusMaster newMaster = createNewMaster(slaveId);
+            if (newMaster != null) {
+                masterPool.put(slaveId, newMaster);
+            } else {
+                masterPool.remove(slaveId);
+            }
+            return newMaster;
+        }
     }
 
     private ModbusMaster createNewMaster(int slaveId) {
@@ -85,14 +97,29 @@ public class ModbusTCPManager {
     }
 
     private boolean isMasterValid(int slaveId, ModbusMaster master) {
-        try {
-            ReadCoilsRequest request = new ReadCoilsRequest(1, 0, 1);
-            master.send(request);
-            return true;
-        } catch (Exception e) {
-            log.error("Modbus连接验证失败, slaveId={}", slaveId, e);
-            return false;
+        int maxRetries = 3;
+        for (int i = 0; i < maxRetries; i++) {
+            try {
+                ReadCoilsRequest request = new ReadCoilsRequest(1, 0, 1);
+                ReadCoilsResponse response = (ReadCoilsResponse) master.send(request);
+                if (response != null) {
+                    return true;
+                }
+            } catch (Exception e) {
+                if (i == maxRetries - 1) {
+                    log.error("Modbus连接验证失败(重试{}次), slaveId={}", maxRetries, slaveId, e);
+                } else {
+                    log.warn("Modbus连接验证第{}次失败, slaveId={}, 将重试", i + 1, slaveId);
+                    try {
+                        Thread.sleep(200);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
         }
+        return false;
     }
 
     /**

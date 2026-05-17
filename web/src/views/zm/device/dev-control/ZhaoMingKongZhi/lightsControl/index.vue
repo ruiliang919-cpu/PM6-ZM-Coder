@@ -27,6 +27,11 @@ export default {
     },
     deviceId: undefined
   },
+  data() {
+    return {
+      isRequesting: false
+    }
+  },
   components: {
     Lights,
     SelectAllCheckBox,
@@ -42,8 +47,8 @@ export default {
       }
     },
     handleLightBrightnessChange(index) {
-
-      if(!this.$refs.lights.checkedData.length) return this.$message.warning("请先选择一条回路")
+      if (!this.$refs.lights.checkedData.length) return this.$message.warning('请先选择一条回路')
+      if (this.isRequesting) return
 
       const brightness = (index + 1) * 10
 
@@ -51,6 +56,7 @@ export default {
         type: 'warning',
         title: '警告'
       }).then(res => {
+        this.isRequesting = true
         this.$refs.lightBrightness.setLoading(true)
         return loopControlLux({
           deviceId: this.deviceId,
@@ -59,16 +65,24 @@ export default {
         })
       }).then(res => {
         this.$message.success(res.msg || '操作成功！')
-        this.$emit("success")
+        this.$emit('success')
+      }).catch(error => {
+        if (error !== 'cancel') {
+          this.$message.error('操作失败')
+        }
       }).finally(() => {
+        this.isRequesting = false
         this.$refs.lightBrightness.setLoading(false)
       })
     },
     handleSwitchChange(type) {
+      if (this.isRequesting) return
+
       this.$confirm(type ? '确认启动吗？' : '确认停止吗？', {
         type: 'warning',
         title: '警告'
       }).then(res => {
+        this.isRequesting = true
         this.$refs.lightBrightness.setLoading(true)
         return loopControlSwitch({
           deviceId: this.deviceId,
@@ -77,7 +91,12 @@ export default {
         })
       }).then(res => {
         this.$message.success(res.msg || '操作成功！')
+      }).catch(error => {
+        if (error !== 'cancel') {
+          this.$message.error('操作失败')
+        }
       }).finally(() => {
+        this.isRequesting = false
         this.$refs.lightBrightness.setLoading(false)
       })
     }

@@ -80,7 +80,6 @@ export default {
         endTime: undefined,
         deviceId: undefined
       },
-      formatDate,
       timer: null
     }
   },
@@ -94,6 +93,10 @@ export default {
     navibarDeviceValue: {
       handler(val) {
         if (val) {
+          if (this.timer) {
+            clearInterval(this.timer)
+            this.timer = null
+          }
           this.queryParams.deviceId = val
           this.getList()
           this.startTimer()
@@ -106,7 +109,10 @@ export default {
     // this.getList()
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
   },
   methods: {
     formatDate,
@@ -127,7 +133,10 @@ export default {
       })
     },
     startTimer() {
-      clearInterval(this.timer)
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
       this.timer = setInterval(() => {
         this._get()
       }, 5000)

@@ -85,6 +85,20 @@ public class DeviceOnlineCheckTask {
 
                     long elapsed = now - lastTime.getTime();
                     if (elapsed > OFFLINE_THRESHOLD_MS) {
+                        // 二次确认：重新从 Redis 读取最新数据，防止竞态条件
+                        Object latestValue = redisTemplate.opsForValue().get(key);
+                        if (latestValue instanceof DevBaseDeviceTCPVo) {
+                            DevBaseDeviceTCPVo latest = (DevBaseDeviceTCPVo) latestValue;
+                            Date latestTime = latest.getLastTime();
+                            if (latestTime != null) {
+                                long latestElapsed = now - latestTime.getTime();
+                                if (latestElapsed <= OFFLINE_THRESHOLD_MS) {
+                                    // 最新状态显示设备仍在线，跳过
+                                    continue;
+                                }
+                            }
+                        }
+                        // 确认离线，执行标记
                         markDeviceOffline(key, tcp);
                         offlineCount++;
                     }

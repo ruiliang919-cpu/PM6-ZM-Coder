@@ -140,12 +140,21 @@ export default {
       this._get()
     },
     _get() {
-      dcAc(this.queryParams).then((response) => {
-        this.demoList = response.data.data.rows || response.data.data || []
-        this.total = response.data.data.total || 0
-        this.cabinetType = response.data.cabinetType || undefined
-        this.loading = false
-      })
+      dcAc(this.queryParams)
+        .then((response) => {
+          const data = response?.data?.data || {}
+          this.demoList = Array.isArray(data.rows) ? data.rows : (Array.isArray(data) ? data : [])
+          this.total = typeof data.total === 'number' ? data.total : 0
+          this.cabinetType = response?.data?.cabinetType || undefined
+        })
+        .catch((error) => {
+          console.error('获取直流数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     startTimer() {
       clearInterval(this.timer)

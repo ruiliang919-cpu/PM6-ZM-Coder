@@ -72,11 +72,13 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.stopTimer()
           this.queryParams.deviceId = n
           this.queryParams.pageNum = 1
           this.getList()
           this.startTimer()
         } else {
+          this.stopTimer()
           this.loading = false
         }
       },
@@ -87,7 +89,7 @@ export default {
     // this.getList()
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this.stopTimer()
   },
   methods: {
     /** 查询测试单表列表 */
@@ -113,10 +115,16 @@ export default {
       })
     },
     startTimer() {
-      clearInterval(this.timer)
+      this.stopTimer()
       this.timer = setInterval(() => {
         this._get()
       }, 5000)
+    },
+    stopTimer() {
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     },
     openAllSwitch() {
       this.$confirm(
@@ -133,6 +141,7 @@ export default {
         this.$message.success(res.msg || '操作成功')
         this.$emit('success')
       }).catch(e => {
+        if (e === 'cancel' || e === 'close') return
         console.error('操作失败:', e)
         this.$message.error('操作失败，请重试')
       })
@@ -152,6 +161,7 @@ export default {
         this.$message.success(res.msg || '操作成功')
         this.$emit('success')
       }).catch(e => {
+        if (e === 'cancel' || e === 'close') return
         console.error('操作失败:', e)
         this.$message.error('操作失败，请重试')
       })

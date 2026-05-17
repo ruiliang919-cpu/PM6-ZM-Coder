@@ -23,11 +23,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -191,8 +196,10 @@ public class MqttMessageHandler {
             tcp.setOnlineStatus(0); // 断开
             redisTemplate.opsForValue().set("zm:create-tcp:" + deviceNo, tcp, 1, TimeUnit.DAYS);
             // 清除断线设备的告警信息
-            Set<String> keys = redisTemplate.keys("zm:fault:" + deviceNo + ":*");
-            redisTemplate.delete(keys);
+            Set<String> keys = scanKeys("zm:fault:" + deviceNo + ":*");
+            if (!keys.isEmpty()) {
+                redisTemplate.delete(keys);
+            }
             boolArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:1:" + ip + ":" + deviceNo + ":0x0000", initData);
             DevFaultRecordVo vo = new DevFaultRecordVo();
             vo.setDeviceId(Math.toIntExact(deviceNo));
@@ -229,6 +236,25 @@ public class MqttMessageHandler {
         } catch (Exception e) {
             log.error("", e);
         }
+    }
+
+    /**
+     * 使用 SCAN 命令替代 KEYS，避免阻塞 Redis
+     */
+    private Set<String> scanKeys(String pattern) {
+        return redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(100)
+                .build();
+            try (Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+            return keys;
+        });
     }
 
     public static void main(String[] args) {

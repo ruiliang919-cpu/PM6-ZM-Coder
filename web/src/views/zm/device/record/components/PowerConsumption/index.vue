@@ -84,6 +84,10 @@ export default {
     navibarDeviceValue: {
       handler(val) {
         if (val) {
+          if (this.timer) {
+            clearInterval(this.timer)
+            this.timer = null
+          }
           this.queryParams.deviceId = val
           this.getList()
           this.startTimer()
@@ -96,7 +100,10 @@ export default {
     // this.getList()
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
   },
   methods: {
     getFullYear,
@@ -113,59 +120,72 @@ export default {
     _get() {
       if (this.type === 0) {
         powerRecordGetDay(this.queryParams).then((response) => {
-          this.demoList = response.rows
-          this.total = response.total
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        }).catch((error) => {
+          console.error('获取能耗数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        }).finally(() => {
           this.loading = false
         })
       } else if (this.type === 1) {
         powerRecordGetWeek(this.queryParams).then((response) => {
-          this.demoList = response.rows
-          this.total = response.total
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        }).catch((error) => {
+          console.error('获取能耗数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        }).finally(() => {
           this.loading = false
         })
       } else if (this.type === 2) {
         powerRecordGetMonth(this.queryParams).then((response) => {
-          this.demoList = response.rows
-          this.total = response.total
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        }).catch((error) => {
+          console.error('获取能耗数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        }).finally(() => {
           this.loading = false
         })
       } else if (this.type === 3) {
         powerRecordGetQuarter(this.queryParams).then((response) => {
-          this.demoList = response.rows
-          this.total = response.total
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        }).catch((error) => {
+          console.error('获取能耗数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        }).finally(() => {
           this.loading = false
         })
       } else if (this.type === 4) {
         powerRecordGetYear(this.queryParams).then((response) => {
-          this.demoList = response.rows
-          this.total = response.total
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        }).catch((error) => {
+          console.error('获取能耗数据失败:', error)
+          this.demoList = []
+          this.total = 0
+        }).finally(() => {
           this.loading = false
         })
       }
     },
     startTimer() {
-      clearInterval(this.timer)
-      if (this.type === 0) {
-        this.timer = setInterval(() => {
-          this._get()
-        }, Math.random() * 20000)
-      } else if (this.type === 1) {
-        this.timer = setInterval(() => {
-          this._get()
-        }, Math.random() * 40000)
-      } else if (this.type === 2) {
-        this.timer = setInterval(() => {
-          this._get()
-        }, Math.random() * 60000)
-      } else if (this.type === 3) {
-        this.timer = setInterval(() => {
-          this._get()
-        }, Math.random() * 80000)
-      } else if (this.type === 4) {
-        this.timer = setInterval(() => {
-          this._get()
-        }, Math.random() * 100000)
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
       }
+      // 基准间隔根据type确定，加2秒随机抖动
+      const baseIntervals = { 0: 10000, 1: 20000, 2: 30000, 3: 40000, 4: 50000 }
+      const interval = (baseIntervals[this.type] || 30000) + Math.floor(Math.random() * 2000)
+      this.timer = setInterval(() => {
+        this._get()
+      }, interval)
     },
     handleRowStyle(row) {
       //   console.log(row);

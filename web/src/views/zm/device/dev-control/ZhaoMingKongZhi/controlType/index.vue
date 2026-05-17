@@ -63,7 +63,8 @@ export default {
         infraredSensorModule: false,
         timeModule: ''
       },
-      timer: null
+      timer: null,
+      timeoutIds: []
     }
   },
   methods: {
@@ -77,9 +78,10 @@ export default {
           }).then(response => {
             this.$message.success(response.msg || '操作成功')
             this.open01 = false
-            setTimeout(() => {
+            const tid = setTimeout(() => {
               this.getData()
             }, 3000)
+            this.timeoutIds.push(tid)
           }).finally(() => {
             this.loading = false
           })
@@ -96,9 +98,10 @@ export default {
           }).then(response => {
             this.$message.success(response.msg || '操作成功')
             this.open02 = false
-            setTimeout(() => {
+            const tid = setTimeout(() => {
               this.getData()
             }, 3000)
+            this.timeoutIds.push(tid)
           }).finally(() => {
             this.loading = false
           })
@@ -122,7 +125,10 @@ export default {
       })
     },
     startTimer() {
-      clearInterval(this.timer)
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
       this.timer = setInterval(() => {
         this._get()
       }, 5000)
@@ -154,7 +160,13 @@ export default {
 
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    if (this.timer) {
+      clearInterval(this.timer)
+      this.timer = null
+    }
+    if (this.timeoutIds) {
+      this.timeoutIds.forEach(id => clearTimeout(id))
+    }
   }
 }
 </script>

@@ -69,6 +69,7 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.stopTimer()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
@@ -84,21 +85,32 @@ export default {
       this._get()
     },
     _get() {
-      getBusInsulation(this.queryParams).then(res => {
-        this.form = res.data
-      }).finally(() => {
-        this.loading = false
-      })
+      getBusInsulation(this.queryParams)
+        .then(res => {
+          this.form = res.data
+        })
+        .catch((error) => {
+          console.error('获取数据失败:', error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     startTimer() {
-      clearInterval(this.timer)
+      this.stopTimer()
       this.timer = setInterval(() => {
         this._get()
       }, 5000)
+    },
+    stopTimer() {
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     }
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this.stopTimer()
   }
 }
 </script>

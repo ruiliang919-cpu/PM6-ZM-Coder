@@ -32,30 +32,43 @@ public class RtuHandler {
 
     // 处理上位机发送帧
     public String handleReceivedData(String frame) {
+        if (frame == null || frame.length() < 8) {
+            log.warn("RTU帧长度非法, length={}, frame={}", frame == null ? 0 : frame.length(), frame);
+            return "帧长度非法";
+        }
         String result = "Hello World!";
-        String[] frameArr = ScaleUtil.splitIntoPairs(frame.substring(0, frame.length() - 4));
-        // crc 校验码
-        int crc = Integer.parseInt(frame.substring(frame.length() - 4), 16);
-        if (crc != ScaleUtil.crcCheck(frameArr)) {
-            // crc 校验出错
-            return result = "crc 校验出错";
-        }
-        // 功能码
-        String code = frameArr[1];
-        // 寄存器地址
-        int address = Integer.parseInt((frameArr[2] + frameArr[3]), 16);
-        // 操作寄存器数量
-        int num = Integer.parseInt((frameArr[4] + frameArr[5]), 16);
+        try {
+            String[] frameArr = ScaleUtil.splitIntoPairs(frame.substring(0, frame.length() - 4));
+            // crc 校验码
+            int crc = Integer.parseInt(frame.substring(frame.length() - 4), 16);
+            if (crc != ScaleUtil.crcCheck(frameArr)) {
+                // crc 校验出错
+                return result = "crc 校验出错";
+            }
+            // 功能码
+            String code = frameArr[1];
+            // 寄存器地址
+            int address = Integer.parseInt((frameArr[2] + frameArr[3]), 16);
+            // 操作寄存器数量
+            int num = Integer.parseInt((frameArr[4] + frameArr[5]), 16);
 
-        // 03 功能码 遥测
-        if (3 == Integer.parseInt(code)) {
-            result = process(address, num);
-        }
-        // 10 功能码 遥控
-        else if (10 == Integer.parseInt(code)) {
-            // 遥控携带数据
-            String data = frame.substring(14, 18);
-            result = process(address, data);
+            // 03 功能码 遥测
+            if (3 == Integer.parseInt(code)) {
+                result = process(address, num);
+            }
+            // 10 功能码 遥控
+            else if (10 == Integer.parseInt(code)) {
+                // 遥控携带数据
+                if (frame.length() < 18) {
+                    log.warn("RTU帧数据段长度不足, length={}", frame.length());
+                    return "帧数据不完整";
+                }
+                String data = frame.substring(14, 18);
+                result = process(address, data);
+            }
+        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+            log.error("RTU帧解析异常, frame={}", frame, e);
+            return "帧格式错误";
         }
         return result;
     }

@@ -108,11 +108,13 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.stopTimer()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
           this.startTimer()
         } else {
+          this.stopTimer()
           this.loading = false
         }
       },
@@ -127,17 +129,29 @@ export default {
     },
     _get() {
       if (!this.queryParams.slaveId) return
-      dccList(this.queryParams).then((response) => {
-        this.demoList = response.rows || []
-        this.total = response.total || 0
-        this.loading = false
-      })
+      dccList(this.queryParams)
+        .then((response) => {
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        })
+        .catch((error) => {
+          console.error('获取数据失败:', error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
     startTimer() {
-      clearInterval(this.timer)
+      this.stopTimer()
       this.timer = setInterval(() => {
         this._get()
       }, 5000)
+    },
+    stopTimer() {
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     },
     handleRowStyle(row) {
       //   console.log(row);
@@ -164,7 +178,7 @@ export default {
     // }, 5 * 1000)
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this.stopTimer()
   }
 }
 </script>

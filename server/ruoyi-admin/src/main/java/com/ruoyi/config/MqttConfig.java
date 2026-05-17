@@ -20,6 +20,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @Slf4j
 @Configuration
@@ -77,7 +78,7 @@ public class MqttConfig {
 
     @Bean(name = "mqttOutboundChannel")
     public MessageChannel mqttOutboundChannel() {
-        return new QueueChannel(100);
+        return new QueueChannel(500);
     }
 
     @Bean
@@ -96,11 +97,13 @@ public class MqttConfig {
     @Bean
     public Executor mqttTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(16);
-        executor.setMaxPoolSize(32);
-        executor.setQueueCapacity(200);
+        executor.setCorePoolSize(32);
+        executor.setMaxPoolSize(64);
+        executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("mqtt-pool-");
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.initialize();
+        log.info("MQTT线程池初始化: coreSize=32, maxSize=64, queueCapacity=500, rejectedHandler=CallerRunsPolicy");
         return executor;
     }
 }

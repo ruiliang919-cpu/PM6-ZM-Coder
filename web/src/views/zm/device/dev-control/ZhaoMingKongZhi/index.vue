@@ -114,6 +114,7 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.stopTimer()
           this.queryParams.deviceId = n
           this.getData()
         }
@@ -133,19 +134,25 @@ export default {
       })
     },
     startTimer() {
-      clearInterval(this.timer)
+      this.stopTimer()
       this.timer = setInterval(() => {
         lightControlList(this.queryParams).then(res => {
           this.lightControlListData.systemControl = res.data.systemControl
         })
       }, 5000)
+    },
+    stopTimer() {
+      if (this.timer) {
+        clearInterval(this.timer)
+        this.timer = null
+      }
     }
   },
   mounted() {
     // this.getData()
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this.stopTimer()
   }
 }
 </script>
