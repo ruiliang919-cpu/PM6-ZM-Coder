@@ -6,8 +6,10 @@ import com.ruoyi.zm.domain.*;
 import com.ruoyi.zm.mapper.*;
 import com.ruoyi.zm.utils.IdGenerator;
 import com.ruoyi.zm.utils.ScaleUtil;
+import com.ruoyi.web.websocket.DeviceStatusPushService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -48,6 +50,9 @@ public class Update03DataService {
     private final DevEnergyMeterWeekMapper energyMeterWeekMapper;
     private final DevEnergyMeterMonthMapper energyMeterMonthMapper;
     private final DevEnergyMeterQuarterMapper energyMeterQuarterMapper;
+
+    @Autowired(required = false)
+    private DeviceStatusPushService deviceStatusPushService;
     private final DevEnergyMeterYearMapper energyMeterYearMapper;
 
     public void updateData(DevInstruct instruct, Object data) {
@@ -1389,6 +1394,15 @@ public class Update03DataService {
         if (shouldUpdateYearlyData(LocalDateTime.now()) && null == source.get(6)) {
             createPower(deviceId, timestamp, data, 6, 6);
             deleteLastP(deviceId, 6, 10);
+        }
+
+        // 功率数据写入后推送WebSocket通知
+        if (deviceStatusPushService != null) {
+            Map<String, Object> pushData = new HashMap<>();
+            pushData.put("deviceId", deviceId);
+            pushData.put("updated", true);
+            pushData.put("timestamp", System.currentTimeMillis());
+            deviceStatusPushService.pushPowerData(pushData);
         }
     }
 

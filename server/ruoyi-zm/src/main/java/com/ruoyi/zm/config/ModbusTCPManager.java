@@ -19,7 +19,14 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.ScanOptions;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,21 +43,28 @@ public class ModbusTCPManager {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTemplate<String, boolean[]> boolArrayRedisTemplate;
     private final DevFaultRecordMapper faultRecordMapper;
+    private final ModbusProperties modbusProperties;
 
     private final ConcurrentHashMap<Integer, ModbusMaster> masterPool = new ConcurrentHashMap<>();
 
     public ModbusMaster getSlave(int slaveId) {
-        ModbusMaster master = masterPool.get(slaveId);
-        if (master == null || !isMasterValid(slaveId, master)) {
-            master = createNewMaster(slaveId);
-            if (master != null) masterPool.put(slaveId, master);
-        }
-        return master;
+        return masterPool.compute(slaveId, (key, existing) -> {
+            if (existing != null && isMasterValid(key, existing)) {
+                return existing;
+            }
+            if (existing != null) {
+                destroyConnection(existing);
+            }
+            return createNewMaster(key);
+        });
     }
 
     private ModbusMaster createNewMaster(int slaveId) {
         DevBaseDeviceTCPVo modbusInfo = getOneByCache(slaveId);
-        if (modbusInfo == null) return null;
+        if (modbusInfo == null) {
+            log.error("创建Modbus连接失败, 未找到设备缓存信息, slaveId={}", slaveId);
+            return null;
+        }
 
         try {
             IpParameters params = new IpParameters();
@@ -58,39 +72,46 @@ public class ModbusTCPManager {
             params.setPort(modbusInfo.getPort());
             params.setEncapsulated(false);
             ModbusMaster master = modbusFactory.createTcpMaster(params, true);
-            master.setTimeout(1000);
-            master.setRetries(0);
+            master.setTimeout(modbusProperties.getTimeout());
+            master.setRetries(modbusProperties.getRetries());
             master.init();
             ReadCoilsRequest request = new ReadCoilsRequest(1, 0, 1);
             master.send(request);
             return master;
         } catch (Exception e) {
+            log.error("创建Modbus连接失败, slaveId={}, ip={}", slaveId, modbusInfo.getIp(), e);
             return null;
         }
     }
 
     private boolean isMasterValid(int slaveId, ModbusMaster master) {
         try {
-            if (master == null) {
-                destroyMaster(slaveId, null);
-                return false;
-            }
             ReadCoilsRequest request = new ReadCoilsRequest(1, 0, 1);
             master.send(request);
             return true;
         } catch (Exception e) {
-            destroyMaster(slaveId, master);
+            log.error("Modbus连接验证失败, slaveId={}", slaveId, e);
             return false;
         }
     }
 
-    private void destroyMaster(int slaveId, ModbusMaster master) {
+    /**
+     * 仅销毁连接，不操作 masterPool（供 compute lambda 内部使用）
+     */
+    private void destroyConnection(ModbusMaster master) {
         try {
             if (master != null) master.destroy();
-            masterPool.remove(slaveId);
         } catch (Exception e) {
-            // log.error("销毁ModbusMaster失败", e);
+            log.error("释放Modbus连接失败", e);
         }
+    }
+
+    /**
+     * 销毁连接并从 masterPool 移除（供 compute 外部使用）
+     */
+    private void safeDestroy(int slaveId, ModbusMaster master) {
+        destroyConnection(master);
+        masterPool.remove(slaveId);
     }
 
 //    @Scheduled(fixedDelay = 5000) // 调整为5秒一次
@@ -111,13 +132,14 @@ public class ModbusTCPManager {
                 modbusInfo.setOnlineStatus(1); // 在线
                 modbusInfo.setLastTime(new Date());
                 // 重新写入到缓存中
-                redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, modbusProperties.getConnectionTtl(), TimeUnit.SECONDS);
                 // log.info("连接Modbus成功，设备IP：{} 连接设备主机号：{}", modbusInfo.getIp(), modbusInfo.getId());
                 redisTemplate.delete("zm:order:" + modbusInfo.getId() + ":1:0x0000");
                 redisTemplate.delete("zm:fault:" + modbusInfo.getId() + ":0xAAAA");
                 redisTemplate.convertAndSend("Recover", slaveId + "~");
             }
         } catch (Exception e) {
+            log.error("Modbus连接异常, slaveId={}", slaveId, e);
             try {
                 boolean[] initData = new boolean[845];
                 boolean[] sourceData = boolArrayRedisTemplate.opsForValue().get("zm:queue:zm:cache:1:" + modbusInfo.getIp() + ":" + modbusInfo.getId() + ":0x0000");
@@ -129,10 +151,24 @@ public class ModbusTCPManager {
                 redisTemplate.delete("zm:order:" + modbusInfo.getId() + ":1:0x0000");
                 if (modbusInfo.getOnlineStatus() == 1) {
                     modbusInfo.setOnlineStatus(0); // 断开
-                    redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, 1, TimeUnit.DAYS);
-                    // 清除断线设备的告警信息
-                    Set<String> keys = redisTemplate.keys("zm:fault:" + modbusInfo.getId() + ":*");
-                    redisTemplate.delete(keys);
+                    redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, modbusProperties.getConnectionTtl(), TimeUnit.SECONDS);
+                    // 清除断线设备的告警信息（使用SCAN替代KEYS，避免阻塞Redis）
+                    Set<String> keysToDelete = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+                        Set<String> keys = new HashSet<>();
+                        ScanOptions options = ScanOptions.scanOptions()
+                            .match("zm:fault:" + modbusInfo.getId() +":*")
+                            .count(100)
+                            .build();
+                        try (Cursor<byte[]> cursor = connection.scan(options)) {
+                            while (cursor.hasNext()) {
+                                keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                            }
+                        }
+                        return keys;
+                    });
+                    if (keysToDelete != null && !keysToDelete.isEmpty()) {
+                        redisTemplate.delete(new ArrayList<>(keysToDelete));
+                    }
                     boolArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:1:" + modbusInfo.getIp() + ":" + modbusInfo.getId() + ":0x0000", initData);
                     DevFaultRecordVo vo = new DevFaultRecordVo();
                     vo.setDeviceId(Math.toIntExact(modbusInfo.getId()));
@@ -152,7 +188,7 @@ public class ModbusTCPManager {
                     faultRecordMapper.insert(recordFault);
                 }
             } catch (Exception e1) {
-                // log.error("出错又出错~~", e1);
+                log.error("Modbus断线处理失败, slaveId={}", slaveId, e1);
             }
         }
     }
@@ -165,7 +201,7 @@ public class ModbusTCPManager {
             modbusInfo = new DevBaseDeviceTCPVo();
             if (!ObjectUtils.isEmpty(source)) {
                 BeanCopyUtils.copy(source, modbusInfo);
-                redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, 1, TimeUnit.DAYS);
+                redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, modbusProperties.getConnectionTtl(), TimeUnit.SECONDS);
             }
         }
         return modbusInfo;

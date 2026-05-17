@@ -9,7 +9,9 @@ import com.ruoyi.mqtt.vo.TelecommandBody;
 import com.ruoyi.mqtt03.MainChannel;
 import com.ruoyi.schedule.TelecommandSendSchedule;
 import com.ruoyi.utils.device.DListUtil;
+import com.ruoyi.web.websocket.DeviceStatusPushService;
 import com.ruoyi.zm.config.ModbusTCPManager;
+import com.ruoyi.zm.constants.DeviceConstants;
 import com.ruoyi.zm.domain.DevBaseDevice;
 import com.ruoyi.zm.domain.DevFaultRecord;
 import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
@@ -42,6 +44,7 @@ public class MqttMessageHandler {
     private final TelecommandSendSchedule telecommandSendSchedule;
     private final RedisTemplate<String, boolean[]> boolArrayRedisTemplate;
     private final Key key;
+    private final DeviceStatusPushService deviceStatusPushService;
 
     @ServiceActivator(inputChannel = "mqttInputChannel")
     public void handleMqttMessage(Message<?> message) {
@@ -83,23 +86,83 @@ public class MqttMessageHandler {
         }
     }
 
+    /**
+     * 处理设备心跳消息
+     * <p>
+     * 策略：先更新内存对象状态，成功后写入Redis缓存，异常则不更新缓存，保证状态一致性。
+     * 每次心跳都刷新 lastTime，确保离线检测定时任务可正常判断设备活性。
+     * </p>
+     *
+     * @param deviceNo 设备编号
+     * @param payload  心跳消息体
+     */
     private void handleHeartbeat(Integer deviceNo, String payload) {
-        Heart.Data bean = JSONUtil.toBean(payload, Heart.class).getData();
-        Boolean online = bean.getOnline();
-        String version = bean.getVersion();
-        DevBaseDeviceTCPVo tcp = tcpManager.getOneByCache(deviceNo);
-        Boolean persist = redisTemplate.hasKey("zm:create-tcp:" + deviceNo);
-        if (!persist || (online && 0 == tcp.getOnlineStatus())) {
-            tcp.setVersion(version);
-            tcp.setOnlineStatus(1);
-            tcp.setLastTime(new Date());
-            redisTemplate.opsForValue().set("zm:create-tcp:" + deviceNo, tcp, 2, TimeUnit.DAYS);
-            redisTemplate.delete("zm:order:" + deviceNo + ":1:0x0000");
-            redisTemplate.delete("zm:fault:" + deviceNo + ":0xAAAA");
-        } else if (tcp.getVersion() == null || tcp.getVersion().isEmpty()) {
-            tcp.setVersion(version);
-            tcp.setLastTime(new Date());
-            redisTemplate.opsForValue().set("zm:create-tcp:" + deviceNo, tcp, 2, TimeUnit.DAYS);
+        try {
+            // 1. 解析心跳数据
+            Heart heart = JSONUtil.toBean(payload, Heart.class);
+            if (heart == null || heart.getData() == null) {
+                log.warn("心跳处理: 心跳数据解析为空, deviceNo={}", deviceNo);
+                return;
+            }
+            Heart.Data data = heart.getData();
+            Boolean online = data.getOnline();
+            String version = data.getVersion();
+
+            // 2. 从缓存获取设备信息
+            DevBaseDeviceTCPVo tcp = tcpManager.getOneByCache(deviceNo);
+            if (tcp == null) {
+                log.warn("心跳处理: 设备缓存不存在, deviceNo={}", deviceNo);
+                return;
+            }
+
+            // 3. 判断设备状态变化
+            boolean wasOffline = tcp.getOnlineStatus() == null
+                || tcp.getOnlineStatus() == DeviceConstants.ONLINE_STATUS_OFFLINE;
+            boolean shouldGoOnline = Boolean.TRUE.equals(online);
+            boolean needFullUpdate = wasOffline && shouldGoOnline;
+            boolean needVersionUpdate = (tcp.getVersion() == null || tcp.getVersion().isEmpty())
+                && version != null && !version.isEmpty();
+            boolean keyExists = Boolean.TRUE.equals(
+                redisTemplate.hasKey(DeviceConstants.CACHE_TCP_PREFIX + deviceNo));
+
+            // 4. 根据状态变化更新缓存
+            if (!keyExists || needFullUpdate) {
+                // 设备首次写入缓存 或 从离线恢复上线：完整更新
+                tcp.setVersion(version);
+                tcp.setOnlineStatus(DeviceConstants.ONLINE_STATUS_ONLINE);
+                tcp.setLastTime(new Date());
+                redisTemplate.opsForValue().set(
+                    DeviceConstants.CACHE_TCP_PREFIX + deviceNo, tcp, 2, TimeUnit.DAYS);
+                redisTemplate.delete("zm:order:" + deviceNo + ":1:0x0000");
+                redisTemplate.delete(DeviceConstants.CACHE_FAULT_PREFIX + deviceNo + ":0xAAAA");
+                log.info("设备上线, deviceNo={}, version={}", deviceNo, version);
+            } else if (needVersionUpdate) {
+                // 设备已在线但版本号缺失：仅更新版本和心跳时间
+                tcp.setVersion(version);
+                tcp.setLastTime(new Date());
+                redisTemplate.opsForValue().set(
+                    DeviceConstants.CACHE_TCP_PREFIX + deviceNo, tcp, 2, TimeUnit.DAYS);
+                log.debug("设备版本更新, deviceNo={}, version={}", deviceNo, version);
+            } else {
+                // 设备已在线且版本已知：仅刷新最后心跳时间（关键：保证离线检测可工作）
+                tcp.setLastTime(new Date());
+                redisTemplate.opsForValue().set(
+                    DeviceConstants.CACHE_TCP_PREFIX + deviceNo, tcp, 2, TimeUnit.DAYS);
+            }
+
+            log.debug("设备心跳更新成功, deviceNo={}", deviceNo);
+
+            // WebSocket 推送设备状态变更
+            try {
+                DevBaseDeviceTCPVo updatedTcp = tcpManager.getOneByCache(deviceNo);
+                if (updatedTcp != null) {
+                    deviceStatusPushService.pushDeviceStatus(deviceNo, updatedTcp);
+                }
+            } catch (Exception pushEx) {
+                log.warn("WebSocket推送心跳状态失败, deviceNo={}", deviceNo, pushEx);
+            }
+        } catch (Exception e) {
+            log.error("心跳处理失败, deviceNo={}", deviceNo, e);
         }
     }
 
@@ -147,6 +210,14 @@ public class MqttMessageHandler {
             recordFault.setShowType(1);
             recordFault.setType(1);
             faultRecordMapper.insert(recordFault);
+
+            // WebSocket 推送设备离线告警
+            try {
+                deviceStatusPushService.pushDeviceStatus(deviceNo, tcp);
+                deviceStatusPushService.pushDeviceAlarm(deviceNo, "设备离线");
+            } catch (Exception pushEx) {
+                log.warn("WebSocket推送离线告警失败, deviceNo={}", deviceNo, pushEx);
+            }
         }
     }
 

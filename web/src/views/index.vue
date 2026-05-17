@@ -36,6 +36,7 @@ import chartBar from './components/charts/configs/chartbar'
 import chartPie from './components/charts/configs/chartpie'
 import { getModule, getVersion, powersByAll, powersByDay } from '../api/index/index'
 import { delay } from '@/utils'
+import { subscribePowerData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
   name: 'Index',
@@ -53,7 +54,8 @@ export default {
       loading0: false,
       loading1: false,
       timer: null,
-      mode: -1
+      mode: -1,
+      wsSubId: null  // WebSocket 订阅ID
     }
   },
   methods: {
@@ -187,14 +189,30 @@ export default {
     this.getPowersByAll()
     this.getPowersByDay()
 
+    // WebSocket 订阅功率数据推送
+    this.wsSubId = subscribePowerData((data) => {
+      console.log('[Index] 收到WebSocket功率推送:', data)
+      // 收到推送后刷新数据
+      this._getPowersByAll()
+      this._getPowersByDay()
+    })
+
+    // 轮询作为 fallback，间隔 30秒（WebSocket 正常时基本不触发）
     this.timer = setInterval(async() => {
+      // WebSocket 连接正常时跳过轮询，仅作为降级方案
+      if (isWebSocketConnected()) return
       await this._getPowersByAll()
       await delay(2000)
       await this._getPowersByDay()
-    }, 10000)
+    }, 30000)
   },
   beforeDestroy() {
     clearInterval(this.timer)
+    // 取消 WebSocket 订阅
+    if (this.wsSubId) {
+      unsubscribe(this.wsSubId)
+      this.wsSubId = null
+    }
   }
 }
 </script>

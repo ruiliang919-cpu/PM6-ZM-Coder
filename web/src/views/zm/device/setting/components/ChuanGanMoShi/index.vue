@@ -152,7 +152,8 @@ export default {
       }).then(res => {
         this.$message.success(res.msg || '操作成功！')
       }).catch(err => {
-
+        console.error('操作失败:', err)
+        this.$message.error('操作失败，请重试')
       })
     },
     handleSaveRight(deviceId, sensorId, enabled) {
@@ -172,7 +173,8 @@ export default {
       }).then(res => {
         this.$message.success(res.msg || '操作成功！')
       }).catch(err => {
-
+        console.error('操作失败:', err)
+        this.$message.error('操作失败，请重试')
       })
     }
   },

@@ -133,7 +133,8 @@ export default {
         this.$message.success(res.msg || '操作成功')
         this.$emit('success')
       }).catch(e => {
-        console.log(e)
+        console.error('操作失败:', e)
+        this.$message.error('操作失败，请重试')
       })
     },
     closeAllSwitch() {
@@ -151,7 +152,8 @@ export default {
         this.$message.success(res.msg || '操作成功')
         this.$emit('success')
       }).catch(e => {
-        console.log(e)
+        console.error('操作失败:', e)
+        this.$message.error('操作失败，请重试')
       })
     }
 

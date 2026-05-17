@@ -5,6 +5,7 @@ import { Message } from 'element-ui'
 //import 'nprogress/nprogress.css'
 import { getToken } from '@/utils/auth'
 import { isRelogin } from '@/utils/request'
+import { connectWebSocket, disconnectWebSocket } from '@/utils/websocket'
 
 //NProgress.configure({ showSpinner: false })
 
@@ -29,6 +30,8 @@ router.beforeEach((to, from, next) => {
             router.addRoutes(accessRoutes) // 动态添加可访问路由表
             next({ ...to, replace: true }) // hack方法 确保addRoutes已完成
           })
+          // 登录成功后建立 WebSocket 连接
+          connectWebSocket()
         }).catch(err => {
             store.dispatch('LogOut').then(() => {
               Message.error(err)
@@ -40,7 +43,8 @@ router.beforeEach((to, from, next) => {
       }
     }
   } else {
-    // 没有token
+    // 没有token，断开 WebSocket
+    disconnectWebSocket()
     if (whiteList.indexOf(to.path) !== -1) {
       // 在免登录白名单，直接进入
       next()

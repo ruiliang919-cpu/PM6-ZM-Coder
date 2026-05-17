@@ -14472,3 +14472,38 @@ INSERT INTO `test_tree` VALUES (12, 10, 108, 3, '子节点88', 0, '2024-05-16 16
 INSERT INTO `test_tree` VALUES (13, 10, 108, 3, '子节点99', 0, '2024-05-16 16:15:03', 'admin', NULL, NULL, 0);
 
 SET FOREIGN_KEY_CHECKS = 1;
+
+-- ============================================
+-- 数据库结构优化 - 2026-05-17
+-- 注意：以下 ALTER 语句为增量变更，若索引已存在会报错，可先检查后再执行
+-- ============================================
+
+-- 1. 修复 dev_base_power 主键自增
+ALTER TABLE `dev_base_power` MODIFY COLUMN `id` BIGINT(20) NOT NULL AUTO_INCREMENT;
+
+-- 2. 添加关键索引
+ALTER TABLE `dev_base_device` ADD INDEX idx_device_no (`device_no`);
+ALTER TABLE `dev_base_device` ADD INDEX idx_region_id (`region_id`);
+ALTER TABLE `dev_base_device` ADD INDEX idx_online_status (`online_status`);
+ALTER TABLE `dev_base_power` ADD INDEX idx_device_timestamp (`device_id`, `timestamp` DESC);
+ALTER TABLE `dev_base_power` ADD INDEX idx_type (`type`);
+
+-- ============================================
+-- 历史数据表优化 - 分区方案 - 2026-05-17
+-- ============================================
+
+-- dev_base_power 按月分区（基于 timestamp 字段）
+-- 注意：分区前需确保 timestamp 字段是主键的一部分或有唯一索引
+-- 如果表已有数据，建议在维护窗口执行
+
+-- 创建归档表（用于存放超过1年的历史数据）
+CREATE TABLE IF NOT EXISTS `dev_base_power_archive` (
+  `id` bigint(20) NOT NULL,
+  `device_id` int(5) DEFAULT NULL COMMENT '设备ID',
+  `type` int(5) DEFAULT NULL COMMENT '类型（1-6）',
+  `value` decimal(10,2) DEFAULT NULL COMMENT '数值',
+  `timestamp` bigint(20) DEFAULT NULL COMMENT '时间戳',
+  PRIMARY KEY (`id`) USING BTREE,
+  KEY `idx_device_timestamp` (`device_id`, `timestamp` DESC),
+  KEY `idx_type` (`type`)
+) ENGINE = InnoDB ROW_FORMAT = DYNAMIC COMMENT = '耗电量历史归档表';

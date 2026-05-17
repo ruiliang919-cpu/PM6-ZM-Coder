@@ -196,6 +196,7 @@ export default {
 
           this.getOutControlStatus(deviceId, sensorId)
         }).catch(e => {
+          console.error('轮询数据获取失败:', e)
         }).finally(() => {
         })
       }, 5000)

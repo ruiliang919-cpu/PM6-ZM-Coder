@@ -267,6 +267,7 @@ export default {
         this.getList();
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {
+        // 用户取消删除操作
       }).finally(() => {
         this.loading = false;
       });

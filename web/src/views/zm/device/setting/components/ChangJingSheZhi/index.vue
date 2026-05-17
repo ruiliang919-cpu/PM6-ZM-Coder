@@ -153,7 +153,8 @@ export default {
       }).then(response => {
         this.$message.success(response.msg || '操作成功')
       }).catch(err => {
-        console.log(err)
+        console.error('操作失败:', err)
+        this.$message.error('操作失败，请重试')
       })
     },
     rename() {
