@@ -180,10 +180,20 @@ public class MqttMessageHandler {
     }
 
     private void yz(Integer deviceNo, String payload) {
-        Boolean connected = JSONUtil.toBean(payload, Yz.class).getConnected();
-        if (connected == null || connected) return;
-        DevBaseDeviceTCPVo tcp = tcpManager.getOneByCache(deviceNo);
-        String ip = tcp.getIp();
+        try {
+            Yz yzBean = JSONUtil.toBean(payload, Yz.class);
+            if (yzBean == null) {
+                log.warn("yz处理: JSON解析结果为空, deviceNo={}", deviceNo);
+                return;
+            }
+            Boolean connected = yzBean.getConnected();
+            if (connected == null || connected) return;
+            DevBaseDeviceTCPVo tcp = tcpManager.getOneByCache(deviceNo);
+            if (tcp == null) {
+                log.warn("yz处理: 设备缓存不存在, deviceNo={}", deviceNo);
+                return;
+            }
+            String ip = tcp.getIp();
         boolean[] initData = new boolean[845];
         boolean[] sourceData = boolArrayRedisTemplate.opsForValue().get("zm:queue:zm:cache:1:" + ip + ":" + deviceNo + ":0x0000");
         if (sourceData != null) {
@@ -203,10 +213,10 @@ public class MqttMessageHandler {
             boolArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:1:" + ip + ":" + deviceNo + ":0x0000", initData);
             DevFaultRecordVo vo = new DevFaultRecordVo();
             vo.setDeviceId(Math.toIntExact(deviceNo));
-            vo.setName(devBaseDeviceMapper.selectOne(new LambdaQueryWrapper<DevBaseDevice>()
+            DevBaseDevice deviceInfo = devBaseDeviceMapper.selectOne(new LambdaQueryWrapper<DevBaseDevice>()
                 .select(DevBaseDevice::getDeviceName)
-                .eq(DevBaseDevice::getDeviceNo, deviceNo)
-            ).getDeviceName());
+                .eq(DevBaseDevice::getDeviceNo, deviceNo));
+            vo.setName(deviceInfo != null ? deviceInfo.getDeviceName() : "未知设备");
             vo.setMessage("设备离线");
             vo.setStime(System.currentTimeMillis());
             redisTemplate.opsForValue().set("zm:fault:" + deviceNo + ":0xAAAA", vo);
@@ -226,15 +236,27 @@ public class MqttMessageHandler {
                 log.warn("WebSocket推送离线告警失败, deviceNo={}", deviceNo, pushEx);
             }
         }
+        } catch (Exception e) {
+            log.error("yz处理失败, deviceNo={}", deviceNo, e);
+        }
     }
 
     private void handleCoilStatus(Integer deviceNo, String payload) {
         try {
             TelecommandBody bean = JSONUtil.toBean(payload, TelecommandBody.class);
-            String ip = key.getCreateTCP(deviceNo).getIp();
+            if (bean == null) {
+                log.warn("线圈处理: JSON解析结果为空, deviceNo={}", deviceNo);
+                return;
+            }
+            DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(deviceNo);
+            if (tcpVo == null) {
+                log.warn("线圈处理: 设备缓存不存在, deviceNo={}", deviceNo);
+                return;
+            }
+            String ip = tcpVo.getIp();
             telecommandSendSchedule.U(ip, deviceNo, bean.getData());
         } catch (Exception e) {
-            log.error("", e);
+            log.error("线圈处理失败, deviceNo={}", deviceNo, e);
         }
     }
 

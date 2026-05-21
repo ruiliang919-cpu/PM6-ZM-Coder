@@ -96,6 +96,9 @@ public class DeviceOnlineCheckTask {
                                     // 最新状态显示设备仍在线，跳过
                                     continue;
                                 }
+                            } else {
+                                // 二次确认时 latestTime 仍为 null，视为异常但继续标记离线
+                                log.warn("设备二次确认时lastTime仍为null, deviceId={}, 将标记离线", tcp.getId());
                             }
                         }
                         // 确认离线，执行标记

@@ -46,22 +46,21 @@ public class WriteBusinessService {
                     for (int i = 0; i < writeValueArray.length; i++) writeValue[i] = writeValueArray[i] != 0;
                     try {
                         if ("0xC2C8".equals(in.getAddr())) {
-                            WriteCoilsResponse c = (WriteCoilsResponse) tcp.send(new WriteCoilsRequest(1, addr, new boolean[]{false}));
+                            WriteCoilsResponse c = (WriteCoilsResponse) tcp.send(new WriteCoilsRequest(slaveId, addr, new boolean[]{false}));
                             if (c != null && !c.isException()) {
                                 insertBatch.add(in);
                             } else in.setFeedback(1);
-                            // System.out.println("0xC2C8:::" + addr);
-                            // System.out.println("0xC2C8:::" + Arrays.toString(writeValue));
                             // 重置更新总点标识
                             InstructFlag.SetFlag(InstructFlag.TOTAL_POINT, slaveId, true);
                             redisTemplate.opsForValue().set("zm:update:" + slaveId + ":Update-the-total-points", "true");
                         } else {
-                            WriteCoilsResponse c = (WriteCoilsResponse) tcp.send(new WriteCoilsRequest(1, addr, writeValue));
+                            WriteCoilsResponse c = (WriteCoilsResponse) tcp.send(new WriteCoilsRequest(slaveId, addr, writeValue));
                             if (c != null && !c.isException()) {
                                 insertBatch.add(in);
                             } else in.setFeedback(1);
                         }
                     } catch (Exception e) {
+                        log.error("FC05写入失败, slaveId={}, addr={}, addrNum={}, error={}", slaveId, in.getAddr(), in.getAddrNum(), e.getMessage());
                         in.setFeedback(1);
                     }
                     break;
@@ -70,17 +69,13 @@ public class WriteBusinessService {
                     short[] writeValue = new short[writeValueArray.length];
                     for (int i = 0; i < writeValueArray.length; i++) writeValue[i] = writeValueArray[i];
                     try {
-                        WriteRegistersRequest request = new WriteRegistersRequest(1, addr, writeValue);
+                        WriteRegistersRequest request = new WriteRegistersRequest(slaveId, addr, writeValue);
                         WriteRegistersResponse registersResponse = (WriteRegistersResponse) tcp.send(request);
-
-                        // System.out.println("0XA80A::" + request.getFunctionCode());
-                        // if (in.getAddr().equals("0XA80A")) System.out.println("0XA80A::" + request.getFunctionCode());
-                        // if (in.getAddr().equals("0xA5AE")) System.out.println("0xA5AE::" + registersResponse.getExceptionMessage());
-                        // if (in.getAddr().equals("0xA0D8")) System.out.println("0xA0D8::" + registersResponse.getExceptionMessage());
 
                         if (registersResponse != null && !registersResponse.isException()) insertBatch.add(in);
                         else in.setFeedback(1);
                     } catch (Exception e) {
+                        log.error("FC06写入失败, slaveId={}, addr={}, addrNum={}, error={}", slaveId, in.getAddr(), in.getAddrNum(), e.getMessage());
                         in.setFeedback(1);
                     }
                     break;
