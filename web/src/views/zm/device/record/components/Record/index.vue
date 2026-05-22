@@ -60,9 +60,11 @@
 <script>
 import { getRecordOne } from '@/api/zm/device/record'
 import { formatDate } from '@/utils'
+import polling from '@/mixins/polling'
 
 export default {
   components: {},
+  mixins: [polling],
   data() {
     return {
       // 遮罩层
@@ -79,8 +81,7 @@ export default {
         startTime: undefined,
         endTime: undefined,
         deviceId: undefined
-      },
-      timer: null
+      }
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -93,13 +94,10 @@ export default {
     navibarDeviceValue: {
       handler(val) {
         if (val) {
-          if (this.timer) {
-            clearInterval(this.timer)
-            this.timer = null
-          }
+          this.$stopPolling()
           this.queryParams.deviceId = val
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         }
       },
       immediate: true
@@ -107,12 +105,6 @@ export default {
   },
   created() {
     // this.getList()
-  },
-  beforeDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer)
-      this.timer = null
-    }
   },
   methods: {
     formatDate,
@@ -123,6 +115,9 @@ export default {
       this.queryParams.endTime = this.date[1]
       this._get()
     },
+    pollingFetch() {
+      this._get()
+    },
     _get() {
       getRecordOne(this.queryParams).then((response) => {
         this.demoList = response.rows || response.data.rows || response.data || []
@@ -131,15 +126,6 @@ export default {
       }).finally(() => {
         this.loading = false
       })
-    },
-    startTimer() {
-      if (this.timer) {
-        clearInterval(this.timer)
-        this.timer = null
-      }
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
     },
     handleRowStyle(row) {
       //   console.log(row);

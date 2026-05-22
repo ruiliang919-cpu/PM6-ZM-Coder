@@ -22,6 +22,7 @@ import { getAlternating } from '@/api/zm/device/dev'
 import CommonContainer from '@/components/CommonContainer/index.vue'
 import Table from './table_left.vue'
 import Table1 from './table_right.vue'
+import polling from '@/mixins/polling'
 
 export default {
   components: {
@@ -29,14 +30,14 @@ export default {
     Table,
     Table1
   },
+  mixins: [polling],
   data() {
     return {
       loading: true,
       queryParams: {
         slaveId: -1
       },
-      form: null,
-      timer: null
+      form: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -63,11 +64,13 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
+          this.$stopPolling()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         } else {
+          this.$stopPolling()
           this.loading = false
         }
       },
@@ -79,22 +82,16 @@ export default {
       this.loading = true
       this._get()
     },
+    pollingFetch() {
+      this._get()
+    },
     _get() {
       getAlternating(this.queryParams).then(res => {
         this.form = res.data
       }).finally(() => {
         this.loading = false
       })
-    },
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
     }
-  },
-  beforeDestroy() {
-    clearInterval(this.timer)
   }
 }
 </script>

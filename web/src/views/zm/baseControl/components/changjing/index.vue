@@ -25,23 +25,21 @@
 <script>
 import { listBaseScene } from '@/api/zm/baseScene'
 import { clearSceneStatus, clearZoneStatus, getSceneStatus, getZoneStatus, intoScenes } from '@/api/zm/baseControl'
+import polling from '@/mixins/polling'
 
 export default {
+  mixins: [polling],
   data() {
     return {
       list: [],
       loading: false,
-      timer: null,
-      flag: false
+      flag: false,
+      pollingConfig: {
+        useGetFlag: true
+      }
     }
   },
   methods: {
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this.getFlag()
-      }, 5000)
-    },
     getFlag() {
       getSceneStatus().then(res => {
         if (res.data) {
@@ -82,10 +80,7 @@ export default {
   },
   mounted() {
     this.getList()
-    this.startTimer()
-  },
-  beforeDestroy() {
-   clearInterval(this.timer)
+    this.$startPolling()
   }
 }
 </script>

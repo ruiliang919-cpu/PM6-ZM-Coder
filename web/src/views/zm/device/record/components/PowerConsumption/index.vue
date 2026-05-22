@@ -48,9 +48,11 @@ import {
   powerRecordGetYear
 } from '@/api/zm/device/record'
 import { formatDate, getDate, getFullYear, getMonth, getQuarterFromApril, getWeekNumber } from '@/utils'
+import polling from '@/mixins/polling'
 
 export default {
   components: {},
+  mixins: [polling],
   props: {
     type: {
       type: Number,
@@ -71,7 +73,12 @@ export default {
         pageSize: 10,
         deviceId: undefined
       },
-      timer: null
+      pollingConfig: {
+        dynamicInterval() {
+          const baseIntervals = { 0: 10000, 1: 20000, 2: 30000, 3: 40000, 4: 50000 }
+          return (baseIntervals[this.type] || 30000) + Math.floor(Math.random() * 2000)
+        }
+      }
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -84,13 +91,10 @@ export default {
     navibarDeviceValue: {
       handler(val) {
         if (val) {
-          if (this.timer) {
-            clearInterval(this.timer)
-            this.timer = null
-          }
+          this.$stopPolling()
           this.queryParams.deviceId = val
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         }
       },
       immediate: true
@@ -98,12 +102,6 @@ export default {
   },
   created() {
     // this.getList()
-  },
-  beforeDestroy() {
-    if (this.timer) {
-      clearInterval(this.timer)
-      this.timer = null
-    }
   },
   methods: {
     getFullYear,
@@ -115,6 +113,9 @@ export default {
     /** 查询测试单表列表 */
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -174,18 +175,6 @@ export default {
           this.loading = false
         })
       }
-    },
-    startTimer() {
-      if (this.timer) {
-        clearInterval(this.timer)
-        this.timer = null
-      }
-      // 基准间隔根据type确定，加2秒随机抖动
-      const baseIntervals = { 0: 10000, 1: 20000, 2: 30000, 3: 40000, 4: 50000 }
-      const interval = (baseIntervals[this.type] || 30000) + Math.floor(Math.random() * 2000)
-      this.timer = setInterval(() => {
-        this._get()
-      }, interval)
     },
     handleRowStyle(row) {
       //   console.log(row);

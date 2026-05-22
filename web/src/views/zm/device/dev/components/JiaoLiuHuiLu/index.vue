@@ -47,9 +47,11 @@
 <script>
 import { listDemo } from '@/api/demo/demo'
 import { acList } from '@/api/zm/device/dev'
+import polling from '@/mixins/polling'
 
 export default {
   components: {},
+  mixins: [polling],
   data() {
     return {
       // 遮罩层
@@ -63,8 +65,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         slaveId: -1
-      },
-      timer: null
+      }
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -78,13 +79,13 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
-          this.stopTimer()
+          this.$stopPolling()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         } else {
-          this.stopTimer()
+          this.$stopPolling()
           this.loading = false
         }
       },
@@ -94,13 +95,13 @@ export default {
   created() {
     // this.getList()
   },
-  beforeDestroy() {
-    this.stopTimer()
-  },
   methods: {
     /** 查询测试单表列表 */
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -109,18 +110,6 @@ export default {
         this.total = response.total || 0
         this.loading = false
       })
-    },
-    startTimer() {
-      this.stopTimer()
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
-    },
-    stopTimer() {
-      if (this.timer) {
-        clearInterval(this.timer)
-        this.timer = null
-      }
     },
     handleRowStyle(row) {
       //   console.log(row);

@@ -25,12 +25,14 @@
 
 import { lightList } from '@/api/zm/baseStatus'
 import card from './components/card/index.vue'
+import polling from '@/mixins/polling'
 
 export default {
   name: 'Status',
   components: {
     card
   },
+  mixins: [polling],
   data() {
     return {
       // 遮罩层
@@ -46,13 +48,11 @@ export default {
         testKey: undefined,
         value: undefined,
         createTime: undefined
-      },
-      timer: null
+      }
     }
   },
   created() {
     this.getList()
-    this.startTimer()
   },
   methods: {
     /** 查询测试单表列表 */
@@ -60,10 +60,8 @@ export default {
       this.loading = true
       this._get()
     },
-    startTimer() {
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
+    pollingFetch() {
+      this._get()
     },
     _get() {
       this.queryParams.params = {}
@@ -96,9 +94,6 @@ export default {
         // border:"1px solid #2280ec !important"
       }
     }
-  },
-  beforeDestroy() {
-    clearInterval(this.timer)
   }
 }
 </script>

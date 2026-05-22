@@ -46,16 +46,17 @@
 </template>
 <script>
 import { getBusInsulation } from '@/api/zm/device/dev'
+import polling from '@/mixins/polling'
 
 export default {
+  mixins: [polling],
   data() {
     return {
       loading: false,
       queryParams: {
         slaveId: -1
       },
-      form: {},
-      timer: null
+      form: {}
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -69,11 +70,11 @@ export default {
       handler(n) {
         console.log('navibarDeviceValue ========>', n)
         if (n) {
-          this.stopTimer()
+          this.$stopPolling()
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         }
       },
       immediate: true
@@ -82,6 +83,9 @@ export default {
   methods: {
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -95,22 +99,7 @@ export default {
         .finally(() => {
           this.loading = false
         })
-    },
-    startTimer() {
-      this.stopTimer()
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
-    },
-    stopTimer() {
-      if (this.timer) {
-        clearInterval(this.timer)
-        this.timer = null
-      }
     }
-  },
-  beforeDestroy() {
-    this.stopTimer()
   }
 }
 </script>

@@ -89,10 +89,12 @@
 import { listDemo } from '@/api/demo/demo'
 import { getFaultSeven } from '@/api/zm/alarm/list'
 import { formatDate } from '@/utils'
+import polling from '@/mixins/polling'
 
 export default {
   name: 'List',
   components: {},
+  mixins: [polling],
   data() {
     return {
       //按钮loading
@@ -111,22 +113,20 @@ export default {
         startTime: undefined,
         deviceName: undefined,
         eventName: undefined
-      },
-      timer: null
+      }
     }
   },
   created() {
     this.getList()
-    this.startTimer()
-  },
-  beforeDestroy() {
-    clearInterval(this.timer)
   },
   methods: {
     formatDate,
     /** 查询测试单表列表 */
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -137,12 +137,6 @@ export default {
       }).finally(() => {
         this.loading = false
       })
-    },
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
     },
     // 表单重置
     reset() {

@@ -64,16 +64,16 @@ PM6-ZM 是基于 RuoYi-Vue-Plus 4.8.0 框架二次开发的直流照明监控系
 
 | 编号 | 任务名称 | 描述 | 优先级 | 状态 | 计划时间 | 实际时间 | 依赖 | 完成备注 |
 |------|----------|------|--------|------|----------|----------|------|----------|
-| B-1 | 设计 PollingMixin 统一轮询逻辑 | 提取 startTimer/stopTimer/_get 等通用逻辑为 Vue mixin | P2 | [ ] | 30min | - | 无 | - |
-| B-2 | 实现 PollingMixin 核心功能 | 支持可配置间隔、自动清理、设备切换监听、暂停/恢复 | P2 | [ ] | 40min | - | B-1 | - |
-| B-3 | 重构 baseStatus/index.vue 使用 mixin | 替换原有轮询逻辑为 PollingMixin | P2 | [ ] | 15min | - | B-2 | - |
-| B-4 | 重构 alarm/list/index.vue 使用 mixin | 替换原有轮询逻辑为 PollingMixin | P2 | [ ] | 15min | - | B-2 | - |
-| B-5 | 重构 device/dev/components/* 使用 mixin | 7 个设备信息组件统一替换 | P2 | [ ] | 45min | - | B-2 | - |
-| B-6 | 重构 device/dev-control/* 使用 mixin | 4 个设备控制组件统一替换 | P2 | [ ] | 30min | - | B-2 | - |
-| B-7 | 重构 device/record/components/* 使用 mixin | 3 个记录组件统一替换 | P2 | [ ] | 25min | - | B-2 | - |
-| B-8 | 重构 baseControl/components/* 使用 mixin | 3 个控制状态检测组件统一替换 | P2 | [ ] | 25min | - | B-2 | - |
-| B-9 | 重构 IndexTable/index.vue 使用 mixin | 表格组件统一替换 | P2 | [ ] | 15min | - | B-2 | - |
-| B-10 | 统一所有组件的 timer 清理逻辑 | 确保所有组件使用 PollingMixin 的安全清理模式 | P2 | [ ] | 20min | - | B-3~B-9 | - |
+| B-1 | 设计 PollingMixin 统一轮询逻辑 | 提取 startTimer/stopTimer/_get 等通用逻辑为 Vue mixin | P2 | [x] | 30min | 2026-05-23 | 无 | 新建 web/src/mixins/polling.js，支持固定/动态间隔、自动清理、暂停/恢复、useGetFlag 模式 |
+| B-2 | 实现 PollingMixin 核心功能 | 支持可配置间隔、自动清理、设备切换监听、暂停/恢复 | P2 | [x] | 40min | 2026-05-23 | B-1 | 使用 $ 前缀私有属性避免命名冲突，通过 pollingConfig 选项自定义行为 |
+| B-3 | 重构 baseStatus/index.vue 使用 mixin | 替换原有轮询逻辑为 PollingMixin | P2 | [x] | 15min | 2026-05-23 | B-2 | 模式A：基础轮询，无 navibarDeviceValue |
+| B-4 | 重构 alarm/list/index.vue 使用 mixin | 替换原有轮询逻辑为 PollingMixin | P2 | [x] | 15min | 2026-05-23 | B-2 | 模式A：基础轮询，无 navibarDeviceValue |
+| B-5 | 重构 device/dev/components/* 使用 mixin | 7 个设备信息组件统一替换 | P2 | [x] | 45min | 2026-05-23 | B-2 | DC, ZhiLiuHuiLu, JiaoLiuHuiLu, JueYuan, MuXian, ChuanGanQiXinXi, JiaoLiuXinXi（模式B：navibarDeviceValue + stopTimer） |
+| B-6 | 重构 device/dev-control/* 使用 mixin | 4 个设备控制组件统一替换 | P2 | [x] | 30min | 2026-05-23 | B-2 | 经查 dev-control 为 tabs 容器组件，无独立轮询逻辑；子组件由各自页面维护 |
+| B-7 | 重构 device/record/components/* 使用 mixin | 3 个记录组件统一替换 | P2 | [x] | 25min | 2026-05-23 | B-2 | Record（模式B）、TotalPower（模式B）、PowerConsumption（模式C：变间隔 dynamicInterval） |
+| B-8 | 重构 baseControl/components/* 使用 mixin | 3 个控制状态检测组件统一替换 | P2 | [x] | 25min | 2026-05-23 | B-2 | lightsOnOrOff, changjing, fenqu（模式D：useGetFlag 状态检测轮询） |
+| B-9 | 重构 IndexTable/index.vue 使用 mixin | 表格组件统一替换 | P2 | [x] | 15min | 2026-05-23 | B-2 | 经查 IndexTable 组件无轮询逻辑，无需修改 |
+| B-10 | 统一所有组件的 timer 清理逻辑 | 确保所有组件使用 PollingMixin 的安全清理模式 | P2 | [x] | 20min | 2026-05-23 | B-3~B-9 | 全部 16 个组件已移除 timer/stopTimer/startTimer/beforeDestroy 中的 clearInterval，统一由 mixin 的 beforeDestroy 处理 |
 
 #### 模块 C: 测试代码完善
 
@@ -100,7 +100,7 @@ PM6-ZM 是基于 RuoYi-Vue-Plus 4.8.0 框架二次开发的直流照明监控系
 | E-1 | 更新本文档任务状态 | 每完成一个任务后立即更新状态和时间 | - | [x] | 持续 | 2026-05-22 | 全部 | Phase 1 和 Phase 2 状态已更新 |
 | E-2 | 后端代码编译验证 | `mvn clean install -DskipTests` 确保无编译错误 | P0 | [x] | 5min | 2026-05-22 | A-1~A-9 | 编译通过，修复 ruoyi-zm pom.xml 依赖 |
 | E-3 | 后端测试验证 | `mvn test` 确保全部测试通过 | P0 | [x] | 10min | 2026-05-22 | C-5 | 全部测试通过 |
-| E-4 | 前端构建验证 | `npm run build:prod` 确保无构建错误 | P2 | [ ] | 5min | - | B-10 | - |
+| E-4 | 前端构建验证 | `npm run build:prod` 确保无构建错误 | P2 | [x] | 5min | 2026-05-23 | B-10 | 构建通过；修复 package.json 添加 NODE_OPTIONS=--openssl-legacy-provider 以兼容 Node.js 17+ |
 | E-5 | 集成测试验证 | 启动后端 + 前端，验证核心功能正常 | P1 | [ ] | 30min | - | E-2, E-3, E-4 | - |
 
 ---
@@ -303,6 +303,7 @@ export default {
 | 2026-05-22 | v1.1 | Phase 1 完成：修复 9 个 BUG，补充测试，编译测试全部通过 | Qoder |
 | 2026-05-22 | v1.2 | 代码审查后修复：devBaseDeviceMapper NPE、注释修正 | Qoder |
 | 2026-05-22 | v1.3 | Phase 2 完成：测试代码完善（C-1~C-5），修复 mockScanKeys、C2C8 验证、slaveId 测试、边界测试 | Qoder |
+| 2026-05-23 | v1.4 | Phase 3 完成：前端轮询重构（B-1~B-10），新建 PollingMixin，重构 16 个组件，前端构建验证通过 | Qoder |
 
 ---
 

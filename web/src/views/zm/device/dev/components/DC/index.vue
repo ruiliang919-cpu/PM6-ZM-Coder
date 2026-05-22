@@ -59,10 +59,12 @@
 <script>
 import { dcAc } from '@/api/zm/device/dev'
 import CommonContainer from '@/components/CommonContainer/index.vue'
+import polling from '@/mixins/polling'
 
 export default {
 
   components: { CommonContainer },
+  mixins: [polling],
   data() {
     return {
       // 遮罩层
@@ -101,8 +103,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
         slaveId: -1
-      },
-      timer: null
+      }
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -119,8 +120,9 @@ export default {
           this.queryParams.slaveId = n
           this.queryParams.pageNum = 1
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         } else {
+          this.$stopPolling()
           this.loading = false
         }
       },
@@ -130,13 +132,13 @@ export default {
   created() {
     // this.getList();
   },
-  beforeDestroy() {
-    clearInterval(this.timer)
-  },
   methods: {
     /** 查询测试单表列表 */
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -155,12 +157,6 @@ export default {
         .finally(() => {
           this.loading = false
         })
-    },
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
     },
     handleRowStyle(row) {
       //   console.log(row);

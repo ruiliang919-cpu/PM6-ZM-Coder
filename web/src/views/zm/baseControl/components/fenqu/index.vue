@@ -136,9 +136,11 @@ import GroupRightCopy from '@/views/zm/history/powerCalculation/components/Group
 import CommonContainer from '@/components/CommonContainer/index.vue'
 import GroupLeftCopy from '@/views/zm/history/powerCalculation/components/GroupLeftCopy/index.vue'
 import { lightZoneSet } from '@/api/zm/history/powerCalculation'
+import polling from '@/mixins/polling'
 
 export default {
   components: { GroupLeftCopy, CommonContainer, GroupRightCopy },
+  mixins: [polling],
   data() {
     return {
       // 遮罩层
@@ -158,24 +160,20 @@ export default {
         value: undefined,
         createTime: undefined
       },
-      timer: null,
-      flag: false
+      flag: false,
+      pollingConfig: {
+        useGetFlag: true
+      }
 
     }
   },
   mounted() {
     this.getList()
     this.getFlag()
-    this.startTimer()
+    this.$startPolling()
   },
   methods: {
 
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this.getFlag()
-      }, 5000)
-    },
     getFlag() {
       getZoneStatus()
         .then(res => {
@@ -264,9 +262,6 @@ export default {
       })
     }
   },
-  beforeDestroy() {
-    clearInterval(this.timer)
-  }
 }
 </script>
 <style lang="scss" scoped>

@@ -1,7 +1,9 @@
 <script>
 import { getOneTotalElectricByDeviceId, getDeviceType, getOneTotalPower } from '@/api/zm/device/record'
+import polling from '@/mixins/polling'
 
 export default {
+  mixins: [polling],
   data() {
     return {
       power: '0.00',
@@ -10,8 +12,7 @@ export default {
       queryParams: {
         deviceId: undefined
       },
-      type: 1,
-      timer: null
+      type: 1
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -27,7 +28,7 @@ export default {
         this.queryParams.deviceId = val
         if(this.queryParams.deviceId){
           this.getList()
-          this.startTimer()
+          this.$startPolling()
         }
       },
       immediate: true
@@ -36,6 +37,9 @@ export default {
   methods: {
     getList() {
       this.loading = true
+      this._get()
+    },
+    pollingFetch() {
       this._get()
     },
     _get() {
@@ -57,16 +61,7 @@ export default {
       }).finally(() => {
         this.loading = false
       })
-    },
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
     }
-  },
-  beforeDestroy() {
-    clearInterval(this.timer)
   }
 }
 </script>

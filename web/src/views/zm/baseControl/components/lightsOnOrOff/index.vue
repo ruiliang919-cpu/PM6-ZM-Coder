@@ -5,23 +5,21 @@ import {
   clearLoopStatus,
   getLoopStatus,
 } from '@/api/zm/baseControl'
+import polling from '@/mixins/polling'
 
 export default {
   name: 'index.vue',
+  mixins: [polling],
   data() {
     return {
       status: false,
       loading: false,
-      timer: null,
+      pollingConfig: {
+        useGetFlag: true
+      }
     }
   },
   methods: {
-    startTimer() {
-      clearInterval(this.timer)
-      this.timer = setInterval(() => {
-        this.getFlag()
-      }, 5000)
-    },
     getFlag() {
       getLoopStatus().then(res => {
         if (res.data) {
@@ -64,10 +62,7 @@ export default {
   },
   mounted() {
     this.getData()
-    this.startTimer()
-  },
-  beforeDestroy() {
-    clearInterval(this.timer)
+    this.$startPolling()
   }
 }
 </script>
