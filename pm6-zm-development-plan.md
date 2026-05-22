@@ -1,6 +1,6 @@
 # PM6-ZM 项目开发行动计划文档
 
-> 文档版本: v1.5
+> 文档版本: v1.6
 > 创建日期: 2026-05-21
 > 更新机制: 每完成一个任务后立即更新状态、实际完成时间和问题记录
 
@@ -89,8 +89,8 @@ PM6-ZM 是基于 RuoYi-Vue-Plus 4.8.0 框架二次开发的直流照明监控系
 
 | 编号 | 任务名称 | 描述 | 优先级 | 状态 | 计划时间 | 实际时间 | 依赖 | 完成备注 |
 |------|----------|------|--------|------|----------|----------|------|----------|
-| D-1 | ModbusTCPManager 添加连接数上限 | 实现 maxConnections 配置的实际限制逻辑 | P3 | [ ] | 30min | - | 无 | - |
-| D-2 | ModbusTCPManager 添加 TTL 清理机制 | 定时清理长时间未使用的连接 | P3 | [ ] | 30min | - | D-1 | - |
+| D-1 | ModbusTCPManager 添加连接数上限 | 实现 maxConnections 配置的实际限制逻辑 | P3 | [x] | 30min | 2026-05-23 | 无 | getSlave() 中添加上限检查，超过时拒绝新连接并记录 warn 日志 |
+| D-2 | ModbusTCPManager 添加 TTL 清理机制 | 定时清理长时间未使用的连接 | P3 | [x] | 30min | 2026-05-23 | D-1 | @Scheduled(fixedRate=300000) 每5分钟扫描，清理超过 connectionTtl 的连接 |
 | D-3 | WebSocket 推送扩展至更多设备状态 | 让设备信息组件从 WebSocket 接收更新，减少轮询 | P3 | [ ] | 60min | - | B-10 | - |
 
 #### 模块 E: 文档与验证
@@ -305,6 +305,7 @@ export default {
 | 2026-05-22 | v1.3 | Phase 2 完成：测试代码完善（C-1~C-5），修复 mockScanKeys、C2C8 验证、slaveId 测试、边界测试 | Qoder |
 | 2026-05-23 | v1.4 | Phase 3 完成：前端轮询重构（B-1~B-10），新建 PollingMixin，重构 16 个组件，前端构建验证通过 | Qoder |
 | 2026-05-23 | v1.5 | 代码审查修复：JueYuan/MuXian/TotalPower 轮询停止逻辑、PollingMixin dynamicInterval 语义优化 | Qoder |
+| 2026-05-23 | v1.6 | Phase 4 完成：ModbusTCPManager 连接池优化（D-1/D-2），添加连接数上限和 TTL 清理机制 | Qoder |
 
 ---
 

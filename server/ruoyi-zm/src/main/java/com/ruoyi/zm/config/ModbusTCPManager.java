@@ -23,12 +23,15 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.ScanOptions;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +52,8 @@ public class ModbusTCPManager {
     private final ConcurrentHashMap<Integer, ModbusMaster> masterPool = new ConcurrentHashMap<>();
     /** 每个 slaveId 独立的锁对象，避免在 ConcurrentHashMap.compute() 内执行耗时 I/O */
     private final ConcurrentHashMap<Integer, Object> slaveIdLocks = new ConcurrentHashMap<>();
+    /** 连接创建时间，用于 TTL 清理 */
+    private final ConcurrentHashMap<Integer, Long> connectionCreateTime = new ConcurrentHashMap<>();
 
     public ModbusMaster getSlave(int slaveId) {
         // 使用 per-key 锁代替 compute()，避免在 ConcurrentHashMap 内部持锁期间执行阻塞网络 I/O
@@ -60,12 +65,24 @@ public class ModbusTCPManager {
             }
             if (existing != null) {
                 destroyConnection(existing);
+                connectionCreateTime.remove(slaveId);
             }
+
+            // D-1: 连接数上限检查
+            int maxConn = modbusProperties.getMaxConnections();
+            if (masterPool.size() >= maxConn && !masterPool.containsKey(slaveId)) {
+                log.warn("Modbus连接池已达上限, maxConnections={}, 当前连接数={}, 拒绝创建 slaveId={} 的新连接",
+                    maxConn, masterPool.size(), slaveId);
+                return null;
+            }
+
             ModbusMaster newMaster = createNewMaster(slaveId);
             if (newMaster != null) {
                 masterPool.put(slaveId, newMaster);
+                connectionCreateTime.put(slaveId, System.currentTimeMillis());
             } else {
                 masterPool.remove(slaveId);
+                connectionCreateTime.remove(slaveId);
             }
             return newMaster;
         }
@@ -139,6 +156,7 @@ public class ModbusTCPManager {
     private void safeDestroy(int slaveId, ModbusMaster master) {
         destroyConnection(master);
         masterPool.remove(slaveId);
+        connectionCreateTime.remove(slaveId);
     }
 
 //    @Scheduled(fixedDelay = 5000) // 调整为5秒一次
@@ -217,6 +235,46 @@ public class ModbusTCPManager {
             } catch (Exception e1) {
                 log.error("Modbus断线处理失败, slaveId={}", slaveId, e1);
             }
+        }
+    }
+
+    /**
+     * D-2: 定时清理超过 TTL 的 Modbus 连接
+     * 每 5 分钟执行一次
+     */
+    @Scheduled(fixedRate = 300000)
+    public void cleanupExpiredConnections() {
+        long now = System.currentTimeMillis();
+        long ttlMillis = modbusProperties.getConnectionTtl() * 1000L;
+        int cleaned = 0;
+
+        Iterator<Map.Entry<Integer, Long>> it = connectionCreateTime.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<Integer, Long> entry = it.next();
+            int slaveId = entry.getKey();
+            long createTime = entry.getValue();
+
+            if (now - createTime > ttlMillis) {
+                Object lock = slaveIdLocks.get(slaveId);
+                if (lock != null) {
+                    synchronized (lock) {
+                        ModbusMaster master = masterPool.get(slaveId);
+                        if (master != null) {
+                            safeDestroy(slaveId, master);
+                            cleaned++;
+                            log.info("Modbus连接 TTL 到期已清理, slaveId={}, 存活时间={}ms", slaveId, now - createTime);
+                        } else {
+                            it.remove();
+                        }
+                    }
+                } else {
+                    it.remove();
+                }
+            }
+        }
+
+        if (cleaned > 0) {
+            log.info("Modbus连接池 TTL 清理完成, 共清理 {} 个过期连接, 当前连接数={}", cleaned, masterPool.size());
         }
     }
 
