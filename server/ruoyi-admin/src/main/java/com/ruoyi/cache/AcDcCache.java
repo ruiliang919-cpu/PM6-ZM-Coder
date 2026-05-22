@@ -3,17 +3,21 @@ package com.ruoyi.cache;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.ruoyi.web.websocket.DeviceStatusPushService;
 import com.ruoyi.zm.domain.vo.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.TreeMap;
 
 @Slf4j
@@ -21,6 +25,9 @@ import java.util.TreeMap;
 @RequiredArgsConstructor
 public class AcDcCache {
     private final Key key;
+
+    @Autowired(required = false)
+    private DeviceStatusPushService deviceStatusPushService;
 
     // 交流信息-交流 1 路与 2 路（电源柜）
     public R<List<DevStatusAcVo>> getAlternating(Long slaveId) {
@@ -248,6 +255,73 @@ public class AcDcCache {
             //            log.error("AcDcCache → getBusInfo", e);
         }
         return null;
+    }
+
+    /**
+     * D-3: 聚合推送设备机柜实时数据
+     * 将设备的母线、交流、绝缘、模块、回路数据聚合后通过 WebSocket 推送
+     */
+    public void pushCabinetData(Integer slaveId) {
+        if (deviceStatusPushService == null) return;
+        try {
+            Long sid = Long.valueOf(slaveId);
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("deviceNo", slaveId);
+            payload.put("timestamp", System.currentTimeMillis());
+
+            Map<String, Object> data = new HashMap<>();
+
+            // 母线信息
+            R<BusRespVo> busInfo = getBusInfo(sid);
+            if (busInfo != null && busInfo.getData() != null) {
+                data.put("bus", busInfo.getData());
+            }
+
+            // 交流信息
+            R<List<DevStatusAcVo>> alternating = getAlternating(sid);
+            if (alternating != null && alternating.getData() != null) {
+                data.put("alternating", alternating.getData());
+            }
+
+            // 绝缘信息
+            R<BusInsulationRespVo> insulation = getBusInsulation(sid);
+            if (insulation != null && insulation.getData() != null) {
+                data.put("insulation", insulation.getData());
+            }
+
+            // 模块信息（DC/AC 或 DC/DC）
+            PageQuery pageQuery = new PageQuery();
+            pageQuery.setPageSize(100);
+            R<TreeMap<String, Object>> dcAc = getDcAc(pageQuery, slaveId);
+            if (dcAc != null && dcAc.getData() != null) {
+                TreeMap<String, Object> modulesData = new TreeMap<>(dcAc.getData());
+                Object listData = modulesData.get("data");
+                if (listData instanceof List) {
+                    TableDataInfo<Object> tableData = new TableDataInfo<>();
+                    tableData.setRows((List<Object>) listData);
+                    tableData.setTotal(((List<?>) listData).size());
+                    modulesData.put("data", tableData);
+                }
+                data.put("modules", modulesData);
+            }
+
+            // 直流回路
+            TableDataInfo<DevStatusDccLoopVo> dccList = getDccList(pageQuery, sid);
+            if (dccList != null && dccList.getRows() != null) {
+                data.put("dccList", dccList);
+            }
+
+            // 交流回路
+            TableDataInfo<DevStatusAcLoopVo> acList = getAcList(sid);
+            if (acList != null && acList.getRows() != null) {
+                data.put("acList", acList);
+            }
+
+            payload.put("data", data);
+            deviceStatusPushService.pushCabinetData(slaveId, payload);
+        } catch (Exception e) {
+            log.error("AcDcCache推送机柜数据失败, slaveId={}", slaveId, e);
+        }
     }
 
     // 直流回路信息列表

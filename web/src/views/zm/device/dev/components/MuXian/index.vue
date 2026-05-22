@@ -66,6 +66,7 @@
 <script>
 import { busInfo } from '@/api/zm/device/dev'
 import polling from '@/mixins/polling'
+import { subscribeCabinetData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
   mixins: [polling],
@@ -89,7 +90,8 @@ export default {
        *         'temperature': '0.00'
        *       }
        */
-      form: {}
+      form: {},
+      wsSubId: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -107,13 +109,18 @@ export default {
           this.queryParams.slaveId = n
           this.getList()
           this.$startPolling()
+          this.subscribeWebSocket(n)
         } else {
           this.$stopPolling()
+          this.unsubscribeWebSocket()
           this.loading = false
         }
       },
       immediate: true
     }
+  },
+  beforeDestroy() {
+    this.unsubscribeWebSocket()
   },
   methods: {
     getList() {
@@ -121,6 +128,10 @@ export default {
       this._get()
     },
     pollingFetch() {
+      // D-3: WebSocket 连接正常时跳过轮询
+      if (isWebSocketConnected() && this.wsSubId) {
+        return
+      }
       this._get()
     },
     _get() {
@@ -134,6 +145,21 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    subscribeWebSocket(deviceNo) {
+      this.unsubscribeWebSocket()
+      if (!isWebSocketConnected()) return
+      this.wsSubId = subscribeCabinetData(deviceNo, (payload) => {
+        if (payload.data && payload.data.bus) {
+          this.form = payload.data.bus
+        }
+      })
+    },
+    unsubscribeWebSocket() {
+      if (this.wsSubId) {
+        unsubscribe(this.wsSubId)
+        this.wsSubId = null
+      }
     }
   }
 }

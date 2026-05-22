@@ -91,7 +91,7 @@ PM6-ZM 是基于 RuoYi-Vue-Plus 4.8.0 框架二次开发的直流照明监控系
 |------|----------|------|--------|------|----------|----------|------|----------|
 | D-1 | ModbusTCPManager 添加连接数上限 | 实现 maxConnections 配置的实际限制逻辑 | P3 | [x] | 30min | 2026-05-23 | 无 | getSlave() 中添加上限检查，超过时拒绝新连接并记录 warn 日志 |
 | D-2 | ModbusTCPManager 添加 TTL 清理机制 | 定时清理长时间未使用的连接 | P3 | [x] | 30min | 2026-05-23 | D-1 | @Scheduled(fixedRate=300000) 每5分钟扫描，清理超过 connectionTtl 的连接 |
-| D-3 | WebSocket 推送扩展至更多设备状态 | 让设备信息组件从 WebSocket 接收更新，减少轮询 | P3 | [ ] | 60min | - | B-10 | - |
+| D-3 | WebSocket 推送扩展至更多设备状态 | 让设备信息组件从 WebSocket 接收更新，减少轮询 | P3 | [x] | 60min | 2026-05-23 | B-10 | 后端 AcDcCache.pushCabinetData() 调整 modules/dccList/acList 格式；前端 JiaoLiuXinXi/ZhiLiuHuiLu/JiaoLiuHuiLu/DC 4个组件接入 WebSocket，ChuanGanQiXinXi 保持轮询 |
 
 #### 模块 E: 文档与验证
 
@@ -306,6 +306,7 @@ export default {
 | 2026-05-23 | v1.4 | Phase 3 完成：前端轮询重构（B-1~B-10），新建 PollingMixin，重构 16 个组件，前端构建验证通过 | Qoder |
 | 2026-05-23 | v1.5 | 代码审查修复：JueYuan/MuXian/TotalPower 轮询停止逻辑、PollingMixin dynamicInterval 语义优化 | Qoder |
 | 2026-05-23 | v1.6 | Phase 4 完成：ModbusTCPManager 连接池优化（D-1/D-2），添加连接数上限和 TTL 清理机制 | Qoder |
+| 2026-05-23 | v1.7 | Phase 4 完成：WebSocket 推送扩展（D-3），4个前端组件接入 WebSocket，后端数据格式统一，前后端构建验证通过 | Qoder |
 
 ---
 

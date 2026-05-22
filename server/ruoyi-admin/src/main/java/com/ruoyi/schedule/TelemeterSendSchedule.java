@@ -1,6 +1,7 @@
 package com.ruoyi.schedule;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.ruoyi.cache.AcDcCache;
 import com.ruoyi.cache.Key;
 import com.ruoyi.flag.InstructFlag;
 import com.ruoyi.send.TelemeterSendService;
@@ -19,6 +20,7 @@ public class TelemeterSendSchedule {
     private final TelemeterSendService send;
     private final DevBaseDeviceMapper deviceMapper;
     private final Key key;
+    private final AcDcCache acDcCache;
 
     public void PushZlNames(int slaveId) {
         DevBaseDeviceTCPVo tcp = key.getCreateTCP(slaveId);
@@ -53,7 +55,11 @@ public class TelemeterSendSchedule {
         // 馈线支路名称10~64
         // 漏电流
         // 漏电流支路数量
-        if (InstructFlag.Flag(InstructFlag.READ03, slaveId)) send.Push(slaveId, tcp.getIp());
+        if (InstructFlag.Flag(InstructFlag.READ03, slaveId)) {
+            send.Push(slaveId, tcp.getIp());
+            // D-3: 遥测指令推送后，通过 WebSocket 推送机柜实时数据
+            acDcCache.pushCabinetData(slaveId);
+        }
     }
 
     // 每天凌晨一次

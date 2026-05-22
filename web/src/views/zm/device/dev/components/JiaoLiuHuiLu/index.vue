@@ -48,6 +48,7 @@
 import { listDemo } from '@/api/demo/demo'
 import { acList } from '@/api/zm/device/dev'
 import polling from '@/mixins/polling'
+import { subscribeCabinetData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
   components: {},
@@ -65,7 +66,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         slaveId: -1
-      }
+      },
+      wsSubId: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -84,16 +86,18 @@ export default {
           this.queryParams.pageNum = 1
           this.getList()
           this.$startPolling()
+          this.subscribeWebSocket(n)
         } else {
           this.$stopPolling()
+          this.unsubscribeWebSocket()
           this.loading = false
         }
       },
       immediate: true
     }
   },
-  created() {
-    // this.getList()
+  beforeDestroy() {
+    this.unsubscribeWebSocket()
   },
   methods: {
     /** 查询测试单表列表 */
@@ -102,6 +106,9 @@ export default {
       this._get()
     },
     pollingFetch() {
+      if (isWebSocketConnected() && this.wsSubId) {
+        return
+      }
       this._get()
     },
     _get() {
@@ -110,6 +117,24 @@ export default {
         this.total = response.total || 0
         this.loading = false
       })
+    },
+    subscribeWebSocket(deviceNo) {
+      this.unsubscribeWebSocket()
+      if (!isWebSocketConnected()) return
+      this.wsSubId = subscribeCabinetData(deviceNo, (payload) => {
+        if (payload.data && payload.data.acList) {
+          const acList = payload.data.acList
+          this.demoList = acList.rows || []
+          this.total = acList.total || 0
+          this.queryParams.pageNum = 1
+        }
+      })
+    },
+    unsubscribeWebSocket() {
+      if (this.wsSubId) {
+        unsubscribe(this.wsSubId)
+        this.wsSubId = null
+      }
     },
     handleRowStyle(row) {
       //   console.log(row);

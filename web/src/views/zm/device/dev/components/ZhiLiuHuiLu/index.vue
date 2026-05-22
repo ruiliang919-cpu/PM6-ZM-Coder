@@ -77,6 +77,7 @@
 <script>
 import { dccList } from '@/api/zm/device/dev'
 import polling from '@/mixins/polling'
+import { subscribeCabinetData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
 
@@ -95,7 +96,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         slaveId: -1
-      }
+      },
+      wsSubId: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -114,8 +116,10 @@ export default {
           this.queryParams.pageNum = 1
           this.getList()
           this.$startPolling()
+          this.subscribeWebSocket(n)
         } else {
           this.$stopPolling()
+          this.unsubscribeWebSocket()
           this.loading = false
         }
       },
@@ -170,7 +174,69 @@ export default {
     // }, 5 * 1000)
   },
   beforeDestroy() {
-    this.stopTimer()
+    this.unsubscribeWebSocket()
+  },
+  methods: {
+    /** 查询测试单表列表 */
+    getList() {
+      this.loading = true
+      this._get()
+    },
+    pollingFetch() {
+      if (isWebSocketConnected() && this.wsSubId) {
+        return
+      }
+      this._get()
+    },
+    _get() {
+      if (!this.queryParams.slaveId) return
+      dccList(this.queryParams)
+        .then((response) => {
+          this.demoList = response.rows || []
+          this.total = response.total || 0
+        })
+        .catch((error) => {
+          console.error('获取数据失败:', error)
+        })
+        .finally(() => {
+          this.loading = false
+        })
+    },
+    subscribeWebSocket(deviceNo) {
+      this.unsubscribeWebSocket()
+      if (!isWebSocketConnected()) return
+      this.wsSubId = subscribeCabinetData(deviceNo, (payload) => {
+        if (payload.data && payload.data.dccList) {
+          const dccList = payload.data.dccList
+          this.demoList = dccList.rows || []
+          this.total = dccList.total || 0
+          this.queryParams.pageNum = 1
+        }
+      })
+    },
+    unsubscribeWebSocket() {
+      if (this.wsSubId) {
+        unsubscribe(this.wsSubId)
+        this.wsSubId = null
+      }
+    },
+    handleRowStyle(row) {
+      //   console.log(row);
+      if (row.rowIndex % 2 !== 0) {
+        return 'custom-border-color'
+      }
+      return 'custom-cell-class-name custom-border-color'
+    },
+    handleHeaderRowStyle(row) {
+      console.log(row)
+      return {
+        backgroundColor: '#2280ec',
+        color: '#fff',
+        fontSize: '16px',
+        padding: '15px 0'
+        // border:"1px solid #2280ec !important"
+      }
+    }
   }
 }
 </script>

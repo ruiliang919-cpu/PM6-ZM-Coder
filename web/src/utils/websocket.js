@@ -385,6 +385,16 @@ export function subscribePowerData(callback) {
 }
 
 /**
+ * D-3: 订阅设备机柜实时数据
+ * @param {number|string} deviceNo - 设备编号
+ * @param {function} callback - 回调函数
+ * @returns {string} 订阅ID
+ */
+export function subscribeCabinetData(deviceNo, callback) {
+  return subscribe('/topic/device/cabinet/' + deviceNo, callback)
+}
+
+/**
  * 获取当前连接状态
  * @returns {boolean}
  */

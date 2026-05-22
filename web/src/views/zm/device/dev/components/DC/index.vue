@@ -60,6 +60,7 @@
 import { dcAc } from '@/api/zm/device/dev'
 import CommonContainer from '@/components/CommonContainer/index.vue'
 import polling from '@/mixins/polling'
+import { subscribeCabinetData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
 
@@ -103,7 +104,8 @@ export default {
         pageNum: 1,
         pageSize: 10,
         slaveId: -1
-      }
+      },
+      wsSubId: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -121,16 +123,18 @@ export default {
           this.queryParams.pageNum = 1
           this.getList()
           this.$startPolling()
+          this.subscribeWebSocket(n)
         } else {
           this.$stopPolling()
+          this.unsubscribeWebSocket()
           this.loading = false
         }
       },
       immediate: true
     }
   },
-  created() {
-    // this.getList();
+  beforeDestroy() {
+    this.unsubscribeWebSocket()
   },
   methods: {
     /** 查询测试单表列表 */
@@ -139,6 +143,9 @@ export default {
       this._get()
     },
     pollingFetch() {
+      if (isWebSocketConnected() && this.wsSubId) {
+        return
+      }
       this._get()
     },
     _get() {
@@ -157,6 +164,26 @@ export default {
         .finally(() => {
           this.loading = false
         })
+    },
+    subscribeWebSocket(deviceNo) {
+      this.unsubscribeWebSocket()
+      if (!isWebSocketConnected()) return
+      this.wsSubId = subscribeCabinetData(deviceNo, (payload) => {
+        if (payload.data && payload.data.modules) {
+          const modules = payload.data.modules
+          const tableData = modules.data || {}
+          this.demoList = Array.isArray(tableData.rows) ? tableData.rows : []
+          this.total = typeof tableData.total === 'number' ? tableData.total : 0
+          this.cabinetType = modules.cabinetType
+          this.queryParams.pageNum = 1
+        }
+      })
+    },
+    unsubscribeWebSocket() {
+      if (this.wsSubId) {
+        unsubscribe(this.wsSubId)
+        this.wsSubId = null
+      }
     },
     handleRowStyle(row) {
       //   console.log(row);

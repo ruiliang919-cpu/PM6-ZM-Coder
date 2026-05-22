@@ -23,6 +23,7 @@ import CommonContainer from '@/components/CommonContainer/index.vue'
 import Table from './table_left.vue'
 import Table1 from './table_right.vue'
 import polling from '@/mixins/polling'
+import { subscribeCabinetData, unsubscribe, isWebSocketConnected } from '@/utils/websocket'
 
 export default {
   components: {
@@ -37,7 +38,8 @@ export default {
       queryParams: {
         slaveId: -1
       },
-      form: null
+      form: null,
+      wsSubId: null
     }
   },
   inject: ['getNavibarDeviceValue'],
@@ -69,13 +71,18 @@ export default {
           this.queryParams.pageNum = 1
           this.getList()
           this.$startPolling()
+          this.subscribeWebSocket(n)
         } else {
           this.$stopPolling()
+          this.unsubscribeWebSocket()
           this.loading = false
         }
       },
       immediate: true
     }
+  },
+  beforeDestroy() {
+    this.unsubscribeWebSocket()
   },
   methods: {
     getList() {
@@ -83,6 +90,9 @@ export default {
       this._get()
     },
     pollingFetch() {
+      if (isWebSocketConnected() && this.wsSubId) {
+        return
+      }
       this._get()
     },
     _get() {
@@ -91,6 +101,21 @@ export default {
       }).finally(() => {
         this.loading = false
       })
+    },
+    subscribeWebSocket(deviceNo) {
+      this.unsubscribeWebSocket()
+      if (!isWebSocketConnected()) return
+      this.wsSubId = subscribeCabinetData(deviceNo, (payload) => {
+        if (payload.data && payload.data.alternating) {
+          this.form = payload.data.alternating
+        }
+      })
+    },
+    unsubscribeWebSocket() {
+      if (this.wsSubId) {
+        unsubscribe(this.wsSubId)
+        this.wsSubId = null
+      }
     }
   }
 }

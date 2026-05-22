@@ -112,4 +112,23 @@ public class DeviceStatusPushService {
             log.error("WebSocket推送设备告警失败, deviceNo={}", deviceNo, e);
         }
     }
+
+    /**
+     * D-3: 推送设备机柜实时数据
+     * <p>
+     * 聚合推送某个设备的所有机柜信息，替代前端轮询。
+     * 订阅目标: /topic/device/cabinet/{deviceNo}
+     * </p>
+     *
+     * @param deviceNo 设备编号
+     * @param data     机柜数据聚合对象
+     */
+    public void pushCabinetData(Integer deviceNo, Object data) {
+        try {
+            messagingTemplate.convertAndSend("/topic/device/cabinet/" + deviceNo, data);
+            log.debug("WebSocket推送机柜数据, deviceNo={}", deviceNo);
+        } catch (Exception e) {
+            log.error("WebSocket推送机柜数据失败, deviceNo={}", deviceNo, e);
+        }
+    }
 }
