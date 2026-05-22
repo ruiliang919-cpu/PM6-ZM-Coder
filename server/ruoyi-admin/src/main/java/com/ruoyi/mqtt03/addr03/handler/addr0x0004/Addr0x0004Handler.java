@@ -1,8 +1,8 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x0004;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.TimeUtil;
 import com.ruoyi.utils.device.time.Timer;
@@ -27,9 +27,8 @@ public class Addr0x0004Handler implements AddrHandler {
 
     @Timer("0004")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x0004 body = gson.fromJson(payload, Addr0x0004.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x0004 body = JSONUtil.toBean(payload.toString(), Addr0x0004.class);
         long timestamp = body.getTime();
         List<Addr0x0004.Data> data = body.getData();
         for (Addr0x0004.Data d : data) {

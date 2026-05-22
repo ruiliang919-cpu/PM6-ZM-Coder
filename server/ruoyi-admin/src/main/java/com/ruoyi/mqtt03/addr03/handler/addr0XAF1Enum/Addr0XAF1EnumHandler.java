@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0XAF1Enum;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
@@ -19,9 +19,8 @@ public class Addr0XAF1EnumHandler implements AddrHandler {
 
     @Timer("AF1Enum")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0XAF1Enum body = gson.fromJson(payload, Addr0XAF1Enum.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0XAF1Enum body = JSONUtil.toBean(payload.toString(), Addr0XAF1Enum.class);
         String ip = key.getCreateTCP(deviceNo).getIp();
         redisTemplate.opsForValue().set(REMOTE_KEY + ip + ":" + deviceNo + ":0XAF1Enum", body.getNum());
     }

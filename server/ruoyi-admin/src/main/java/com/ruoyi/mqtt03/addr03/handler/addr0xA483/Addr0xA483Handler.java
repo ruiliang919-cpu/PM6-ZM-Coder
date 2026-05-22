@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0xA483;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
@@ -26,9 +26,8 @@ public class Addr0xA483Handler implements AddrHandler {
 
     @Timer("A483")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0xA483 body = gson.fromJson(payload, Addr0xA483.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0xA483 body = JSONUtil.toBean(payload.toString(), Addr0xA483.class);
         List<Addr0xA483.Data> data = body.getData();
         String ip = key.getCreateTCP(deviceNo).getIp();
         String k = REMOTE_KEY + ip + ":" + deviceNo + ":";

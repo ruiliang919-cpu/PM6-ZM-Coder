@@ -1,8 +1,8 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0X00CB;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
 import com.ruoyi.zm.domain.*;
@@ -31,9 +31,8 @@ public class Addr0x00CBHandler implements AddrHandler {
 
     @Timer("00CB")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0X00CB body = gson.fromJson(payload, Addr0X00CB.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0X00CB body = JSONUtil.toBean(payload.toString(), Addr0X00CB.class);
         long timestamp = body.getTime();
 
         List<DevEnergyMeterDay> days = new ArrayList<>();

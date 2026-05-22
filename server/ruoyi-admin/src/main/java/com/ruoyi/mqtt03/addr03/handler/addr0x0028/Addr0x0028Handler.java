@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x0028;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
@@ -24,9 +24,8 @@ public class Addr0x0028Handler implements AddrHandler {
 
     @Override
     @Timer("0028")
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x0028 body = gson.fromJson(payload, Addr0x0028.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x0028 body = JSONUtil.toBean(payload.toString(), Addr0x0028.class);
         List<Addr0x0028.Data> data = body.getData();
         String ip = key.getCreateTCP(deviceNo).getIp();
         Map<String, BigDecimal> m = data.stream().collect(Collectors.toMap(d -> (TELEMETER_KEY + ip + ":" + deviceNo + ":" + d.getAddr()), d -> new BigDecimal(d.getValue())));

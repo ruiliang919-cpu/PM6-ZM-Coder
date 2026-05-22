@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import com.ruoyi.common.core.domain.R;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +21,6 @@ public class RecoverController {
     @Value("${recover.password:123456}")
     private String password;
 
-    @SaIgnore
     @GetMapping("/password")
     public R<Boolean> password(String password) {
         return R.ok(this.password.equals(password));

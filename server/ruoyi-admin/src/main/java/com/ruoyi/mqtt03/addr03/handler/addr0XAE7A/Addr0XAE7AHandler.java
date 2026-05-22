@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0XAE7A;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
@@ -22,9 +22,8 @@ public class Addr0XAE7AHandler implements AddrHandler {
 
     @Timer("AE7A")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0XAE7A body = gson.fromJson(payload, Addr0XAE7A.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0XAE7A body = JSONUtil.toBean(payload.toString(), Addr0XAE7A.class);
         Map<String, Object> data = new HashMap<>();
         body.getData().forEach(d1 -> {
             d1.setInductiveSwitchStatus(d1.getInductiveSwitchStatus() == 1 ? 0 : 1);

@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -105,7 +105,6 @@ public class BasicInformationController {
     }
 
     // 获取机柜信息 用于基本资料展示
-    @SaIgnore
     @PostMapping("/getCabinetList")
     public R<TableDataInfo<BaseDeviceResp>> getCabinetList(@RequestBody PageQuery pageQuery) {
         DeviceCache cache = new DeviceCache(redisTemplate, shortArrayRedisTemplate, booleanArrayRedisTemplate,

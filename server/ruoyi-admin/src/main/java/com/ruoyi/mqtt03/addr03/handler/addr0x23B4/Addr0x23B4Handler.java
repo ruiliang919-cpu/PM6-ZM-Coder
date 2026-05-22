@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x23B4;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.AddrHandlerFactory;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
@@ -18,9 +18,8 @@ public class Addr0x23B4Handler implements AddrHandler {
 
     @Override
     @Timer("23B4")
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x23B4 body = gson.fromJson(payload, Addr0x23B4.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x23B4 body = JSONUtil.toBean(payload.toString(), Addr0x23B4.class);
         Addr0x23B4.Data data = body.getData();
         StringBuilder s = new StringBuilder();
         Integer[] group = data.getGroup();

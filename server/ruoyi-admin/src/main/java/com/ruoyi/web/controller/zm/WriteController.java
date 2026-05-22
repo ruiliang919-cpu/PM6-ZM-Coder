@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
@@ -51,7 +51,6 @@ import static com.ruoyi.zm.utils.ScaleUtil.combineIDs;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/zm/write")
-@SaIgnore
 public class WriteController {
     private final DevBaseDeviceMapper deviceMapper;
     private final RedisTemplate<String, int[]> intArrayRedisTemplate;
@@ -117,7 +116,8 @@ public class WriteController {
                 codes = temp;
             }
             codes[groupNameVo.getGroupId() - 1] = (short) ((long) devBaseDistrict.getId());
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.error("Error reading remote array for groupName", e);
         }
         shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA5AE", codes);
 
@@ -195,7 +195,8 @@ public class WriteController {
                     short[] temp = key.getRemoteByArr(reqVo.getDeviceId(), "0xA5AE");
                     if (temp[0] != -1) codes = temp;
                     codes[reqVo.getGroupId() - 1] = reqVo.getZoneId();
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.error("Error reading remote array for updateLoop", e);
                 }
                 shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA5AE", codes);
             }
@@ -208,7 +209,6 @@ public class WriteController {
     };
 
     // 修改照明控制-分区控制 开关 已保存缓存
-    @SaIgnore
     @GetMapping("/updateZoneLightSwitch")
     public R<?> updateZoneLightSwitch1(Integer zoneId, Integer swStatus) {
         if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
@@ -248,6 +248,7 @@ public class WriteController {
                     groupControlSwitch(vo);
 
                 } catch (Exception e) {
+                    log.error("Error in updateZoneLightSwitch for device: {}", no, e);
                 }
             }
         }
@@ -293,6 +294,7 @@ public class WriteController {
                     vo.setDeviceId(Math.toIntExact(no));
                     groupControlLux(vo);
                 } catch (Exception e) {
+                    log.error("Error in updateZoneLightLux for device: {}", no, e);
                 }
             }
         }
@@ -1437,7 +1439,7 @@ public class WriteController {
                 reqVo.setDeviceId(Math.toIntExact(device.getDeviceNo()));
                 updateSimpleControlCommon(reqVo);
             } catch (Exception e) {
-                // e.printStackTrace();
+                log.error("Error in updateSimpleControlToAll for device: {}", device.getDeviceNo(), e);
             }
         }
         return R.ok("指令已下发");
@@ -1457,7 +1459,7 @@ public class WriteController {
                 reqVo.setDeviceId(Math.toIntExact(device.getDeviceNo()));
                 updateSceneControlCommon(reqVo);
             } catch (Exception e) {
-                // e.printStackTrace();
+                log.error("Error in updateSceneControlToAll for device: {}", device.getDeviceNo(), e);
             }
         }
         return R.ok("指令已下发");

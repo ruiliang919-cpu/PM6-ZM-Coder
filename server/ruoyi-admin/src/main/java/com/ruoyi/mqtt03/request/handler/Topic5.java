@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.AddrHandlerFactory;
 import com.ruoyi.mqtt03.request.base.RequestHandler;
@@ -20,7 +20,7 @@ public class Topic5 implements RequestHandler {
     private final WriteController w;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int id = payload.get("id").getAsInt();
         GroupNameVo g = new GroupNameVo();
         g.setGroupId(id);

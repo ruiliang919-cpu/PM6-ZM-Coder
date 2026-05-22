@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x0000;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
 import com.ruoyi.zm.domain.DevBaseLoss;
@@ -19,9 +19,8 @@ public class Addr0x0000Handler implements AddrHandler {
 
     @Timer("0000")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x0000 body = gson.fromJson(payload, Addr0x0000.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x0000 body = JSONUtil.toBean(payload.toString(), Addr0x0000.class);
         DevBaseLoss loss = (DevBaseLoss) redisTemplate.opsForValue().get("zm:power:loss:" + deviceNo);
         PowerTimeRespVo power = (PowerTimeRespVo) redisTemplate.opsForValue().get("zm:power:power:" + deviceNo);
         DevBaseLoss cacheLoss = new DevBaseLoss();

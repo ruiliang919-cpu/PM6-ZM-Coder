@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.request.base.RequestHandler;
 import com.ruoyi.mqttwrite.inf.InfValue;
@@ -21,7 +21,7 @@ public class Topic11 implements RequestHandler {
     private final Key k;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int moduleId = payload.get("id").getAsInt();
         Map<String, Object> zdMap = (Map<String, Object>) k.getRemote(deviceNo, "0XAE8F");
         if (zdMap != null && !zdMap.isEmpty()) {

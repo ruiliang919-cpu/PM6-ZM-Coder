@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x0025;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.AddrHandlerFactory;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
@@ -18,9 +18,8 @@ public class Addr0x0025Handler implements AddrHandler {
 
     @Override
     @Timer("0025")
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x0025 body = gson.fromJson(payload, Addr0x0025.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x0025 body = JSONUtil.toBean(payload.toString(), Addr0x0025.class);
         Integer num = body.getNum();
         String ip = key.getCreateTCP(deviceNo).getIp();
         redisTemplate.opsForValue().set(AddrHandlerFactory.getKey(ip, "0x0025", deviceNo), num);

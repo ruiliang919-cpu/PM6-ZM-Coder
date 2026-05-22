@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.request.base.RequestHandler;
 import com.ruoyi.web.controller.zm.WriteController;
@@ -18,7 +18,7 @@ public class Topic6 implements RequestHandler {
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int id = payload.get("id").getAsInt();
         w.sceneName(deviceNo, id, n(deviceNo, id));
     }

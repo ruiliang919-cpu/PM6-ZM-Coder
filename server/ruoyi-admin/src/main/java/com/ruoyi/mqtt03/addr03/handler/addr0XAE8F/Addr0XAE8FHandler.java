@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0XAE8F;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
@@ -22,9 +22,8 @@ public class Addr0XAE8FHandler implements AddrHandler {
 
     @Timer("AE8F")
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0XAE8F body = gson.fromJson(payload, Addr0XAE8F.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0XAE8F body = JSONUtil.toBean(payload.toString(), Addr0XAE8F.class);
         Map<String, Object> data = new HashMap<>();
         data.put("data", body.getData());
         data.put("data1", body.getData1());

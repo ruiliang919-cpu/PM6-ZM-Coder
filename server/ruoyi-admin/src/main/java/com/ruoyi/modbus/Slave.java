@@ -10,6 +10,7 @@ import com.serotonin.modbus4j.ip.tcp.TcpSlave;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +22,7 @@ import javax.annotation.PostConstruct;
 public class Slave {
     private final RtuHandler rtuHandler;
     private final RtuWriteUtil rtuWriteUtil;
+    private final TaskExecutor taskExecutor;
     private final Key key;
     private final DeviceUtilCache deviceUtilCache;
     private final RedisTemplate<String, Object> redisTemplate;
@@ -31,7 +33,10 @@ public class Slave {
 
     @PostConstruct
     public void run() {
-        if (flag) new Thread(this::createSalve).start();
+        if (flag) {
+            log.info("Starting modbus slave server thread...");
+            taskExecutor.execute(this::createSalve);
+        }
     }
 
     private void createSalve() {
@@ -48,7 +53,7 @@ public class Slave {
         try {
             salve.start();
         } catch (Exception e) {
-            // log.info("创建从站失败~~~", e);
+            log.error("创建从站失败", e);
         }
     }
 }

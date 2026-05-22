@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.request.base;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 
 public interface RequestHandler {
-    void handle(Integer deviceNo, JsonObject payload);
+    void handle(Integer deviceNo, JSONObject payload);
 }

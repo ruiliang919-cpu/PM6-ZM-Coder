@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03.addr03.handler.addr0x2100;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONUtil;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.utils.device.time.Timer;
 import lombok.RequiredArgsConstructor;
@@ -19,9 +19,8 @@ public class Addr0x2100Handler implements AddrHandler {
 
     @Override
     @Timer("2100")
-    public void handle(Integer deviceNo, JsonObject payload) {
-        Gson gson = new Gson();
-        Addr0x2100 body = gson.fromJson(payload, Addr0x2100.class);
+    public void handle(Integer deviceNo, JSONObject payload) {
+        Addr0x2100 body = JSONUtil.toBean(payload.toString(), Addr0x2100.class);
         String key = "zm:power:ill:" + deviceNo + ":";
         int select = body.getSelect();
         List<Addr0x2100.Data> data = body.getData();

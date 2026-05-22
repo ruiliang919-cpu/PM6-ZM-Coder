@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt03.addr03.handler.addr0xA483.Addr0xA483;
 import com.ruoyi.mqtt03.addr03.handler.addr0xA483.Addr0xA483Handler;
@@ -23,7 +23,7 @@ public class Topic21 implements RequestHandler {
     private final StringRedisTemplate stringRedisTemplate;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int moduleId = payload.get("id").getAsInt();
         Addr0xA483.Data d = (Addr0xA483.Data) redisTemplate.opsForHash().get(Addr0xA483Handler.writeKey + deviceNo, moduleId + "m");
         if (d != null) {

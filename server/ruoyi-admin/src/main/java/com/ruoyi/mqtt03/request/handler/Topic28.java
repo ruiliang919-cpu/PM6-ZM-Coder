@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.cache.LoopByGroupCache;
 import com.ruoyi.mqtt03.request.base.RequestHandler;
@@ -17,7 +17,7 @@ public class Topic28 implements RequestHandler {
     private final Key k;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int id = payload.get("id").getAsInt();
         UpdateLoopReqVo u = new UpdateLoopReqVo();
         u.setDeviceId(deviceNo);

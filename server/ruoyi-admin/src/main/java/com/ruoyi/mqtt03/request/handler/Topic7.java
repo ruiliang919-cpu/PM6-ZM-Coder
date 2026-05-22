@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt.MqttPublisher;
 import com.ruoyi.mqtt.PublishKey;
@@ -16,7 +16,7 @@ public class Topic7 implements RequestHandler {
     private final Key key;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         int id = payload.get("id").getAsInt();
         int zoneId = d(deviceNo, id);
         CommonDataInt data = new CommonDataInt();

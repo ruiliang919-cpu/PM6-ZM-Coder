@@ -1,6 +1,6 @@
 package com.ruoyi.mqtt03.request.handler;
 
-import com.google.gson.JsonObject;
+import cn.hutool.json.JSONObject;
 import com.ruoyi.mqtt03.request.base.RequestHandler;
 import com.ruoyi.web.controller.zm.WriteController;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ public class Topic1 implements RequestHandler {
     private final WriteController w;
 
     @Override
-    public void handle(Integer deviceNo, JsonObject payload) {
+    public void handle(Integer deviceNo, JSONObject payload) {
         w.timeSaveNow(deviceNo);
     }
 }

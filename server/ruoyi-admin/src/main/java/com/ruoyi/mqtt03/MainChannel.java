@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt03;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
 import com.ruoyi.mqtt03.addr03.AddrHandlerFactory;
 import com.ruoyi.mqtt03.addr03.base.AddrHandler;
 import com.ruoyi.mqtt03.request.RequestHandlerFactory;
@@ -18,16 +18,24 @@ public class MainChannel {
     private final RequestHandlerFactory requestHandlerFactory;
 
     public void handleHoldingRegister(Integer deviceNo, String payload) {
-        JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
-        String addr = json.get("addr").getAsString().substring(2);
-        AddrHandler handler = addrHandlerFactory.getHandler(addr);
-        if (handler != null) handler.handle(deviceNo, json);
+        try {
+            JSONObject json = JSONUtil.parseObj(payload);
+            String addr = json.getStr("addr").substring(2);
+            AddrHandler handler = addrHandlerFactory.getHandler(addr);
+            if (handler != null) handler.handle(deviceNo, json);
+        } catch (Exception e) {
+            log.error("handleHoldingRegister error, deviceNo={}", deviceNo, e);
+        }
     }
 
     public void handleRequest(Integer deviceNo, String payload) {
-        JsonObject json = JsonParser.parseString(payload).getAsJsonObject();
-        int topic = json.get("writeTopic").getAsInt();
-        RequestHandler handler = requestHandlerFactory.getHandler(topic);
-        if (handler != null) handler.handle(deviceNo, json);
+        try {
+            JSONObject json = JSONUtil.parseObj(payload);
+            int topic = json.getInt("writeTopic");
+            RequestHandler handler = requestHandlerFactory.getHandler(topic);
+            if (handler != null) handler.handle(deviceNo, json);
+        } catch (Exception e) {
+            log.error("handleRequest error, deviceNo={}", deviceNo, e);
+        }
     }
 }

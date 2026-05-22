@@ -104,7 +104,8 @@ public class HomeController {
                             else vo.setPower(BigDecimal.ZERO);
                             allPower.add(vo);
                         }
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.error("Error processing energy data item: {}", item, e);
                     }
                 });
             } else if (type == 2) {
@@ -123,7 +124,8 @@ public class HomeController {
                             else vo.setPower(BigDecimal.ZERO);
                             allPower.add(vo);
                         }
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.error("Error processing daily energy data item: {}", item, e);
                     }
                 });
             }

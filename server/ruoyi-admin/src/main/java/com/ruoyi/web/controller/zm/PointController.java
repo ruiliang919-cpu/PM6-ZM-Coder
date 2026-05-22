@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import com.ruoyi.common.core.domain.R;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -61,7 +61,6 @@ public class PointController {
         return R.ok(0);
     }
 
-    @SaIgnore
     @GetMapping("/getZoneStatus")
     public R<?> getZoneStatus() {
         if (redisTemplate.hasKey("zm:global:zone:status")) return R.ok(true);
@@ -74,7 +73,6 @@ public class PointController {
         return R.ok();
     }
 
-    @SaIgnore
     @GetMapping("/getSceneStatus")
     public R<?> getSceneStatus() {
         if (redisTemplate.hasKey("zm:global:scene:status"))
@@ -88,7 +86,6 @@ public class PointController {
         return R.ok();
     }
 
-    @SaIgnore
     @GetMapping("/getLoopStatus")
     public R<?> getLoopStatus() {
         if (redisTemplate.hasKey("zm:global:loop:status:change")) return R.ok(true);

@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import com.ruoyi.utils.device.time.TimeUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -16,7 +16,6 @@ import java.util.concurrent.Executor;
 
 // http://localhost:8081/method/time/status
 // http://localhost:8081/method/time/thread
-@SaIgnore
 @RestController
 @RequestMapping("/method/time")
 @RequiredArgsConstructor

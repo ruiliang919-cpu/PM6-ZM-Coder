@@ -1,7 +1,7 @@
 package com.ruoyi.mqtt;
 
 import cn.hutool.json.JSONUtil;
-import com.google.gson.Gson;
+
 import com.ruoyi.cache.Key;
 import com.ruoyi.mqtt.vo.Heart;
 import com.ruoyi.zm.domain.DevWriteInstruct;
@@ -89,12 +89,12 @@ public class MqttPublisher {
             data.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
             data.setVersion("阿弥诺斯");
             heart.setData(data);
-            mqttOutboundChannel.send(MessageBuilder.withPayload(new Gson().toJson(heart))
+            mqttOutboundChannel.send(MessageBuilder.withPayload(JSONUtil.toJsonStr(heart))
                 .setHeader(MqttHeaders.TOPIC, "/zm/" + i + "/heart")
                 .setHeader(MqttHeaders.QOS, 2)
                 .setHeader(MqttHeaders.RETAINED, false)
                 .build());
-            mqttOutboundChannel.send(MessageBuilder.withPayload(new Gson().toJson(m))
+            mqttOutboundChannel.send(MessageBuilder.withPayload(JSONUtil.toJsonStr(m))
                 .setHeader(MqttHeaders.TOPIC, "/zm/" + i + "/coil")
                 .setHeader(MqttHeaders.QOS, 2)
                 .setHeader(MqttHeaders.RETAINED, false)

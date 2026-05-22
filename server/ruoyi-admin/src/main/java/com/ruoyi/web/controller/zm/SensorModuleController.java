@@ -1,6 +1,6 @@
 package com.ruoyi.web.controller.zm;
 
-import cn.dev33.satoken.annotation.SaIgnore;
+
 import com.ruoyi.cache.IllUtilCache;
 import com.ruoyi.cache.IlluminanceCache;
 import com.ruoyi.cache.InfraredCache;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.util.*;
 
 // 传感模式控制层接口
-@SaIgnore
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/zm/sensorModule")
