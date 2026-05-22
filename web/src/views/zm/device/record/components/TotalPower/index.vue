@@ -29,6 +29,9 @@ export default {
         if(this.queryParams.deviceId){
           this.getList()
           this.$startPolling()
+        } else {
+          this.$stopPolling()
+          this.loading = false
         }
       },
       immediate: true

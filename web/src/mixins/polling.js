@@ -58,13 +58,18 @@ export default {
     $startPolling() {
       this.$stopPolling()
       if (this.$pollingPaused) return
+      const interval = this.$pollingInterval
       this.$pollingTimer = setInterval(() => {
         if (this.$pollingUseGetFlag) {
-          this.getFlag?.()
+          if (typeof this.getFlag === 'function') {
+            this.getFlag()
+          } else {
+            console.warn('[PollingMixin] getFlag() not implemented in component:', this.$options.name)
+          }
         } else {
           this.pollingFetch?.()
         }
-      }, this.$pollingInterval)
+      }, interval)
     },
 
     /**

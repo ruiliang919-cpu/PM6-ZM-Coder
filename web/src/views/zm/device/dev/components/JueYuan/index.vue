@@ -75,6 +75,9 @@ export default {
           this.queryParams.pageNum = 1
           this.getList()
           this.$startPolling()
+        } else {
+          this.$stopPolling()
+          this.loading = false
         }
       },
       immediate: true

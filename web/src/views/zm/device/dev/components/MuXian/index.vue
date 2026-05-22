@@ -107,6 +107,9 @@ export default {
           this.queryParams.slaveId = n
           this.getList()
           this.$startPolling()
+        } else {
+          this.$stopPolling()
+          this.loading = false
         }
       },
       immediate: true
