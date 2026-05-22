@@ -1,6 +1,6 @@
 # PM6-ZM 项目开发行动计划文档
 
-> 文档版本: v1.2
+> 文档版本: v1.5
 > 创建日期: 2026-05-21
 > 更新机制: 每完成一个任务后立即更新状态、实际完成时间和问题记录
 
@@ -304,6 +304,7 @@ export default {
 | 2026-05-22 | v1.2 | 代码审查后修复：devBaseDeviceMapper NPE、注释修正 | Qoder |
 | 2026-05-22 | v1.3 | Phase 2 完成：测试代码完善（C-1~C-5），修复 mockScanKeys、C2C8 验证、slaveId 测试、边界测试 | Qoder |
 | 2026-05-23 | v1.4 | Phase 3 完成：前端轮询重构（B-1~B-10），新建 PollingMixin，重构 16 个组件，前端构建验证通过 | Qoder |
+| 2026-05-23 | v1.5 | 代码审查修复：JueYuan/MuXian/TotalPower 轮询停止逻辑、PollingMixin dynamicInterval 语义优化 | Qoder |
 
 ---
 
