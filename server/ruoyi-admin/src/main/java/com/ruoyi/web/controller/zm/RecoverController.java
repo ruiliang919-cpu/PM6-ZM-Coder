@@ -18,7 +18,7 @@ public class RecoverController {
     @Value("${recover.host:http://127.0.0.1:4444/}")
     private String host;
 
-    @Value("${recover.password:123456}")
+    @Value("${recovery.password:}")
     private String password;
 
     @GetMapping("/password")

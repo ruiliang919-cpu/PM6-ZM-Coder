@@ -55,7 +55,7 @@ spring:
           # jdbc 所有参数配置参考 https://lionli.blog.csdn.net/article/details/122018562
           # rewriteBatchedStatements=true 批处理优化 大幅提升批量插入更新删除性能(对数据库有性能损耗 使用批量操作应考虑性能问题)
 #          url: jdbc:mysql://127.0.0.1:4406/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
-          url: jdbc:mysql://192.168.20.109:3306/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          url: jdbc:mysql://192.168.20.109:3306/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true <!-- 仅开发环境 -->
           username: ${DB_USERNAME:root}
           password: ${DB_PASSWORD:123456}
         # 从库数据源
@@ -63,7 +63,7 @@ spring:
           lazy: true
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true <!-- 仅开发环境 -->
           username:
           password:
       hikari:
@@ -189,8 +189,14 @@ sms:
     territory: ap-guangzhou
   is-print: false
 
-recover:
+recovery:
   password: 123456
 
 slave:
   port: 1505
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env

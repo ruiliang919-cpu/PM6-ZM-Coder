@@ -237,10 +237,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: '*'
+        include: health,info
   endpoint:
     health:
-      show-details: ALWAYS
+      show-details: when-authorized
     logfile:
       external-file: ./logs/sys-console.log
 log4j:
