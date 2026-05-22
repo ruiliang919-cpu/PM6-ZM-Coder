@@ -47,3 +47,4 @@ skills-lock.json
 
 # ===== 嵌套子模块构建产物 =====
 server/ruoyi-extend/**/target/
+.omc/
