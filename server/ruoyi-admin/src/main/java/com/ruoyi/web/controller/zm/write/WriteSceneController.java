@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.zm.write;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.cache.Key;
+import com.ruoyi.cache.ModuleGuard;
 import com.ruoyi.cache.SceneCache;
 import com.ruoyi.cache.SceneControlCache;
 import com.ruoyi.common.core.domain.R;
@@ -54,9 +55,11 @@ public class WriteSceneController {
 
     private final static String[] ADDR_SCENE = {"", "0XAAEE", "0XAB2E", "0XAB6E"};
 
+    private final ModuleGuard moduleGuard;
+
     @GetMapping("/intoScenes")
     public R<?> intoScenes1(Integer sceneId) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return intoScenes(sceneId);
     }
 
@@ -72,7 +75,7 @@ public class WriteSceneController {
 
     @GetMapping("/intoScene")
     public R<?> intoScene1(Integer deviceId, Integer sceneId) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return intoSceneNotRecord(deviceId, sceneId);
     }
 
@@ -117,7 +120,7 @@ public class WriteSceneController {
 
     @GetMapping("/sceneName")
     public R<?> sceneName1(Integer deviceId, Integer sceneId, String name) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return sceneName(deviceId, sceneId, name);
     }
 
@@ -150,7 +153,7 @@ public class WriteSceneController {
 
     @PostMapping("/updateSceneParams")
     public R<?> updateSceneParams1(@RequestBody SceneParamsReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneParams(reqVo);
     }
 
@@ -228,7 +231,7 @@ public class WriteSceneController {
 
     @PostMapping("/updateSceneControl")
     public R<?> updateSceneControl1(@RequestBody SceneControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneControl(reqVo);
     }
 
@@ -297,7 +300,7 @@ public class WriteSceneController {
 
     @PostMapping("/updateSceneControlToAll")
     public R<?> updateSceneControlToAll1(@RequestBody SceneControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneControlToAll(reqVo);
     }
 
@@ -433,8 +436,4 @@ public class WriteSceneController {
         return R.ok("指令已下发");
     }
 
-    private Boolean module() {
-        String module = (String) redisTemplate.opsForValue().get("zm:global:module:select");
-        return "on-the-line".equals(module);
-    }
 }

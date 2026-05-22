@@ -1,6 +1,5 @@
 package com.ruoyi.web.controller.device;
 
-import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.annotation.RepeatSubmit;

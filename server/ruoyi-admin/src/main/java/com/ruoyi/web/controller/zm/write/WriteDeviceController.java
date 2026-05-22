@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.zm.write;
 
 import com.ruoyi.cache.Key;
+import com.ruoyi.cache.ModuleGuard;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.mqtt.MqttPublisher;
 import com.ruoyi.mqtt.PublishKey;
@@ -33,6 +34,8 @@ public class WriteDeviceController {
     private final MqttPublisher mqttPublisher;
     private final Key key;
 
+    private final ModuleGuard moduleGuard;
+
     @PostMapping("/deviceSave")
     public R<?> deviceSave(@RequestBody DevBaseDevice device) {
         int index = deviceMapper.updateById(device);
@@ -49,14 +52,14 @@ public class WriteDeviceController {
 
     @PostMapping("/timeSave")
     public R<?> timeSave(@RequestBody DevBaseDevice device) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         mqttPublisher.publish(Math.toIntExact(device.getDeviceNo()), PublishKey.对时设置, new TimeVO());
         return R.ok("启动对时");
     }
 
     @PostMapping("/updateInfraredParams")
     public R<?> updateInfraredParams(@RequestParam Integer deviceId, @RequestBody InfValue infValue) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         InfraredParamsTable table = infValue.getData().get(0);
         if (table.getInductiveLux() < 0 || table.getInductiveLux() > 100
@@ -122,7 +125,7 @@ public class WriteDeviceController {
 
     @PostMapping("/updateIlluminanceParams")
     public R<?> updateIlluminanceParams(@RequestParam Integer deviceId, @RequestBody IllValue illValue) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         IlluminanceParamsTable table = illValue.getData().get(0);
 
@@ -185,8 +188,4 @@ public class WriteDeviceController {
         return R.ok("指令已下发");
     }
 
-    private Boolean module() {
-        String module = (String) redisTemplate.opsForValue().get("zm:global:module:select");
-        return "on-the-line".equals(module);
-    }
 }

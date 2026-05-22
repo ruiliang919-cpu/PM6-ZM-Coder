@@ -18,14 +18,6 @@ public class RecoverController {
     @Value("${recover.host:http://127.0.0.1:4444/}")
     private String host;
 
-    @Value("${recovery.password:}")
-    private String password;
-
-    @GetMapping("/password")
-    public R<Boolean> password(String password) {
-        return R.ok(this.password.equals(password));
-    }
-
     @GetMapping("/issued")
     public R<?> issued() {
         restTemplate.getForEntity(host + "recover/issued", String.class);

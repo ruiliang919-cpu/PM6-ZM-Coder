@@ -52,6 +52,15 @@ import static com.ruoyi.zm.utils.ScaleUtil.combineIDs;
  *   WriteGroupController, WriteSceneController, WriteDeviceController,
  *   WriteControlController, WriteModuleController
  *   旧端点保留兼容，新功能请使用拆分后的路径。
+ *
+ * DTO 迁移说明（旧端点 → 新端点）:
+ *   groupName:         GroupNameVo → GroupNameVo (不变)
+ *   updateLoop:        UpdateLoopReqVo → LoopVo
+ *   updateZoneLight*:  String zoneId → Integer deviceId + 独立参数
+ *   updateSimpleControl: SimpleControlReqVo → SimpleValue (注意字段映射 getGroupIds()→getData1(), getTable()→getData2())
+ *   deviceSave:        DeviceSaveReqVo → DevBaseDevice (实体类)
+ *   updateAcDc/DcDc:   BigDecimal value → BigDecimal value (不变，保留解析逻辑)
+ *   loopControl*:      WriteLoopReqVo → LoopControlVO (getLoopControl()→getData().getLoopArr())
  */
 @Deprecated
 @Slf4j
@@ -80,7 +89,7 @@ public class WriteController {
     // 改分组名称 已保存缓存
     @PostMapping("/groupName")
     public R<?> groupName1(@RequestBody GroupNameVo groupNameVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupName(groupNameVo);
     }
 
@@ -134,7 +143,7 @@ public class WriteController {
     // 机柜设置-回路分组-保存接口 已保存缓存
     @PostMapping("/updateLoop")
     public synchronized R<?> updateLoop1(@RequestBody UpdateLoopReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateLoop(reqVo);
     }
 
@@ -216,9 +225,11 @@ public class WriteController {
     };
 
     // 修改照明控制-分区控制 开关 已保存缓存
+    private final ModuleGuard moduleGuard;
+
     @GetMapping("/updateZoneLightSwitch")
     public R<?> updateZoneLightSwitch1(Integer zoneId, Integer swStatus) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         swStatus = (swStatus == 1 ? 0 : 1);
         return updateZoneLightSwitch(zoneId, swStatus);
     }
@@ -265,7 +276,7 @@ public class WriteController {
     // 修改照明控制-分区控制 调光 亮度值设定范围 0~100 已保存缓存
     @GetMapping("/updateZoneLightLux")
     public R<?> updateZoneLightLux1(Integer zoneId, Integer lux) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateZoneLightLux(zoneId, lux);
     }
 
@@ -311,7 +322,7 @@ public class WriteController {
     // 照明状态&控制-照明控制-场景控制/进入场景（所有机柜） 已保存缓存
     @GetMapping("/intoScenes")
     public R<?> intoScenes1(Integer sceneId) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return intoScenes(sceneId);
     }
 
@@ -330,7 +341,7 @@ public class WriteController {
     // 直流机柜-机柜控制-照明控制-场景控制/进入场景（单个机柜） 已保存缓存
     @GetMapping("/intoScene")
     public R<?> intoScene1(Integer deviceId, Integer sceneId) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return intoSceneNotRecord(deviceId, sceneId);
     }
 
@@ -377,7 +388,7 @@ public class WriteController {
     // 机柜设置-场景设置-场景参数 保存接口 已保存缓存
     @PostMapping("/updateSceneParams")
     public R<?> updateSceneParams1(@RequestBody SceneParamsReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneParams(reqVo);
     }
 
@@ -461,7 +472,7 @@ public class WriteController {
     // 机柜设置-时控模式-普通时控模式参数-保存接口 已保存缓存
     @PostMapping("/updateSimpleControl")
     public R<?> updateSimpleControl1(@RequestBody SimpleControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSimpleControl(reqVo);
     }
 
@@ -593,7 +604,7 @@ public class WriteController {
     // 机柜设置-时控模式-场景时控模式参数-保存接口
     @PostMapping("/updateSceneControl")
     public R<?> updateSceneControl1(@RequestBody SceneControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneControl(reqVo);
     }
 
@@ -920,7 +931,7 @@ public class WriteController {
     // 机柜设置-传感模式-红外传感器-照明参数 已保存缓存
     @PostMapping("/updateInfraredParams")
     public R<?> updateInfraredParams1(@RequestBody InfraredParamsReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateInfraredParams(reqVo);
     }
 
@@ -1008,7 +1019,7 @@ public class WriteController {
     // 外控通道与外控地址不需要写入
     @PostMapping("/updateIlluminanceParams")
     public R<?> updateIlluminanceParams1(@RequestBody IlluminanceParamsReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateIlluminanceParams(reqVo);
     }
 
@@ -1114,7 +1125,7 @@ public class WriteController {
     // 机柜设置-其他设置-对时保存 已保存缓存
     @PostMapping("/timeSave")
     public R<?> timeSave1(@RequestBody TimeSaveReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return timeSave(reqVo);
     }
 
@@ -1131,7 +1142,7 @@ public class WriteController {
     // 改场景名称 已保存缓存
     @GetMapping("/sceneName")
     public R<?> sceneName1(Integer deviceId, Integer sceneId, String name) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return sceneName(deviceId, sceneId, name);
     }
 
@@ -1166,7 +1177,7 @@ public class WriteController {
     // 直流机柜-机柜设置-交流开关 已保存缓存
     @PostMapping("/updateAcControl")
     public R<?> updateAcControl1(@RequestBody List<TimeControlAcRespVo> reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateAcControl(reqVo);
     }
 
@@ -1213,7 +1224,7 @@ public class WriteController {
     // 直流机柜-机柜控制-模块控制 AC/DC输出电压设置 已保存缓存
     @GetMapping("/updateAcDc")
     public R<?> updateAcDc1(Integer deviceId, BigDecimal value) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateAcDc(deviceId, value);
     }
 
@@ -1246,7 +1257,7 @@ public class WriteController {
     // 直流机柜-机柜控制-模块控制 DC/DC输出电压设置 已保存缓存
     @GetMapping("/updateDcDc")
     public R<?> updateDcDc1(Integer deviceId, BigDecimal value) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateDcDc(deviceId, value);
     }
 
@@ -1279,7 +1290,7 @@ public class WriteController {
     // 机柜控制-照明控制-总开关-开关控制 已保存缓存
     @GetMapping("/systemSwitch")
     public R<?> systemSwitch1(Integer deviceId, Integer systemSwitch) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return systemSwitch(deviceId, systemSwitch);
     }
 
@@ -1295,7 +1306,7 @@ public class WriteController {
     // 机柜控制-照明控制-工作模式-开关控制 已保存缓存
     @GetMapping("/workModule")
     public R<?> workModule1(Integer deviceId, Integer workModule) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return workModule(deviceId, workModule);
     }
 
@@ -1312,7 +1323,7 @@ public class WriteController {
     // 直流机柜-机柜控制-照明控制-回路控制-控制亮度 已保存缓存
     @PostMapping("/loopControlLux")
     public R<?> loopControlLux1(@RequestBody WriteLoopReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return loopControlLux(reqVo);
     }
 
@@ -1339,7 +1350,7 @@ public class WriteController {
     // 直流机柜-机柜控制-照明控制-回路控制-控制开关 已保存缓存
     @PostMapping("/loopControlSwitch")
     public R<?> loopControlSwitch1(@RequestBody WriteLoopReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return loopControlSwitch(reqVo);
     }
 
@@ -1366,7 +1377,7 @@ public class WriteController {
     // 直流机柜-机柜控制-照明控制-分组控制-控制亮度 已保存缓存
     @PostMapping("/groupControlLux")
     public R<?> groupControlLux1(@RequestBody WriteGroupReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupControlLux(reqVo);
     }
 
@@ -1398,7 +1409,7 @@ public class WriteController {
     // 直流机柜-机柜控制-照明控制-分组控制-控制开关 已保存缓存
     @PostMapping("/groupControlSwitch")
     public R<?> groupControlSwitch1(@RequestBody WriteGroupReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupControlSwitch(reqVo);
     }
 
@@ -1430,7 +1441,7 @@ public class WriteController {
     // 机柜设置-时控模式-普通时控模式参数-一键设置参数接口 已保存缓存
     @PostMapping("/updateSimpleControlToAll")
     public R<?> updateSimpleControlToAll1(@RequestBody SimpleControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSimpleControlToAll(reqVo);
     }
 
@@ -1455,7 +1466,7 @@ public class WriteController {
     // 机柜设置-时控模式-场景时控模式参数-一键设置参数接口 已保存缓存
     @PostMapping("/updateSceneControlToAll")
     public R<?> updateSceneControlToAll1(@RequestBody SceneControlReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateSceneControlToAll(reqVo);
     }
 
@@ -1482,7 +1493,7 @@ public class WriteController {
     // 系统设置-控制方式-模式选择
     @GetMapping("/selectTimeModule")
     public R<?> selectTimeModule1(Integer deviceId, Integer timeModule) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return selectTimeModule(deviceId, timeModule);
     }
 
@@ -1501,7 +1512,7 @@ public class WriteController {
     // 系统设置-控制方式-红外传感模式
     @GetMapping("/selectInfraredModule")
     public R<?> selectInfraredModule1(Integer deviceId, Boolean enabled) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return selectInfraredModule(deviceId, enabled);
     }
 
@@ -1518,7 +1529,7 @@ public class WriteController {
     // 系统设置-控制方式-照度传感模式
     @GetMapping("/selectIlluminanceModule")
     public R<?> selectIlluminanceModule1(Integer deviceId, Boolean enabled) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return selectIlluminanceModule(deviceId, enabled);
     }
 
@@ -1535,7 +1546,7 @@ public class WriteController {
     // 系统控制-照明控制-手动模式选择
     @GetMapping("/selectHandModule")
     public R<?> selectHandModule1(Integer deviceId, Integer handModule) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return selectHandModule(deviceId, handModule);
     }
 

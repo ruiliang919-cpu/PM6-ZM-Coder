@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.zm.write;
 import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.ruoyi.cache.Key;
+import com.ruoyi.cache.ModuleGuard;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.modbus.util.RecordPlus;
 import com.ruoyi.mqtt.MqttPublisher;
@@ -26,6 +27,7 @@ import org.bouncycastle.util.Arrays;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static com.ruoyi.cache.Key.REMOTE_KEY;
@@ -54,7 +56,7 @@ public class WriteControlController {
 
     @PostMapping("/updateSimpleControl")
     public R<?> updateSimpleControl(@RequestParam Integer deviceId, @RequestBody SimpleValue simpleValue) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         mqttPublisher.publish(deviceId, PublishKey.普通时控, simpleValue);
 
@@ -160,7 +162,7 @@ public class WriteControlController {
 
     @PostMapping("/updateSimpleControlToAll")
     public R<?> updateSimpleControlToAll(@RequestBody SimpleValue simpleValue) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         for (int i = 0; i < simpleValue.getData1().size(); i++) {
             if (simpleValue.getData1().get(i).getLux() < 0 || simpleValue.getData1().get(i).getLux() > 100) {
@@ -179,9 +181,11 @@ public class WriteControlController {
         return R.ok("指令已下发");
     }
 
+    private final ModuleGuard moduleGuard;
+
     @GetMapping("/updateZoneLightSwitch")
     public R<?> updateZoneLightSwitch(@RequestParam String type, @RequestParam Integer value) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         Integer zoneId = Integer.parseInt(type);
         Integer swStatus = (value == 1 ? 0 : 1);
         return updateZoneLightSwitchInternal(zoneId, swStatus);
@@ -224,7 +228,7 @@ public class WriteControlController {
 
     @GetMapping("/updateZoneLightLux")
     public R<?> updateZoneLightLux(@RequestParam String type, @RequestParam Integer value) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         Integer zoneId = Integer.parseInt(type);
         return updateZoneLightLuxInternal(zoneId, value);
     }
@@ -268,7 +272,7 @@ public class WriteControlController {
 
     @PostMapping("/updateAcControl")
     public R<?> updateAcControl(@RequestBody AcValue acValue) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         Integer deviceId = acValue.getData().get(0).getDeviceId();
 
@@ -293,21 +297,25 @@ public class WriteControlController {
     }
 
     @GetMapping("/updateAcDc")
-    public R<?> updateAcDc(@RequestParam Integer deviceId, @RequestParam int acdc) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+    public R<?> updateAcDc(@RequestParam Integer deviceId, @RequestParam BigDecimal value) {
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
+        int val;
+        String valueStr = value.toString();
+        String[] split = valueStr.split("\\.");
+        val = Integer.parseInt(split[0] + split[1]);
 
         DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(deviceId);
         short[] saveArr = key.getRemoteByArr(deviceId, "0xA007");
         if (saveArr[0] == -1) {
-            saveArr = new short[]{(short) acdc, 360};
+            saveArr = new short[]{(short) val, 360};
         } else {
-            saveArr[0] = (short) acdc;
+            saveArr[0] = (short) val;
         }
         shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA007", saveArr);
 
         String dcDc = saveArr[1] + "";
         String dcDcValue = dcDc.substring(0, dcDc.length() - 1) + "." + dcDc.substring(dcDc.length() - 1);
-        String acDcValue = acdc + "";
+        String acDcValue = val + "";
         if (acDcValue.length() > 1) {
             acDcValue = acDcValue.substring(0, acDcValue.length() - 1) + "." + acDcValue.substring(acDcValue.length() - 1);
         }
@@ -320,21 +328,25 @@ public class WriteControlController {
     }
 
     @GetMapping("/updateDcDc")
-    public R<?> updateDcDc(@RequestParam Integer deviceId, @RequestParam int acdc) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+    public R<?> updateDcDc(@RequestParam Integer deviceId, @RequestParam BigDecimal value) {
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
+        int val;
+        String valueStr = value.toString();
+        String[] split = valueStr.split("\\.");
+        val = Integer.parseInt(split[0] + split[1]);
 
         DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(deviceId);
         short[] saveArr = key.getRemoteByArr(deviceId, "0xA007");
         if (saveArr[0] == -1) {
-            saveArr = new short[]{220, (short) acdc};
+            saveArr = new short[]{220, (short) val};
         } else {
-            saveArr[1] = (short) acdc;
+            saveArr[1] = (short) val;
         }
         shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA007", saveArr);
 
         String acDc = saveArr[0] + "";
         String acDcValue = acDc.substring(0, acDc.length() - 1) + "." + acDc.substring(acDc.length() - 1);
-        String dcDcValue = acdc + "";
+        String dcDcValue = val + "";
         if (dcDcValue.length() > 1) {
             dcDcValue = dcDcValue.substring(0, dcDcValue.length() - 1) + "." + dcDcValue.substring(dcDcValue.length() - 1);
         }
@@ -348,7 +360,7 @@ public class WriteControlController {
 
     @PostMapping("/loopControlLux")
     public R<?> loopControlLux(@RequestParam Integer deviceId, @RequestBody LoopControlVO loopControlVO) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         mqttPublisher.publish(deviceId, PublishKey.回路总开关, loopControlVO);
 
@@ -359,7 +371,7 @@ public class WriteControlController {
 
     @PostMapping("/loopControlSwitch")
     public R<?> loopControlSwitch(@RequestParam Integer deviceId, @RequestBody LoopControlVO loopControlVO) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
 
         mqttPublisher.publish(deviceId, PublishKey.回路总开关, loopControlVO);
 
@@ -571,10 +583,6 @@ public class WriteControlController {
         redisTemplate.opsForList().rightPush(QUEUE_WRITE_KEY + deviceId, instruct);
     }
 
-    private Boolean module() {
-        String module = (String) redisTemplate.opsForValue().get("zm:global:module:select");
-        return "on-the-line".equals(module);
-    }
 
     private Integer[] convertFromData2(Integer[] data2) {
         List<Integer> result = new ArrayList<>();

@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.zm.write;
 
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.ruoyi.cache.Key;
+import com.ruoyi.cache.ModuleGuard;
 import com.ruoyi.cache.LoopByGroupCache;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.mqtt.MqttPublisher;
@@ -44,9 +45,11 @@ public class WriteGroupController {
         14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
         34, 35, 36, 37, 38, 39, 40};
 
+    private final ModuleGuard moduleGuard;
+
     @PostMapping("/groupName")
     public R<?> groupName1(@RequestBody GroupNameVo groupNameVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupName(groupNameVo);
     }
 
@@ -99,7 +102,7 @@ public class WriteGroupController {
 
     @PostMapping("/updateLoop")
     public synchronized R<?> updateLoop1(@RequestBody UpdateLoopReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return updateLoop(reqVo);
     }
 
@@ -178,7 +181,7 @@ public class WriteGroupController {
 
     @PostMapping("/groupControlLux")
     public R<?> groupControlLux1(@RequestBody WriteGroupReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupControlLux(reqVo);
     }
 
@@ -208,7 +211,7 @@ public class WriteGroupController {
 
     @PostMapping("/groupControlSwitch")
     public R<?> groupControlSwitch1(@RequestBody WriteGroupReqVo reqVo) {
-        if (module()) return R.warn("设备处于远程控制模式，不能下发指令");
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
         return groupControlSwitch(reqVo);
     }
 
@@ -236,8 +239,4 @@ public class WriteGroupController {
         return R.ok("指令下发成功");
     }
 
-    private Boolean module() {
-        String module = (String) redisTemplate.opsForValue().get("zm:global:module:select");
-        return "on-the-line".equals(module);
-    }
 }
