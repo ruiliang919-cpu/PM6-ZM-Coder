@@ -6,6 +6,7 @@ import com.ruoyi.zm.domain.DevInstruct;
 import com.ruoyi.zm.domain.DevWriteInstruct;
 import com.ruoyi.zm.mapper.DevWriteInstructMapper;
 import com.serotonin.modbus4j.ModbusMaster;
+import com.serotonin.modbus4j.msg.ModbusRequest;
 import com.serotonin.modbus4j.msg.WriteCoilsRequest;
 import com.serotonin.modbus4j.msg.WriteCoilsResponse;
 import com.serotonin.modbus4j.msg.WriteRegistersRequest;
@@ -14,10 +15,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,6 +52,9 @@ class WriteBusinessServiceTest {
     private RedisTemplate<String, Object> redisTemplate;
 
     @Mock
+    private ValueOperations<String, Object> valueOperations;
+
+    @Mock
     private ModbusMaster modbusMaster;
 
     @InjectMocks
@@ -59,6 +65,7 @@ class WriteBusinessServiceTest {
     @BeforeEach
     void setUp() {
         instructs = new ArrayList<>();
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     // ==================== FC05 遥控测试 ====================
@@ -72,19 +79,26 @@ class WriteBusinessServiceTest {
 
         WriteCoilsResponse response = mock(WriteCoilsResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
-        writeBusinessService.Business(instructs, modbusMaster, 1);
+        writeBusinessService.Business(instructs, modbusMaster, 5);
 
         // Then
         assertThat(instruct.getFeedback()).isEqualTo(0); // 成功
-        verify(writeInstructMapper).insertBatch(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) ->
-            list.size() == 1 && list.get(0).getFeedback() == 0
-        ));
-        verify(writeInstructMapper).updateBatchById(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) ->
-            list.size() == 1 && list.get(0).getFeedback() == 0
-        ));
+        ArgumentCaptor<WriteCoilsRequest> coilsRequestCaptor = ArgumentCaptor.forClass(WriteCoilsRequest.class);
+        verify(modbusMaster).send(coilsRequestCaptor.capture());
+        assertThat(coilsRequestCaptor.getValue().getSlaveId()).isEqualTo(5);
+
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> insertListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).insertBatch(insertListCaptor.capture());
+        assertThat(insertListCaptor.getValue()).hasSize(1);
+        assertThat(insertListCaptor.getValue().get(0).getFeedback()).isEqualTo(0);
+
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> updateListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).updateBatchById(updateListCaptor.capture());
+        assertThat(updateListCaptor.getValue()).hasSize(1);
+        assertThat(updateListCaptor.getValue().get(0).getFeedback()).isEqualTo(0);
     }
 
     @Test
@@ -96,13 +110,16 @@ class WriteBusinessServiceTest {
 
         WriteCoilsResponse response = mock(WriteCoilsResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
-        writeBusinessService.Business(instructs, modbusMaster, 1);
+        writeBusinessService.Business(instructs, modbusMaster, 7);
 
         // Then
         assertThat(instruct.getFeedback()).isEqualTo(0);
+        ArgumentCaptor<WriteCoilsRequest> coilsRequestCaptor = ArgumentCaptor.forClass(WriteCoilsRequest.class);
+        verify(modbusMaster).send(coilsRequestCaptor.capture());
+        assertThat(coilsRequestCaptor.getValue().getSlaveId()).isEqualTo(7);
     }
 
     @Test
@@ -114,16 +131,15 @@ class WriteBusinessServiceTest {
 
         WriteCoilsResponse response = mock(WriteCoilsResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
-        writeBusinessService.Business(instructs, modbusMaster, 1);
+        writeBusinessService.Business(instructs, modbusMaster, 3);
 
-        // Then: 0xC2C8地址应写入单个false值
-        verify(modbusMaster).send(argThat((WriteCoilsRequest req) -> {
-            // 验证请求参数
-            return true;
-        }));
+        // Then: 0xC2C8地址应写入单个false值，且slaveId=3
+        ArgumentCaptor<WriteCoilsRequest> c2c8RequestCaptor = ArgumentCaptor.forClass(WriteCoilsRequest.class);
+        verify(modbusMaster).send(c2c8RequestCaptor.capture());
+        assertThat(c2c8RequestCaptor.getValue().getSlaveId()).isEqualTo(3);
         assertThat(instruct.getFeedback()).isEqualTo(0);
     }
 
@@ -136,7 +152,7 @@ class WriteBusinessServiceTest {
 
         WriteCoilsResponse response = mock(WriteCoilsResponse.class);
         when(response.isException()).thenReturn(true);
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -144,9 +160,10 @@ class WriteBusinessServiceTest {
         // Then
         assertThat(instruct.getFeedback()).isEqualTo(1); // 失败
         verify(writeInstructMapper, never()).insertBatch(anyList());
-        verify(writeInstructMapper).updateBatchById(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) ->
-            list.size() == 1 && list.get(0).getFeedback() == 1
-        ));
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> updateListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).updateBatchById(updateListCaptor.capture());
+        assertThat(updateListCaptor.getValue()).hasSize(1);
+        assertThat(updateListCaptor.getValue().get(0).getFeedback()).isEqualTo(1);
     }
 
     @Test
@@ -156,8 +173,7 @@ class WriteBusinessServiceTest {
         DevInstruct instruct = createInstruct(5, "0x0064", createWriteValue(1));
         instructs.add(instruct);
 
-        when(modbusMaster.send(any(WriteCoilsRequest.class)))
-            .thenThrow(new RuntimeException("Modbus连接断开"));
+        doThrow(new RuntimeException("Modbus连接断开")).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -173,7 +189,7 @@ class WriteBusinessServiceTest {
         DevInstruct instruct = createInstruct(5, "0x0064", createWriteValue(1));
         instructs.add(instruct);
 
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(null);
+        doReturn(null).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -193,13 +209,16 @@ class WriteBusinessServiceTest {
 
         WriteRegistersResponse response = mock(WriteRegistersResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteRegistersRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
-        writeBusinessService.Business(instructs, modbusMaster, 1);
+        writeBusinessService.Business(instructs, modbusMaster, 9);
 
         // Then
         assertThat(instruct.getFeedback()).isEqualTo(0);
+        ArgumentCaptor<WriteRegistersRequest> registersRequestCaptor = ArgumentCaptor.forClass(WriteRegistersRequest.class);
+        verify(modbusMaster).send(registersRequestCaptor.capture());
+        assertThat(registersRequestCaptor.getValue().getSlaveId()).isEqualTo(9);
         verify(writeInstructMapper).insertBatch(anyList());
     }
 
@@ -212,7 +231,7 @@ class WriteBusinessServiceTest {
 
         WriteRegistersResponse response = mock(WriteRegistersResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteRegistersRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -230,7 +249,7 @@ class WriteBusinessServiceTest {
 
         WriteRegistersResponse response = mock(WriteRegistersResponse.class);
         when(response.isException()).thenReturn(true);
-        when(modbusMaster.send(any(WriteRegistersRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -247,7 +266,7 @@ class WriteBusinessServiceTest {
         DevInstruct instruct = createInstruct(6, "0x00C8", createWriteValue(100));
         instructs.add(instruct);
 
-        when(modbusMaster.send(any(WriteRegistersRequest.class)))
+        when(modbusMaster.send(any(ModbusRequest.class)))
             .thenThrow(new RuntimeException("写入超时"));
 
         // When
@@ -273,8 +292,7 @@ class WriteBusinessServiceTest {
         WriteRegistersResponse registerResponse = mock(WriteRegistersResponse.class);
         when(registerResponse.isException()).thenReturn(false);
 
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(coilResponse);
-        when(modbusMaster.send(any(WriteRegistersRequest.class))).thenReturn(registerResponse);
+        doReturn(coilResponse).doReturn(registerResponse).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -282,8 +300,13 @@ class WriteBusinessServiceTest {
         // Then
         assertThat(fc05.getFeedback()).isEqualTo(0);
         assertThat(fc06.getFeedback()).isEqualTo(0);
-        verify(writeInstructMapper).insertBatch(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) -> list.size() == 2));
-        verify(writeInstructMapper).updateBatchById(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) -> list.size() == 2));
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> insertListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).insertBatch(insertListCaptor.capture());
+        assertThat(insertListCaptor.getValue()).hasSize(2);
+
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> updateListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).updateBatchById(updateListCaptor.capture());
+        assertThat(updateListCaptor.getValue()).hasSize(2);
     }
 
     @Test
@@ -312,9 +335,7 @@ class WriteBusinessServiceTest {
         WriteCoilsResponse failResponse = mock(WriteCoilsResponse.class);
         when(failResponse.isException()).thenReturn(true);
 
-        when(modbusMaster.send(any(WriteCoilsRequest.class)))
-            .thenReturn(successResponse)
-            .thenReturn(failResponse);
+        doReturn(successResponse).doReturn(failResponse).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);
@@ -322,8 +343,13 @@ class WriteBusinessServiceTest {
         // Then
         assertThat(success.getFeedback()).isEqualTo(0);
         assertThat(fail.getFeedback()).isEqualTo(1);
-        verify(writeInstructMapper).insertBatch(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) -> list.size() == 1));
-        verify(writeInstructMapper).updateBatchById(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> list) -> list.size() == 2));
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> insertListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).insertBatch(insertListCaptor.capture());
+        assertThat(insertListCaptor.getValue()).hasSize(1);
+
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> updateListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).updateBatchById(updateListCaptor.capture());
+        assertThat(updateListCaptor.getValue()).hasSize(2);
     }
 
     // ==================== 数据库操作测试 ====================
@@ -340,13 +366,13 @@ class WriteBusinessServiceTest {
         writeBusinessService.insertWriteInstruct(list);
 
         // Then
-        verify(writeInstructMapper).insertBatch(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> insertList) -> {
-            if (insertList.size() != 2) return false;
-            DevWriteInstruct first = insertList.get(0);
-            return first.getType() == 2 && // 接收指令类型
-                first.getId() != null && // 重新生成ID
-                first.getAddr().equals("0x0064");
-        }));
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> insertListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).insertBatch(insertListCaptor.capture());
+        assertThat(insertListCaptor.getValue()).hasSize(2);
+        DevWriteInstruct first = insertListCaptor.getValue().get(0);
+        assertThat(first.getType()).isEqualTo(2); // 接收指令类型
+        assertThat(first.getId()).isNotNull(); // 重新生成ID
+        assertThat(first.getAddr()).isEqualTo("0x0064");
     }
 
     @Test
@@ -372,11 +398,11 @@ class WriteBusinessServiceTest {
         writeBusinessService.updateWriteInstruct(list);
 
         // Then
-        verify(writeInstructMapper).updateBatchById(argThat((java.util.List<com.ruoyi.zm.domain.DevWriteInstruct> updateList) ->
-            updateList.size() == 1 &&
-            updateList.get(0).getFeedback() == 1 &&
-            updateList.get(0).getAddr().equals("0x0064")
-        ));
+        ArgumentCaptor<java.util.List<com.ruoyi.zm.domain.DevWriteInstruct>> updateListCaptor = ArgumentCaptor.forClass(java.util.List.class);
+        verify(writeInstructMapper).updateBatchById(updateListCaptor.capture());
+        assertThat(updateListCaptor.getValue()).hasSize(1);
+        assertThat(updateListCaptor.getValue().get(0).getFeedback()).isEqualTo(1);
+        assertThat(updateListCaptor.getValue().get(0).getAddr()).isEqualTo("0x0064");
     }
 
     @Test
@@ -400,7 +426,7 @@ class WriteBusinessServiceTest {
 
         WriteCoilsResponse response = mock(WriteCoilsResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteCoilsRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 0);
@@ -420,7 +446,7 @@ class WriteBusinessServiceTest {
 
         WriteRegistersResponse response = mock(WriteRegistersResponse.class);
         when(response.isException()).thenReturn(false);
-        when(modbusMaster.send(any(WriteRegistersRequest.class))).thenReturn(response);
+        doReturn(response).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);

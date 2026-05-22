@@ -25,6 +25,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import org.mockito.Mockito;
+
 /**
  * DeviceOnlineCheckTask 单元测试
  *
@@ -49,7 +51,7 @@ class DeviceOnlineCheckTaskTest {
 
     @BeforeEach
     void setUp() {
-        when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+        lenient().when(redisTemplate.opsForValue()).thenReturn(valueOperations);
     }
 
     // ==================== 辅助方法 ====================
@@ -76,8 +78,8 @@ class DeviceOnlineCheckTaskTest {
     private void mockScanKeys(Set<String> keys) {
         doAnswer(invocation -> {
             RedisCallback<Set<String>> callback = invocation.getArgument(0);
-            // 模拟 SCAN 命令：直接返回传入的 keys 集合
-            return callback.doInRedis(null);
+            // 模拟 SCAN 命令：返回预先构建的 keys 集合，忽略传入的回调连接参数
+            return keys;
         }).when(redisTemplate).execute(any(RedisCallback.class));
     }
 
@@ -106,10 +108,7 @@ class DeviceOnlineCheckTaskTest {
 
         DevBaseDeviceTCPVo device = createOnlineDevice(1, new Date());
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn(device);
 
@@ -130,10 +129,7 @@ class DeviceOnlineCheckTaskTest {
 
         DevBaseDeviceTCPVo device = createOnlineDevice(2, new Date(System.currentTimeMillis() - 120000));
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn(device);
 
@@ -156,10 +152,7 @@ class DeviceOnlineCheckTaskTest {
 
         DevBaseDeviceTCPVo device = createOfflineDevice(3);
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn(device);
 
@@ -182,10 +175,7 @@ class DeviceOnlineCheckTaskTest {
 
         DevBaseDeviceTCPVo device = createOnlineDevice(4, null);
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn(device);
 
@@ -206,10 +196,7 @@ class DeviceOnlineCheckTaskTest {
         Set<String> keys = new HashSet<>();
         keys.add(key);
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn("invalid data");
 
@@ -233,10 +220,7 @@ class DeviceOnlineCheckTaskTest {
         DevBaseDeviceTCPVo device1 = createOnlineDevice(6, new Date(System.currentTimeMillis() - 120000));
         DevBaseDeviceTCPVo device2 = createOnlineDevice(7, new Date());
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key1)).thenThrow(new RuntimeException("Redis异常"));
         when(valueOperations.get(key2)).thenReturn(device2);
@@ -261,10 +245,7 @@ class DeviceOnlineCheckTaskTest {
         device.setOnlineStatus(null);
         device.setLastTime(new Date());
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key)).thenReturn(device);
 
@@ -288,10 +269,7 @@ class DeviceOnlineCheckTaskTest {
         DevBaseDeviceTCPVo oldDevice = createOnlineDevice(9, new Date(System.currentTimeMillis() - 120000));
         DevBaseDeviceTCPVo latestDevice = createOnlineDevice(9, new Date()); // 最新状态在线
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key))
             .thenReturn(oldDevice)
@@ -315,10 +293,7 @@ class DeviceOnlineCheckTaskTest {
         DevBaseDeviceTCPVo oldDevice = createOnlineDevice(10, new Date(System.currentTimeMillis() - 120000));
         DevBaseDeviceTCPVo latestDevice = createOnlineDevice(10, new Date(System.currentTimeMillis() - 120000));
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key))
             .thenReturn(oldDevice)
@@ -344,10 +319,7 @@ class DeviceOnlineCheckTaskTest {
         DevBaseDeviceTCPVo oldDevice = createOnlineDevice(11, new Date(System.currentTimeMillis() - 120000));
         DevBaseDeviceTCPVo latestDevice = createOnlineDevice(11, null); // 二次确认时 lastTime 为 null
 
-        doAnswer(invocation -> {
-            RedisCallback<?> callback = invocation.getArgument(0);
-            return callback.doInRedis(null);
-        }).when(redisTemplate).execute(any(RedisCallback.class));
+        mockScanKeys(keys);
 
         when(valueOperations.get(key))
             .thenReturn(oldDevice)

@@ -14,6 +14,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import org.mockito.ArgumentCaptor;
+
 /**
  * ModbusTcpUtil 单元测试
  *
@@ -43,7 +45,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).isEqualTo(expected);
-        verify(master).send(argThat((ReadHoldingRegistersRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadHoldingRegistersRequest> captor = ArgumentCaptor.forClass(ReadHoldingRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -73,7 +77,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).isEqualTo(expected);
-        verify(master).send(argThat((ReadHoldingRegistersRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadHoldingRegistersRequest> captor = ArgumentCaptor.forClass(ReadHoldingRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     // ==================== FC01 读取线圈 ====================
@@ -92,7 +98,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).isEqualTo(expected);
-        verify(master).send(argThat((ReadCoilsRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadCoilsRequest> captor = ArgumentCaptor.forClass(ReadCoilsRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -109,7 +117,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).isEqualTo(expected);
-        verify(master).send(argThat((ReadCoilsRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadCoilsRequest> captor = ArgumentCaptor.forClass(ReadCoilsRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     // ==================== FC02 读取离散输入 ====================
@@ -128,7 +138,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).isEqualTo(expected);
-        verify(master).send(argThat((ReadDiscreteInputsRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadDiscreteInputsRequest> captor = ArgumentCaptor.forClass(ReadDiscreteInputsRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -155,7 +167,9 @@ class ModbusTcpUtilTest {
 
         // When & Then (不抛异常即通过)
         ModbusTcpUtil.WriteCoil(master, 1, 100, true);
-        verify(master).send(argThat((WriteCoilRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<WriteCoilRequest> captor = ArgumentCaptor.forClass(WriteCoilRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -198,7 +212,9 @@ class ModbusTcpUtilTest {
 
         // When & Then
         ModbusTcpUtil.WriteRegister(master, 1, 200, 500);
-        verify(master).send(argThat((WriteRegisterRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<WriteRegisterRequest> captor = ArgumentCaptor.forClass(WriteRegisterRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -230,7 +246,9 @@ class ModbusTcpUtilTest {
 
         // When & Then
         ModbusTcpUtil.WriteRegisters(master, 1, 300, new short[]{1, 2, 3, 4});
-        verify(master).send(argThat((WriteRegistersRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<WriteRegistersRequest> captor = ArgumentCaptor.forClass(WriteRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -243,7 +261,9 @@ class ModbusTcpUtilTest {
 
         // When & Then
         ModbusTcpUtil.WriteRegisters(master, 1, 300, new short[]{});
-        verify(master).send(argThat((WriteRegistersRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<WriteRegistersRequest> captor = ArgumentCaptor.forClass(WriteRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -274,7 +294,9 @@ class ModbusTcpUtilTest {
 
         // When & Then
         ModbusTcpUtil.WriteCoils(master, 1, 50, new boolean[]{true, false, true});
-        verify(master).send(argThat((WriteCoilsRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<WriteCoilsRequest> captor = ArgumentCaptor.forClass(WriteCoilsRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -308,7 +330,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).hasSize(1);
-        verify(master).send(argThat((ReadHoldingRegistersRequest req) -> req.getSlaveId() == 0));
+        ArgumentCaptor<ReadHoldingRegistersRequest> captor = ArgumentCaptor.forClass(ReadHoldingRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(0);
     }
 
     @Test
@@ -324,7 +348,9 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).containsExactly((short) 42);
-        verify(master).send(argThat((ReadHoldingRegistersRequest req) -> req.getSlaveId() == 1));
+        ArgumentCaptor<ReadHoldingRegistersRequest> captor = ArgumentCaptor.forClass(ReadHoldingRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(1);
     }
 
     @Test
@@ -340,6 +366,42 @@ class ModbusTcpUtilTest {
 
         // Then
         assertThat(result).hasSize(2);
-        verify(master).send(argThat((ReadHoldingRegistersRequest req) -> req.getSlaveId() == 7));
+        ArgumentCaptor<ReadHoldingRegistersRequest> captor = ArgumentCaptor.forClass(ReadHoldingRegistersRequest.class);
+        verify(master).send(captor.capture());
+        assertThat(captor.getValue().getSlaveId()).isEqualTo(7);
+    }
+
+    @Test
+    @DisplayName("边界: null master发送请求应抛出NullPointerException")
+    void testBoundary_NullMaster() {
+        // When & Then
+        assertThatThrownBy(() -> ModbusTcpUtil.ReadHR(null, 1, 0, 3))
+            .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("边界: null响应对象应抛出NullPointerException")
+    void testBoundary_NullResponse() throws ModbusTransportException {
+        // Given
+        when(master.send(any(ReadHoldingRegistersRequest.class))).thenReturn(null);
+
+        // When & Then
+        assertThatThrownBy(() -> ModbusTcpUtil.ReadHR(master, 1, 0, 3))
+            .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    @DisplayName("边界: 异常响应不抛ModbusTransportException但抛RuntimeException")
+    void testBoundary_ExceptionResponseNotTransport() throws ModbusTransportException {
+        // Given: 响应对象本身不是异常，但isException=true（由ModbusTcpUtil抛出RuntimeException）
+        WriteRegisterResponse response = mock(WriteRegisterResponse.class);
+        when(response.isException()).thenReturn(true);
+        when(response.getExceptionMessage()).thenReturn("非法功能码");
+        when(master.send(any(WriteRegisterRequest.class))).thenReturn(response);
+
+        // When & Then
+        assertThatThrownBy(() -> ModbusTcpUtil.WriteRegister(master, 1, 100, 50))
+            .isInstanceOf(RuntimeException.class)
+            .hasMessageContaining("非法功能码");
     }
 }
