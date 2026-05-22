@@ -28,6 +28,11 @@ public class WriteModuleController {
     private final RedisTemplate<String, Object> redisTemplate;
     private final MqttPublisher mqttPublisher;
 
+    private Boolean module() {
+        String module = (String) redisTemplate.opsForValue().get("zm:global:module:select");
+        return "on-the-line".equals(module);
+    }
+
     @GetMapping("/getModuleNow")
     public R<?> getModuleNow(@RequestParam(required = false) Integer deviceId) {
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
@@ -36,6 +41,7 @@ public class WriteModuleController {
 
     @GetMapping("/selectTimeModule")
     public R<?> selectTimeModule(Integer deviceId, Integer timeModule) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         if (timeModule == 1) remote.setTimeModule("noEnabled");
         else if (timeModule == 2) remote.setTimeModule("simple");
@@ -49,6 +55,7 @@ public class WriteModuleController {
 
     @GetMapping("/selectInfraredModule")
     public R<?> selectInfraredModule(Integer deviceId, Boolean enabled) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         remote.setInfraredSensorModule(enabled);
         redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
@@ -60,6 +67,7 @@ public class WriteModuleController {
 
     @GetMapping("/selectIlluminanceModule")
     public R<?> selectIlluminanceModule(Integer deviceId, Boolean enabled) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         remote.setIlluminanceSensorModule(enabled);
         redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
@@ -71,6 +79,7 @@ public class WriteModuleController {
 
     @GetMapping("/selectHandModule")
     public R<?> selectHandModule(Integer deviceId, Integer handModule) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         if (handModule == 1) remote.setHandModule("loop");
         else if (handModule == 2) remote.setHandModule("group");
@@ -84,6 +93,7 @@ public class WriteModuleController {
 
     @GetMapping("/systemSwitch")
     public R<?> systemSwitch(Integer deviceId, Integer systemSwitch) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Map<String, Object> m = new HashMap<>();
         m.put("msgId", IdGenerator.UUIDId());
         m.put("addr", "0xC000");
@@ -94,6 +104,7 @@ public class WriteModuleController {
 
     @GetMapping("/workModule")
     public R<?> workModule(Integer deviceId, Integer workModule) {
+        if (module()) return R.ok("遥控状态,请先取消");
         Map<String, Object> m = new HashMap<>();
         m.put("msgId", IdGenerator.UUIDId());
         m.put("addr", "0xC001");

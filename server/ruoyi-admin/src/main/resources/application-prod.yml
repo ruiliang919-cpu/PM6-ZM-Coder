@@ -49,6 +49,7 @@ spring:
     database: 0
     timeout: 100s
     ssl: false
+    password: ${REDIS_PASSWORD}
 
 redisson:
   keyPrefix:
@@ -67,7 +68,7 @@ mail:
   enabled: false
 
 recovery:
-  password: 123456
+  password: ${RECOVERY_PASSWORD}
 
 sms:
   is-print: false

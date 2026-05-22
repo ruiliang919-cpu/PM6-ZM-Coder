@@ -33,7 +33,6 @@ public class DeviceInfoController extends BaseController {
     private final MqttInit mqttInit;
 
     // 新增机柜
-    @SaIgnore
     @RepeatSubmit()
     @PostMapping("/zm/baseDevice/add")
     public R<Void> add(@RequestBody DevBaseDeviceReqBo bo) throws ModbusTransportException {

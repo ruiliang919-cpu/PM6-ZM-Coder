@@ -1,0 +1,23 @@
+{
+  "updatedAt": "2026-05-22T17:12:34.449Z",
+  "missions": [
+    {
+      "id": "session:f5efbf76-d974-490e-85cc-0cbbfb9609ff:none",
+      "source": "session",
+      "name": "none",
+      "objective": "Session mission",
+      "createdAt": "2026-05-22T16:00:30.927Z",
+      "updatedAt": "2026-05-22T17:12:34.449Z",
+      "status": "completed",
+      "workerCount": 23,
+      "taskCounts": {
+        "total": 23,
+        "pending": 0,
+        "blocked": 0,
+        "inProgress": 0,
+        "completed": 23,
+        "failed": 0
+      }
+    }
+  ]
+}

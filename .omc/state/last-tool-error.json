@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"cd /mnt/c/Users/lr/PM6-ZM-Coder && git log --oneline -5\",\"description\":\"Check recent git history\"}",
+  "error": "Exit code 1\n/usr/bin/bash: line 1: cd: /mnt/c/Users/lr/PM6-ZM-Coder: No such file or directory",
+  "timestamp": "2026-05-22T17:42:34.731Z",
+  "retry_count": 1
+}
