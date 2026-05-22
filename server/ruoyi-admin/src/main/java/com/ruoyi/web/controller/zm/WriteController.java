@@ -47,6 +47,13 @@ import static com.ruoyi.cache.Key.REMOTE_KEY;
 import static com.ruoyi.schedule.InstructionQueue.QUEUE_WRITE_KEY;
 import static com.ruoyi.zm.utils.ScaleUtil.combineIDs;
 
+/**
+ * @deprecated 已拆分为 5 个独立 Controller，参见 write/ 子包:
+ *   WriteGroupController, WriteSceneController, WriteDeviceController,
+ *   WriteControlController, WriteModuleController
+ *   旧端点保留兼容，新功能请使用拆分后的路径。
+ */
+@Deprecated
 @Slf4j
 @RestController
 @RequiredArgsConstructor
