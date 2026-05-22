@@ -266,8 +266,7 @@ class WriteBusinessServiceTest {
         DevInstruct instruct = createInstruct(6, "0x00C8", createWriteValue(100));
         instructs.add(instruct);
 
-        when(modbusMaster.send(any(ModbusRequest.class)))
-            .thenThrow(new RuntimeException("写入超时"));
+        doThrow(new RuntimeException("写入超时")).when(modbusMaster).send(any(ModbusRequest.class));
 
         // When
         writeBusinessService.Business(instructs, modbusMaster, 1);

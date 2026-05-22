@@ -16,6 +16,7 @@ import static org.mockito.Mockito.*;
 
 import org.mockito.ArgumentCaptor;
 
+
 /**
  * ModbusTcpUtil 单元测试
  *
@@ -376,7 +377,8 @@ class ModbusTcpUtilTest {
     void testBoundary_NullMaster() {
         // When & Then
         assertThatThrownBy(() -> ModbusTcpUtil.ReadHR(null, 1, 0, 3))
-            .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("ModbusMaster cannot be null");
     }
 
     @Test
@@ -387,7 +389,8 @@ class ModbusTcpUtilTest {
 
         // When & Then
         assertThatThrownBy(() -> ModbusTcpUtil.ReadHR(master, 1, 0, 3))
-            .isInstanceOf(NullPointerException.class);
+            .isInstanceOf(NullPointerException.class)
+            .hasMessageContaining("Modbus response is null");
     }
 
     @Test

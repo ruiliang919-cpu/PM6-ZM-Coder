@@ -20,8 +20,14 @@ public class ModbusTcpUtil {
     // 返回整型数据数组
     // 注意：所有 10 个读写方法均使用传入的 slaveId 参数，不再硬编码
     public static short[] ReadHR(ModbusMaster master, int slaveId, int start, int number) throws ModbusTransportException {
+        if (master == null) {
+            throw new NullPointerException("ModbusMaster cannot be null");
+        }
         ReadHoldingRegistersRequest request = new ReadHoldingRegistersRequest(slaveId, start, number);
         ReadHoldingRegistersResponse response = (ReadHoldingRegistersResponse) master.send(request);
+        if (response == null) {
+            throw new NullPointerException("Modbus response is null");
+        }
         return response.getShortData();
     }
 
