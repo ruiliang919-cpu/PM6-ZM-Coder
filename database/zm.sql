@@ -14507,3 +14507,19 @@ CREATE TABLE IF NOT EXISTS `dev_base_power_archive` (
   KEY `idx_device_timestamp` (`device_id`, `timestamp` DESC),
   KEY `idx_type` (`type`)
 ) ENGINE = InnoDB ROW_FORMAT = DYNAMIC COMMENT = '耗电量历史归档表';
+
+-- ----------------------------
+-- Redis 状态快照备份表（防 Redis 重启数据丢失）
+-- 由 DeviceStateSnapshotService 定时写入 + 启动时恢复
+-- ----------------------------
+DROP TABLE IF EXISTS `device_state_snapshot`;
+CREATE TABLE `device_state_snapshot` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `state_key` varchar(500) NOT NULL COMMENT 'Redis键名',
+  `state_value` longtext COMMENT 'JSON序列化的值',
+  `state_type` varchar(20) DEFAULT 'string' COMMENT 'Redis类型: string/hash/list',
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '最后更新',
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE KEY `uk_state_key` (`state_key`),
+  KEY `idx_updated` (`updated_at`)
+) ENGINE = InnoDB ROW_FORMAT = DYNAMIC COMMENT = 'Redis设备状态快照备份表';
