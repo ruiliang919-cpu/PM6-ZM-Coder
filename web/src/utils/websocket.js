@@ -138,7 +138,7 @@ export function connectWebSocket() {
   ws.onopen = function() {
     console.log('[WebSocket] TCP连接已建立，发送STOMP CONNECT帧')
     // 发送 STOMP CONNECT 帧
-    var connectFrame = serializeFrame('CONNECT', {
+    const connectFrame = serializeFrame('CONNECT', {
       'accept-version': '1.1,1.0',
       'heart-beat': HEARTBEAT_INTERVAL + ',' + HEARTBEAT_INTERVAL
     })
@@ -146,7 +146,7 @@ export function connectWebSocket() {
   }
 
   ws.onmessage = function(event) {
-    var frame = parseFrame(event.data)
+    const frame = parseFrame(event.data)
     if (!frame) return
 
     if (frame.command === 'CONNECTED') {
@@ -168,11 +168,11 @@ export function connectWebSocket() {
       startHeartbeat()
     } else if (frame.command === 'MESSAGE') {
       // 收到消息
-      var subId = frame.headers['subscription']
-      var sub = subscriptions[subId]
+      const subId = frame.headers['subscription']
+      const sub = subscriptions[subId]
       if (sub && sub.callback) {
         try {
-          var data = JSON.parse(frame.body)
+          const data = JSON.parse(frame.body)
           sub.callback(data)
         } catch (e) {
           // 非 JSON 消息，直接传递 body
@@ -222,7 +222,7 @@ export function disconnectWebSocket() {
     try {
       // 发送 STOMP DISCONNECT 帧
       if (connected) {
-        var disconnectFrame = serializeFrame('DISCONNECT', {
+        const disconnectFrame = serializeFrame('DISCONNECT', {
           'receipt': 'disconnect-receipt'
         })
         ws.send(disconnectFrame)
@@ -250,11 +250,11 @@ export function disconnectWebSocket() {
  * @returns {string} 订阅ID，用于取消订阅
  */
 function subscribe(destination, callback) {
-  var id = 'sub-' + (++subIdCounter)
+  const id = 'sub-' + (++subIdCounter)
   subscriptions[id] = { id: id, destination: destination, callback: callback }
 
   if (connected && ws) {
-    var subFrame = serializeFrame('SUBSCRIBE', {
+    const subFrame = serializeFrame('SUBSCRIBE', {
       'id': id,
       'destination': destination
     })
@@ -273,7 +273,7 @@ export function unsubscribe(subId) {
   if (!subscriptions[subId]) return
 
   if (connected && ws) {
-    var unsubFrame = serializeFrame('UNSUBSCRIBE', {
+    const unsubFrame = serializeFrame('UNSUBSCRIBE', {
       'id': subId
     })
     ws.send(unsubFrame)
@@ -287,11 +287,11 @@ export function unsubscribe(subId) {
  * 重新订阅所有已注册的订阅（重连后调用）
  */
 function resubscribeAll() {
-  var ids = Object.keys(subscriptions)
-  for (var i = 0; i < ids.length; i++) {
-    var sub = subscriptions[ids[i]]
+  const ids = Object.keys(subscriptions)
+  for (let i = 0; i < ids.length; i++) {
+    const sub = subscriptions[ids[i]]
     if (ws) {
-      var subFrame = serializeFrame('SUBSCRIBE', {
+      const subFrame = serializeFrame('SUBSCRIBE', {
         'id': sub.id,
         'destination': sub.destination
       })

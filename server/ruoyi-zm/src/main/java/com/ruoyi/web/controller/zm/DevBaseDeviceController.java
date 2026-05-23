@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import cn.dev33.satoken.annotation.SaIgnore;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -59,7 +61,7 @@ public class DevBaseDeviceController extends BaseController {
     /**
      * 查询机柜列表
      */
-    // @SaCheckPermission("zm:baseDevice:list")
+    @SaCheckPermission("zm:baseDevice:list")
     @PostMapping("/list")
     public TableDataInfo<DevBaseDeviceVo> list(DevBaseDeviceBo bo, @RequestBody PageQuery pageQuery) throws ModbusTransportException {
         return iDevBaseDeviceService.queryPageList(bo, pageQuery);
@@ -68,7 +70,7 @@ public class DevBaseDeviceController extends BaseController {
     /**
      * 导出机柜列表
      */
-    // @SaCheckPermission("zm:baseDevice:export")
+    @SaCheckPermission("zm:baseDevice:export")
     // @Log(title = "机柜", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevBaseDeviceBo bo, HttpServletResponse response) {
@@ -81,7 +83,7 @@ public class DevBaseDeviceController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:baseDevice:query")
+    @SaCheckPermission("zm:baseDevice:query")
     @GetMapping("/{id}")
     public R<DevBaseDeviceVo> getInfo(@NotNull(message = "主键不能为空")
                                       @PathVariable Long id) {

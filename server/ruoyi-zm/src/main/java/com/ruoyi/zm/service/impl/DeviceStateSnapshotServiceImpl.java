@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -122,8 +123,8 @@ public class DeviceStateSnapshotServiceImpl implements DeviceStateSnapshotServic
     @Override
     public void restoreAllIfNeeded() {
         if (!enabled) return;
-        Long keyCount = redisTemplate.countExistingKeys(
-            redisTemplate.keys("zm:create-tcp:*"));
+        // 使用SCAN替代KEYS，避免阻塞Redis
+        Long keyCount = countKeysByScan("zm:create-tcp:*");
         if (keyCount != null && keyCount > 10) {
             log.info("Redis has {} create-tcp keys, skip restore", keyCount);
             return;
@@ -158,6 +159,26 @@ public class DeviceStateSnapshotServiceImpl implements DeviceStateSnapshotServic
             }
         }
         if (restored > 0) log.info("Restored '{}': {} keys", keyPattern, restored);
+    }
+
+    /**
+     * 使用SCAN命令统计匹配模式的key数量，避免KEYS命令阻塞Redis
+     */
+    private Long countKeysByScan(String pattern) {
+        return redisTemplate.execute((RedisCallback<Long>) connection -> {
+            long count = 0;
+            ScanOptions options = ScanOptions.scanOptions()
+                .match(pattern)
+                .count(100)
+                .build();
+            try (Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    cursor.next();
+                    count++;
+                }
+            }
+            return count;
+        });
     }
 
     @SuppressWarnings("unchecked")

@@ -3,7 +3,6 @@ package com.ruoyi.mqtt;
 import cn.hutool.json.JSONUtil;
 
 import com.ruoyi.cache.Key;
-import com.ruoyi.mqtt.vo.Heart;
 import com.ruoyi.zm.domain.DevWriteInstruct;
 import com.ruoyi.zm.mapper.DevWriteInstructMapper;
 import com.ruoyi.zm.utils.IdGenerator;
@@ -16,12 +15,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.IntStream;
 
 @Slf4j
 @Component
@@ -45,7 +38,7 @@ public class MqttPublisher {
             if (topic != PublishKey.事件记录 && topic != PublishKey.照度外控值)
                 save(ip, deviceNo, v, t);
         } catch (Exception e) {
-            log.error("", e);
+            log.error("MQTT publish failed, topic={}, deviceNo={}", topic != null ? topic.name() : "null", deviceNo, e);
         }
     }
 
@@ -59,47 +52,6 @@ public class MqttPublisher {
         d.setWriteValue(value);
         d.setAddr(topic);
         instructMapper.insert(d);
-    }
-
-    public static void main(String[] args) {
-        boolean[] initData = new boolean[845];
-        Arrays.fill(initData, true);
-        Map<String, Object> m = new HashMap<>();
-        m.put("ip", "193");
-        m.put("data", initData);
-        System.out.println(JSONUtil.toJsonStr(m));
-    }
-
-    //    @Scheduled(fixedRate = 1000)
-    public void postConstruct() {
-        boolean[] initData = new boolean[845];
-        Arrays.fill(initData, true);
-        Map<String, Object> m = new HashMap<>();
-        m.put("ip", "");
-        m.put("data", initData);
-        Map<Integer, Object[]> m1 = new HashMap<>();
-        m1.put(99, new Object[]{"192.168.2.99", 1});
-        m1.put(19, new Object[]{"192.168.2.19", 2});
-        m1.put(193, new Object[]{"192.168.2.193", 3});
-        IntStream.of(99, 19, 193).forEach(i -> {
-            Heart heart = new Heart();
-            heart.setIp(m1.get(i)[0].toString());
-            Heart.Data data = new Heart.Data();
-            data.setOnline(true);
-            data.setTime(LocalDateTime.now().toEpochSecond(ZoneOffset.UTC));
-            data.setVersion("阿弥诺斯");
-            heart.setData(data);
-            mqttOutboundChannel.send(MessageBuilder.withPayload(JSONUtil.toJsonStr(heart))
-                .setHeader(MqttHeaders.TOPIC, "/zm/" + i + "/heart")
-                .setHeader(MqttHeaders.QOS, 2)
-                .setHeader(MqttHeaders.RETAINED, false)
-                .build());
-            mqttOutboundChannel.send(MessageBuilder.withPayload(JSONUtil.toJsonStr(m))
-                .setHeader(MqttHeaders.TOPIC, "/zm/" + i + "/coil")
-                .setHeader(MqttHeaders.QOS, 2)
-                .setHeader(MqttHeaders.RETAINED, false)
-                .build());
-        });
     }
 
     @Scheduled(fixedRate = 20000)

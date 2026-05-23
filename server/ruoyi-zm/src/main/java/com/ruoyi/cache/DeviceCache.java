@@ -125,29 +125,30 @@ public class DeviceCache {
 
     // 单独获取调光与开关模块
     public HashMap<String, Integer> getDcDimNum(Integer deviceId) {
+        HashMap<String, Integer> result = new HashMap<>();
         try {
-            return new HashMap<String, Integer>() {{
-                try {
-                    put("dimmerNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0022")).intValue());
-                } catch (Exception e) {
-                    put("dimmerNum", 0);
+            try {
+                result.put("dimmerNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0022")).intValue());
+            } catch (Exception e) {
+                log.warn("DeviceCache → getDcDimNum: failed to read dimmerNum for deviceId={}", deviceId, e);
+                result.put("dimmerNum", 0);
+            }
+            try {
+                boolean typeB = key.getTelecommand(deviceId)[822];
+                if (typeB) {
+                    // 电源柜 整流模块数量
+                    result.put("dcModuleNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0026")).intValue());
+                } else {
+                    // 配电柜 DC/DC模块数量
+                    result.put("dcModuleNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0027")).intValue());
                 }
-                try {
-                    boolean typeB = key.getTelecommand(deviceId)[822];
-                    if (typeB) {
-                        // 电源柜 整流模块数量
-                        put("dcModuleNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0026")).intValue());
-                    } else {
-                        // 配电柜 DC/DC模块数量
-                        put("dcModuleNum", ((java.math.BigDecimal) keys.getTelemeter(deviceId, "0x0027")).intValue());
-                    }
-                } catch (Exception e) {
-                    put("dcModuleNum", 0);
-                }
-            }};
+            } catch (Exception e) {
+                log.warn("DeviceCache → getDcDimNum: failed to read dcModuleNum for deviceId={}", deviceId, e);
+                result.put("dcModuleNum", 0);
+            }
         } catch (Exception e) {
-            log.error("DeviceCache → getDcDimNum", e);
+            log.error("DeviceCache → getDcDimNum failed for deviceId={}", deviceId, e);
         }
-        return new HashMap<>();
+        return result;
     }
 }

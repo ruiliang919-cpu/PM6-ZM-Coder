@@ -1,5 +1,6 @@
 import { login, logout, getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
+import { isInElectron } from '@/utils/ruoyi'
 
 const user = {
   state: {
@@ -60,10 +61,12 @@ const user = {
           }
           commit('SET_NAME', user.userName)
           commit('SET_AVATAR', avatar)
-          try {
-            cantCloseWindow()
-          }catch (e){
-            console.error(e)
+          if (isInElectron()) {
+            try {
+              cantCloseWindow()
+            }catch (e){
+              console.error(e)
+            }
           }
           resolve(res)
         }).catch(error => {
@@ -80,10 +83,12 @@ const user = {
           commit('SET_ROLES', [])
           commit('SET_PERMISSIONS', [])
           removeToken()
-          try {
-            canCloseWindow()
-          }catch (e){
-            console.error(e)
+          if (isInElectron()) {
+            try {
+              canCloseWindow()
+            }catch (e){
+              console.error(e)
+            }
           }
           resolve()
         }).catch(error => {

@@ -115,7 +115,7 @@ export default {
         query: {
           currentIndex: this.currentIndex
         }
-      })
+      }).catch(() => {})
     }
   }
 }
@@ -143,7 +143,7 @@ export default {
   }
 }
 
-@media screen and (max-width: 1080px) {
+@media screen and (max-width: 860px) {
   .JiaoLiuHuiLu {
     width: 100%;
   }

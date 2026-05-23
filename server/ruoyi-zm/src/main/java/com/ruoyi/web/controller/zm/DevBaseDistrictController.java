@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.dtflys.forest.utils.StringUtils;
 import com.ruoyi.cache.Key;
 import com.ruoyi.common.annotation.RepeatSubmit;
@@ -43,7 +45,7 @@ public class DevBaseDistrictController extends BaseController {
     /**
      * 查询控制分区列表
      */
-    // @SaCheckPermission("zm:baseDistrict:list")
+    @SaCheckPermission("zm:baseDistrict:list")
     @PostMapping("/list")
     public TableDataInfo<DevBaseDistrictVo> list(@RequestBody PageQueryByName pageQuery) {
         try {
@@ -63,7 +65,7 @@ public class DevBaseDistrictController extends BaseController {
     /**
      * 导出控制分区列表
      */
-    // @SaCheckPermission("zm:baseDistrict:export")
+    @SaCheckPermission("zm:baseDistrict:export")
     // @Log(title = "控制分区", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevBaseDistrictBo bo, HttpServletResponse response) {
@@ -76,7 +78,7 @@ public class DevBaseDistrictController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:baseDistrict:query")
+    @SaCheckPermission("zm:baseDistrict:query")
     @GetMapping("/{id}")
     public R<DevBaseDistrict> getInfo(@NotNull(message = "主键不能为空")
                                           @PathVariable Long id) {
@@ -86,7 +88,7 @@ public class DevBaseDistrictController extends BaseController {
     /**
      * 新增控制分区
      */
-    // @SaCheckPermission("zm:baseDistrict:add")
+    @SaCheckPermission("zm:baseDistrict:add")
     @RepeatSubmit()
     @PostMapping("/add")
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DevBaseDistrictBo bo) {
@@ -98,7 +100,7 @@ public class DevBaseDistrictController extends BaseController {
     /**
      * 修改控制分区
      */
-    // @SaCheckPermission("zm:baseDistrict:edit")
+    @SaCheckPermission("zm:baseDistrict:edit")
     // @Log(title = "控制分区", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping("/edit")
@@ -113,7 +115,7 @@ public class DevBaseDistrictController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:baseDistrict:remove")
+    @SaCheckPermission("zm:baseDistrict:remove")
     // @Log(title = "控制分区", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

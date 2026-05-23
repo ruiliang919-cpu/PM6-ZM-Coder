@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.cache.AcDcCache;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.domain.R;
@@ -52,7 +54,7 @@ public class CabinetInformationController {
 
     // 回路信息-交流回路信息（配电柜）
     // 根据设备ID获取对应机柜的交流回路信息
-    // @SaCheckPermission("zm:cabinetInfo:acList")
+    @SaCheckPermission("zm:cabinetInfo:acList")
     @PostMapping("/acList")
     public TableDataInfo<DevStatusAcLoopVo> getAcList(@RequestBody PageQuery pageQuery, Long slaveId) {
         TableDataInfo<DevStatusAcLoopVo> acList = cache.getAcList(slaveId);
@@ -78,7 +80,7 @@ public class CabinetInformationController {
 
     // 回路信息-直流回路状态（配电柜）
     // 根据设备ID获取对应机柜的直流回路状态
-    // @SaCheckPermission("zm:cabinetInfo:dccList")
+    @SaCheckPermission("zm:cabinetInfo:dccList")
     @PostMapping("/dccList")
     public TableDataInfo<DevStatusDccLoopVo> getDccList(@RequestBody PageQuery pageQuery, @RequestParam("slaveId") Long slaveId) {
         // pageQuery.setPageSize(100);
@@ -122,7 +124,7 @@ public class CabinetInformationController {
     }
 
     // 直流信息-母线信息（电源柜）
-    // @SaCheckPermission("zm:cabinetInfo:busInfo")
+    @SaCheckPermission("zm:cabinetInfo:busInfo")
     @GetMapping("/busInfo")
     public R<BusRespVo> getBusInfo(Long slaveId) {
         R<BusRespVo> busInfo = cache.getBusInfo(slaveId);
@@ -132,7 +134,7 @@ public class CabinetInformationController {
 
     // 根据机柜类型判断，电源柜AC/DC 1，配电箱DC/DC 0
     // 直流信息-DC/DC信息（AC/DC信息）
-    // @SaCheckPermission("zm:cabinetInfo:dcAc")
+    @SaCheckPermission("zm:cabinetInfo:dcAc")
     @PostMapping("/dcAc")
     public R<TreeMap<String, Object>> getDcAc(@RequestBody PageQuery pageQuery, Integer slaveId) {
         pageQuery.setPageSize(100);
@@ -185,7 +187,7 @@ public class CabinetInformationController {
 
     // 绝缘信息-母线绝缘（电源柜）
     // 母线正极绝缘电阻值，母线负极绝电阻值
-    // @SaCheckPermission("zm:cabinetInfo:getBusInsulation")
+    @SaCheckPermission("zm:cabinetInfo:getBusInsulation")
     @GetMapping("/getBusInsulation")
     public R<BusInsulationRespVo> getBusInsulation(Long slaveId) {
         R<BusInsulationRespVo> busInsulation = cache.getBusInsulation(slaveId);
@@ -198,7 +200,7 @@ public class CabinetInformationController {
     }
 
     // 交流信息-交流 1 路与 2 路（电源柜）
-    // @SaCheckPermission("zm:cabinetInfo:getAlternating")
+    @SaCheckPermission("zm:cabinetInfo:getAlternating")
     @GetMapping("/getAlternating")
     public R<List<DevStatusAcVo>> getAlternating(Long slaveId) {
         R<List<DevStatusAcVo>> alternating = cache.getAlternating(slaveId);

@@ -278,13 +278,4 @@ public class MqttMessageHandler {
             return keys;
         });
     }
-
-    public static void main(String[] args) {
-        Map<String, Object> m = new HashMap<>();
-        m.put("ip", 99);
-        boolean[] data = new boolean[845];
-        Arrays.fill(data, true);
-        m.put("data", data);
-        System.out.println(JSONUtil.toJsonStr(m));
-    }
 }

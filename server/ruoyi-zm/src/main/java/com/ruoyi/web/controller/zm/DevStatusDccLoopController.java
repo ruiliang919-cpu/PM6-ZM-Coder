@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -38,7 +40,7 @@ public class DevStatusDccLoopController extends BaseController {
     /**
      * 查询直流回路列表
      */
-    // @SaCheckPermission("zm:statusDccLoop:list")
+    @SaCheckPermission("zm:statusDccLoop:list")
     @PostMapping("/list")
     public TableDataInfo<DevStatusDccLoopVo> list(DevStatusDccLoopBo bo,@RequestBody  PageQuery pageQuery) {
         return iDevStatusDccLoopService.queryPageList(bo, pageQuery);
@@ -47,7 +49,7 @@ public class DevStatusDccLoopController extends BaseController {
     /**
      * 导出直流回路列表
      */
-    // @SaCheckPermission("zm:statusDccLoop:export")
+    @SaCheckPermission("zm:statusDccLoop:export")
     // @Log(title = "直流回路", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevStatusDccLoopBo bo, HttpServletResponse response) {
@@ -60,7 +62,7 @@ public class DevStatusDccLoopController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:statusDccLoop:query")
+    @SaCheckPermission("zm:statusDccLoop:query")
     @GetMapping("/{id}")
     public R<DevStatusDccLoopVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -70,7 +72,7 @@ public class DevStatusDccLoopController extends BaseController {
     /**
      * 新增直流回路
      */
-    // @SaCheckPermission("zm:statusDccLoop:add")
+    @SaCheckPermission("zm:statusDccLoop:add")
     // @Log(title = "直流回路", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -81,7 +83,7 @@ public class DevStatusDccLoopController extends BaseController {
     /**
      * 修改直流回路
      */
-    // @SaCheckPermission("zm:statusDccLoop:edit")
+    @SaCheckPermission("zm:statusDccLoop:edit")
     // @Log(title = "直流回路", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -94,7 +96,7 @@ public class DevStatusDccLoopController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:statusDccLoop:remove")
+    @SaCheckPermission("zm:statusDccLoop:remove")
     // @Log(title = "直流回路", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

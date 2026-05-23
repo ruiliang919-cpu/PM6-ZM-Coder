@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -38,7 +40,7 @@ public class DevStatusDccController extends BaseController {
     /**
      * 查询直流信息列表
      */
-    // @SaCheckPermission("zm:statusDcc:list")
+    @SaCheckPermission("zm:statusDcc:list")
     @PostMapping("/list")
     public TableDataInfo<DevStatusDccVo> list(DevStatusDccBo bo,@RequestBody  PageQuery pageQuery) {
         return iDevStatusDccService.queryPageList(bo, pageQuery);
@@ -47,7 +49,7 @@ public class DevStatusDccController extends BaseController {
     /**
      * 导出直流信息列表
      */
-    // @SaCheckPermission("zm:statusDcc:export")
+    @SaCheckPermission("zm:statusDcc:export")
     // @Log(title = "直流信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevStatusDccBo bo, HttpServletResponse response) {
@@ -60,7 +62,7 @@ public class DevStatusDccController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:statusDcc:query")
+    @SaCheckPermission("zm:statusDcc:query")
     @GetMapping("/{id}")
     public R<DevStatusDccVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -70,7 +72,7 @@ public class DevStatusDccController extends BaseController {
     /**
      * 新增直流信息
      */
-    // @SaCheckPermission("zm:statusDcc:add")
+    @SaCheckPermission("zm:statusDcc:add")
     // @Log(title = "直流信息", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -81,7 +83,7 @@ public class DevStatusDccController extends BaseController {
     /**
      * 修改直流信息
      */
-    // @SaCheckPermission("zm:statusDcc:edit")
+    @SaCheckPermission("zm:statusDcc:edit")
     // @Log(title = "直流信息", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -94,7 +96,7 @@ public class DevStatusDccController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:statusDcc:remove")
+    @SaCheckPermission("zm:statusDcc:remove")
     // @Log(title = "直流信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

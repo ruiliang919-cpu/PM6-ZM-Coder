@@ -102,9 +102,11 @@ public class Key {
             }
             return tcpVo;
         } catch (Exception e) {
-            // System.err.println("getCreateTCP~~" + e.getMessage());
+            log.error("getCreateTCP failed, deviceNo={}", deviceNo, e);
+            DevBaseDeviceTCPVo fallback = new DevBaseDeviceTCPVo();
+            fallback.setId(deviceNo);
+            return fallback;
         }
-        return new DevBaseDeviceTCPVo();
     }
 
     public <T> TableDataInfo<T> getPageTable(List<T> source, PageQuery page) {

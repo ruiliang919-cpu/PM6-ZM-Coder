@@ -57,7 +57,7 @@ public class GlobalExceptionHandler {
     /**
      * 认证失败
      */
-    // @ExceptionHandler(NotLoginException.class)
+    @ExceptionHandler(NotLoginException.class)
     public R<Void> handleNotLoginException(NotLoginException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',认证失败'{}',无法访问系统资源", requestURI, e.getMessage());
@@ -137,7 +137,7 @@ public class GlobalExceptionHandler {
     public R<Void> handleRuntimeException(RuntimeException e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生未知异常.", requestURI, e);
-        return R.fail(e.getMessage());
+        return R.fail("系统错误，请稍后重试");
     }
 
     /**
@@ -147,7 +147,7 @@ public class GlobalExceptionHandler {
     public R<Void> handleException(Exception e, HttpServletRequest request) {
         String requestURI = request.getRequestURI();
         log.error("请求地址'{}',发生系统异常.", requestURI, e);
-        return R.fail(e.getMessage());
+        return R.fail("系统错误，请稍后重试");
     }
 
     /**

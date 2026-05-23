@@ -199,10 +199,11 @@ public class ModbusTCPManager {
                     boolArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:1:" + modbusInfo.getIp() + ":" + modbusInfo.getId() + ":0x0000", initData);
                     DevFaultRecordVo vo = new DevFaultRecordVo();
                     vo.setDeviceId(Math.toIntExact(modbusInfo.getId()));
-                    vo.setName(devBaseDeviceMapper.selectOne(new LambdaQueryWrapper<DevBaseDevice>()
+                    DevBaseDevice faultDevice = devBaseDeviceMapper.selectOne(new LambdaQueryWrapper<DevBaseDevice>()
                         .select(DevBaseDevice::getDeviceName)
                         .eq(DevBaseDevice::getDeviceNo, modbusInfo.getId())
-                    ).getDeviceName());
+                    );
+                    vo.setName(faultDevice != null ? faultDevice.getDeviceName() : "未知设备");
                     vo.setMessage("设备离线");
                     vo.setStime(System.currentTimeMillis());
                     redisTemplate.opsForValue().set("zm:fault:" + modbusInfo.getId() + ":0xAAAA", vo);

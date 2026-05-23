@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.cache.GroupCache;
 import com.ruoyi.cache.Key;
@@ -87,7 +89,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 查询回路分组列表
      */
-    // // @SaCheckPermission("zm:configGroup:list")
+    @SaCheckPermission("zm:configGroup:list")
     @PostMapping("/list")
     public TableDataInfo<DevConfigGroupVo> list(Integer deviceId, @RequestBody PageQuery pageQuery) {
         TableDataInfo<DevConfigGroupVo> groupList = loopByGroupCache.groupList(deviceId, pageQuery);
@@ -148,7 +150,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 根据分组ID查询对应的回路
      */
-    // // @SaCheckPermission("zm:configGroup:getLoopsByGroup")
+    @SaCheckPermission("zm:configGroup:getLoopsByGroup")
     @PostMapping("/getLoopsByGroup")
     public R<List<WebDccLoopGroupRespVO>> getLoopsByGroup(@RequestBody WebDccLoopGruopReqVO vo) {
         R<List<WebDccLoopGroupRespVO>> results = loopByGroupCache.getLoopsByGroup(vo);
@@ -171,7 +173,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 根据设备ID查询未被分组的回路
      */
-    // @SaCheckPermission("zm:configGroup:getLoopsByFree")
+    @SaCheckPermission("zm:configGroup:getLoopsByFree")
     @PostMapping("/getLoopsByFree")
     public R<List<WebDccLoopGroupRespVO>> getLoopsByFree(@RequestBody WebDccLoopGruopReqVO vo) {
         R<List<WebDccLoopGroupRespVO>> results = loopByGroupCache.getLoopsByFree(vo);
@@ -199,7 +201,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 新增回路到回路分组中
      */
-    // @SaCheckPermission("zm:configGroup:insertLoopToGroup")
+    @SaCheckPermission("zm:configGroup:insertLoopToGroup")
     @GetMapping("/insertLoopToGroup")
     public R<Void> insertLoopToGroup(Long salveId, Long groupId, Long loopId) throws ModbusTransportException {
 
@@ -209,7 +211,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 从回路分组中删除回路
      */
-    // @SaCheckPermission("zm:configGroup:deleteLoopFromGroup")
+    @SaCheckPermission("zm:configGroup:deleteLoopFromGroup")
     @GetMapping("/deleteLoopFromGroup")
     public R<Void> deleteLoopFromGroup(Long salveId, Long groupId, Long loopId) throws ModbusTransportException {
 
@@ -219,7 +221,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 导出回路分组列表
      */
-    // @SaCheckPermission("zm:configGroup:export")
+    @SaCheckPermission("zm:configGroup:export")
     // @Log(title = "回路分组", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevConfigGroupBo bo, HttpServletResponse response) {
@@ -232,7 +234,7 @@ public class DevConfigGroupController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:configGroup:query")
+    @SaCheckPermission("zm:configGroup:query")
     @GetMapping("/{id}")
     public R<DevConfigGroupVo> getInfo(@NotNull(message = "主键不能为空")
                                        @PathVariable Long id) {
@@ -242,7 +244,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 新增回路分组
      */
-    // @SaCheckPermission("zm:configGroup:add")
+    @SaCheckPermission("zm:configGroup:add")
     // @Log(title = "回路分组", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -253,7 +255,7 @@ public class DevConfigGroupController extends BaseController {
     /**
      * 修改回路分组
      */
-    // @SaCheckPermission("zm:configGroup:edit")
+    @SaCheckPermission("zm:configGroup:edit")
     // @Log(title = "回路分组", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -266,7 +268,7 @@ public class DevConfigGroupController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:configGroup:remove")
+    @SaCheckPermission("zm:configGroup:remove")
     // @Log(title = "回路分组", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

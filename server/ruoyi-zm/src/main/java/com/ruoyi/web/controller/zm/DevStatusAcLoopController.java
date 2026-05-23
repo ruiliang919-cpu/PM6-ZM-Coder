@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -38,7 +40,7 @@ public class DevStatusAcLoopController extends BaseController {
     /**
      * 查询交流回路列表
      */
-    // @SaCheckPermission("zm:statusAcLoop:list")
+    @SaCheckPermission("zm:statusAcLoop:list")
     @PostMapping("/list")
     public TableDataInfo<DevStatusAcLoopVo> list(DevStatusAcLoopBo bo,@RequestBody  PageQuery pageQuery) {
         return iDevStatusAcLoopService.queryPageList(bo, pageQuery);
@@ -47,7 +49,7 @@ public class DevStatusAcLoopController extends BaseController {
     /**
      * 导出交流回路列表
      */
-    // @SaCheckPermission("zm:statusAcLoop:export")
+    @SaCheckPermission("zm:statusAcLoop:export")
     // @Log(title = "交流回路", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevStatusAcLoopBo bo, HttpServletResponse response) {
@@ -60,7 +62,7 @@ public class DevStatusAcLoopController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:statusAcLoop:query")
+    @SaCheckPermission("zm:statusAcLoop:query")
     @GetMapping("/{id}")
     public R<DevStatusAcLoopVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -70,7 +72,7 @@ public class DevStatusAcLoopController extends BaseController {
     /**
      * 新增交流回路
      */
-    // @SaCheckPermission("zm:statusAcLoop:add")
+    @SaCheckPermission("zm:statusAcLoop:add")
     // @Log(title = "交流回路", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -81,7 +83,7 @@ public class DevStatusAcLoopController extends BaseController {
     /**
      * 修改交流回路
      */
-    // @SaCheckPermission("zm:statusAcLoop:edit")
+    @SaCheckPermission("zm:statusAcLoop:edit")
     // @Log(title = "交流回路", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -94,7 +96,7 @@ public class DevStatusAcLoopController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:statusAcLoop:remove")
+    @SaCheckPermission("zm:statusAcLoop:remove")
     // @Log(title = "交流回路", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

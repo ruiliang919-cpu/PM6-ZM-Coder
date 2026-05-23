@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -38,7 +40,7 @@ public class DevStatusAcController extends BaseController {
     /**
      * 查询交流信息列表
      */
-    // @SaCheckPermission("zm:statusAc:list")
+    @SaCheckPermission("zm:statusAc:list")
     @PostMapping("/list")
     public TableDataInfo<DevStatusAcVo> list(DevStatusAcBo bo,@RequestBody  PageQuery pageQuery) {
         return iDevStatusAcService.queryPageList(bo, pageQuery);
@@ -47,7 +49,7 @@ public class DevStatusAcController extends BaseController {
     /**
      * 导出交流信息列表
      */
-    // @SaCheckPermission("zm:statusAc:export")
+    @SaCheckPermission("zm:statusAc:export")
     // @Log(title = "交流信息", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevStatusAcBo bo, HttpServletResponse response) {
@@ -60,7 +62,7 @@ public class DevStatusAcController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:statusAc:query")
+    @SaCheckPermission("zm:statusAc:query")
     @GetMapping("/{id}")
     public R<DevStatusAcVo> getInfo(@NotNull(message = "主键不能为空")
                                     @PathVariable Long id) {
@@ -70,7 +72,7 @@ public class DevStatusAcController extends BaseController {
     /**
      * 新增交流信息
      */
-    // @SaCheckPermission("zm:statusAc:add")
+    @SaCheckPermission("zm:statusAc:add")
     // @Log(title = "交流信息", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -81,7 +83,7 @@ public class DevStatusAcController extends BaseController {
     /**
      * 修改交流信息
      */
-    // @SaCheckPermission("zm:statusAc:edit")
+    @SaCheckPermission("zm:statusAc:edit")
     // @Log(title = "交流信息", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -94,7 +96,7 @@ public class DevStatusAcController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:statusAc:remove")
+    @SaCheckPermission("zm:statusAc:remove")
     // @Log(title = "交流信息", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.cache.SceneCache;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
@@ -42,7 +44,7 @@ public class DevBaseSceneController extends BaseController {
     /**
      * 查询场景列表
      */
-    // @SaCheckPermission("zm:baseScene:list")
+    @SaCheckPermission("zm:baseScene:list")
     @PostMapping("/list")
     public TableDataInfo<DevBaseSceneVo> list(DevBaseSceneBo bo, @RequestBody PageQuery pageQuery) {
         return iDevBaseSceneService.queryPageList(bo, pageQuery);
@@ -51,7 +53,7 @@ public class DevBaseSceneController extends BaseController {
     /**
      * 导出场景列表
      */
-    // @SaCheckPermission("zm:baseScene:export")
+    @SaCheckPermission("zm:baseScene:export")
     // @Log(title = "场景", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevBaseSceneBo bo, HttpServletResponse response) {
@@ -64,7 +66,7 @@ public class DevBaseSceneController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:baseScene:query")
+    @SaCheckPermission("zm:baseScene:query")
     @GetMapping("/{id}")
     public R<DevBaseSceneVo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -74,7 +76,7 @@ public class DevBaseSceneController extends BaseController {
     /**
      * 新增场景
      */
-    // @SaCheckPermission("zm:baseScene:add")
+    @SaCheckPermission("zm:baseScene:add")
     // @Log(title = "场景", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping("/add")
@@ -86,7 +88,7 @@ public class DevBaseSceneController extends BaseController {
     /**
      * 修改场景
      */
-    // @SaCheckPermission("zm:baseScene:edit")
+    @SaCheckPermission("zm:baseScene:edit")
     // @Log(title = "场景", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping("/edit")
@@ -100,7 +102,7 @@ public class DevBaseSceneController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:baseScene:remove")
+    @SaCheckPermission("zm:baseScene:remove")
     // @Log(title = "场景", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     @Transactional

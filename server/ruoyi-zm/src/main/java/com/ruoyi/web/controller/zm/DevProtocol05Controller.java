@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -38,7 +40,7 @@ public class DevProtocol05Controller extends BaseController {
     /**
      * 查询遥控协议列表
      */
-    // @SaCheckPermission("zm:protocol05:list")
+    @SaCheckPermission("zm:protocol05:list")
     @PostMapping("/list")
     public TableDataInfo<DevProtocol05Vo> list(DevProtocol05Bo bo,@RequestBody  PageQuery pageQuery) {
         return iDevProtocol05Service.queryPageList(bo, pageQuery);
@@ -47,7 +49,7 @@ public class DevProtocol05Controller extends BaseController {
     /**
      * 导出遥控协议列表
      */
-    // @SaCheckPermission("zm:protocol05:export")
+    @SaCheckPermission("zm:protocol05:export")
     // @Log(title = "遥控协议", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevProtocol05Bo bo, HttpServletResponse response) {
@@ -60,7 +62,7 @@ public class DevProtocol05Controller extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:protocol05:query")
+    @SaCheckPermission("zm:protocol05:query")
     @GetMapping("/{id}")
     public R<DevProtocol05Vo> getInfo(@NotNull(message = "主键不能为空")
                                      @PathVariable Long id) {
@@ -70,7 +72,7 @@ public class DevProtocol05Controller extends BaseController {
     /**
      * 新增遥控协议
      */
-    // @SaCheckPermission("zm:protocol05:add")
+    @SaCheckPermission("zm:protocol05:add")
     // @Log(title = "遥控协议", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping()
@@ -81,7 +83,7 @@ public class DevProtocol05Controller extends BaseController {
     /**
      * 修改遥控协议
      */
-    // @SaCheckPermission("zm:protocol05:edit")
+    @SaCheckPermission("zm:protocol05:edit")
     // @Log(title = "遥控协议", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping()
@@ -94,7 +96,7 @@ public class DevProtocol05Controller extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:protocol05:remove")
+    @SaCheckPermission("zm:protocol05:remove")
     // @Log(title = "遥控协议", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

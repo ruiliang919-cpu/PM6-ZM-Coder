@@ -7,7 +7,9 @@ import com.serotonin.modbus4j.code.DataType;
 import com.serotonin.modbus4j.exception.ErrorResponseException;
 import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.locator.BaseLocator;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class Modbus4jReadUtil {
 
     /**
@@ -25,8 +27,9 @@ public class Modbus4jReadUtil {
         try {
             return master.getValue(loc);
         }catch (Exception e){
-            if (e.getMessage().equals("java.net.SocketTimeoutException: connect timed out")) System.err.println(dev_code+"："+e.getMessage());
-            else e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().contains("connect timed out"))
+                log.error("Modbus readCoilStatus timeout, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
+            else log.error("Modbus readCoilStatus failed, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
             return null;
         }
     }
@@ -47,8 +50,9 @@ public class Modbus4jReadUtil {
         try{
             return master.getValue(loc);
         }catch (Exception e){
-            if (e.getMessage().equals("java.net.SocketTimeoutException: connect timed out")) System.err.println(dev_code+"："+e.getMessage());
-            else e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().contains("connect timed out"))
+                log.error("Modbus readInputStatus timeout, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
+            else log.error("Modbus readInputStatus failed, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
             return null;
         }
     }
@@ -70,8 +74,9 @@ public class Modbus4jReadUtil {
         try {
             return master.getValue(loc);
         }catch (Exception e){
-            if (e.getMessage().equals("java.net.SocketTimeoutException: connect timed out")) System.err.println(dev_code+"："+e.getMessage());
-            else e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().contains("connect timed out"))
+                log.error("Modbus readHoldingRegister timeout, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
+            else log.error("Modbus readHoldingRegister failed, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
             return null;
         }
     }
@@ -93,8 +98,9 @@ public class Modbus4jReadUtil {
         try{
             return master.getValue(loc);
         }catch (Exception e){
-            if (e.getMessage().equals("java.net.SocketTimeoutException: connect timed out")) System.err.println(dev_code+"："+e.getMessage());
-            else e.printStackTrace();
+            if (e.getMessage() != null && e.getMessage().contains("connect timed out"))
+                log.error("Modbus readInputRegisters timeout, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
+            else log.error("Modbus readInputRegisters failed, slaveId={}, offset={}, dev_code={}", slaveId, offset, dev_code, e);
             return null;
         }
     }

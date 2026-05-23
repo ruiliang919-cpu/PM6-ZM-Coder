@@ -132,13 +132,11 @@ import {
   updateZoneLightSwitch,
   zoneControlList
 } from '@/api/zm/baseControl'
-import GroupRightCopy from '@/views/zm/history/powerCalculation/components/GroupRightCopy/index.vue'
 import CommonContainer from '@/components/CommonContainer/index.vue'
-import GroupLeftCopy from '@/views/zm/history/powerCalculation/components/GroupLeftCopy/index.vue'
 import { lightZoneSet } from '@/api/zm/history/powerCalculation'
 
 export default {
-  components: { GroupLeftCopy, CommonContainer, GroupRightCopy },
+  components: { CommonContainer },
   data() {
     return {
       // 遮罩层

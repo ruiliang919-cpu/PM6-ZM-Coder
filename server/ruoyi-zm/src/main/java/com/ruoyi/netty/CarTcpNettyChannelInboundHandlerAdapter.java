@@ -56,7 +56,7 @@ public class CarTcpNettyChannelInboundHandlerAdapter extends ChannelInboundHandl
      */
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        cause.printStackTrace();
+        log.error("Netty channel exception caught, closing connection", cause);
         ctx.close();// 抛出异常，断开与客户端的连接
     }
 

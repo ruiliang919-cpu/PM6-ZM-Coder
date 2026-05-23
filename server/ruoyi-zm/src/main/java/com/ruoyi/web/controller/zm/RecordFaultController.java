@@ -20,12 +20,16 @@ import com.ruoyi.zm.mapper.DevFaultRecordMapper;
 import com.ruoyi.zm.service.IDevFaultRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.Cursor;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -49,20 +53,42 @@ public class RecordFaultController {
     private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final Key key;
 
-    private Map<Long, String> NameMap() {
-        return deviceMapper.selectList(new LambdaQueryWrapper<DevBaseDevice>()
+    private Map<Long, String> cachedNameMap;
+    private long nameMapCacheTime;
+
+    private synchronized Map<Long, String> NameMap() {
+        long now = System.currentTimeMillis();
+        if (cachedNameMap != null && (now - nameMapCacheTime) < 60_000) {
+            return cachedNameMap;
+        }
+        cachedNameMap = deviceMapper.selectList(new LambdaQueryWrapper<DevBaseDevice>()
                 .select(DevBaseDevice::getDeviceNo, DevBaseDevice::getDeviceName))
             .stream().collect(Collectors.toMap(DevBaseDevice::getDeviceNo,
                 DevBaseDevice::getDeviceName, (o1, o2) -> o2));
+        nameMapCacheTime = now;
+        return cachedNameMap;
     }
 
     @Scheduled(fixedDelay = 5000)
     public void allFaults() {
         // 从缓存中取出数据
-        Set<String> keys = redisTemplate.keys("zm:fault:*");
+        // 使用SCAN替代KEYS，避免阻塞Redis
+        Set<String> keys = redisTemplate.execute((RedisCallback<Set<String>>) connection -> {
+            Set<String> keyset = new HashSet<>();
+            ScanOptions options = ScanOptions.scanOptions()
+                .match("zm:fault:*")
+                .count(100)
+                .build();
+            try (Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    keyset.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+            return keyset;
+        });
         List<DevFaultRecordVo> source = new ArrayList<>();
         Map<Long, String> nameMap = NameMap();
-        if (!keys.isEmpty()) {
+        if (keys != null && !keys.isEmpty()) {
             for (String key : keys) {
                 DevFaultRecordVo record = (DevFaultRecordVo) redisTemplate.opsForValue().get(key);
                 if (record != null) {
@@ -221,7 +247,8 @@ public class RecordFaultController {
             String head;
             String name = "";
             try {
-                name = deviceMapper.selectById(news.getDeviceId()).getDeviceName();
+                DevBaseDevice newsDevice = deviceMapper.selectById(news.getDeviceId());
+                name = newsDevice != null ? newsDevice.getDeviceName() : "未知设备";
                 head = key.get01Name(news.getMessage());
             } catch (Exception e) {
                 head = news.getMessage();

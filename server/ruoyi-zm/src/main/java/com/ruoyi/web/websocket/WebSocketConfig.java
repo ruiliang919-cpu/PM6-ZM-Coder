@@ -1,6 +1,7 @@
 package com.ruoyi.web.websocket;
 
 import cn.dev33.satoken.stp.StpUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -48,6 +49,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      * WebSocket 握手鉴权拦截器
      * 在握手阶段校验 token 参数，拒绝未认证连接
      */
+    @Slf4j
     static class WebSocketAuthInterceptor implements HandshakeInterceptor {
 
         @Override
@@ -57,19 +59,23 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                 ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
                 String token = servletRequest.getServletRequest().getParameter("token");
                 if (token == null || token.isEmpty()) {
+                    log.warn("WebSocket握手被拒绝: token为空");
                     return false;
                 }
                 try {
                     Object loginId = StpUtil.getLoginIdByToken(token);
                     if (loginId == null) {
+                        log.warn("WebSocket握手被拒绝: token无效, token={}", token);
                         return false;
                     }
                     attributes.put("loginId", loginId);
                     return true;
                 } catch (Exception e) {
+                    log.warn("WebSocket握手异常: token校验失败, token={}", token, e);
                     return false;
                 }
             }
+            log.warn("WebSocket握手被拒绝: 非Servlet请求");
             return false;
         }
 

@@ -9,10 +9,13 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 // 监听器
 @Slf4j
 public class BasicProcessImageListener implements ProcessImageListener {
+    private static final Pattern NUMERIC = Pattern.compile("^\\d{1,2}$");
+
     private RtuWriteUtil rtuWriteUtil;
     private int start;
     private RedisTemplate<String, Object> redisTemplate;
@@ -31,9 +34,9 @@ public class BasicProcessImageListener implements ProcessImageListener {
     @Override
     public void holdingRegisterWrite(int offset, short oldValue, short newValue) {
         if (offset >= start + 205 && offset < start + 211) {
-            String value = "";
+            String value;
             if (newValue < 10) value = "0" + newValue;
-            else value = value + newValue;
+            else value = String.valueOf(newValue);
             timeMap.put(offset, value);
             log.info("{}", timeMap);
             if (timeMap.size() == 6) {
@@ -45,15 +48,18 @@ public class BasicProcessImageListener implements ProcessImageListener {
                     Objects.equals(timeMap.get(210), "00")
                 ) timeMap.clear();
                 else {
-                    try {
-                        String command = "cmd /c date " + timeMap.get(205) + "-" + timeMap.get(206) + "-" + timeMap.get(207);
-                        log.info(command);
-                        Runtime.getRuntime().exec(command);
-                        command = "cmd /c time " + timeMap.get(208) + ":" + timeMap.get(209) + ":" + timeMap.get(210) + ".00";
-                        log.info(command);
-                        Runtime.getRuntime().exec(command);
-                    } catch (IOException e) {
-                        log.error("", e);
+                    String year = timeMap.get(205);
+                    String month = timeMap.get(206);
+                    String day = timeMap.get(207);
+                    String hour = timeMap.get(208);
+                    String minute = timeMap.get(209);
+                    String second = timeMap.get(210);
+                    if (NUMERIC.matcher(year).matches() && NUMERIC.matcher(month).matches()
+                        && NUMERIC.matcher(day).matches() && NUMERIC.matcher(hour).matches()
+                        && NUMERIC.matcher(minute).matches() && NUMERIC.matcher(second).matches()) {
+                        setSystemDateTime(year, month, day, hour, minute, second);
+                    } else {
+                        log.warn("Modbus对时参数校验失败: {}-{}-{} {}:{}:{}", year, month, day, hour, minute, second);
                     }
                     timeMap.clear();
                 }
@@ -101,6 +107,31 @@ public class BasicProcessImageListener implements ProcessImageListener {
         }else if (offset == start + 217) {
             // 装饰灯照明
             rtuWriteUtil.loopControl(newValue, 4);
+        }
+    }
+
+    private void setSystemDateTime(String year, String month, String day,
+                                    String hour, String minute, String second) {
+        try {
+            String dateStr = year + "-" + month + "-" + day;
+            log.info("Modbus对时 设置日期: {}", dateStr);
+            Process dateProcess = new ProcessBuilder("cmd", "/c", "date", dateStr).start();
+            int dateExit = dateProcess.waitFor();
+            if (dateExit != 0) {
+                log.warn("Modbus对时 日期命令 exitCode={}", dateExit);
+            }
+            String timeStr = hour + ":" + minute + ":" + second + ".00";
+            log.info("Modbus对时 设置时间: {}", timeStr);
+            Process timeProcess = new ProcessBuilder("cmd", "/c", "time", timeStr).start();
+            int timeExit = timeProcess.waitFor();
+            if (timeExit != 0) {
+                log.warn("Modbus对时 时间命令 exitCode={}", timeExit);
+            }
+        } catch (IOException e) {
+            log.error("Modbus对时失败", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Modbus对时被中断", e);
         }
     }
 

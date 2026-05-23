@@ -8,8 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +22,6 @@ public class LeakageCache {
     private static final List<String> nameList = new ArrayList<>();
 
     // 直流机柜-机柜信息-传感器页面列表
-    @Transactional
     public TableDataInfo<Leakage> table(int deviceId, int num, int size) throws ModbusTransportException {
         List<String> leakageCurrents = new ArrayList<>();
         int Num = 0;

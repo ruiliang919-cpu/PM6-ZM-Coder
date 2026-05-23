@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.dtflys.forest.utils.StringUtils;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
@@ -40,7 +42,7 @@ public class DevBaseRegionController extends BaseController {
     /**
      * 查询设备区域列表
      */
-    // @SaCheckPermission("zm:baseRegion:list")
+    @SaCheckPermission("zm:baseRegion:list")
     @PostMapping("/list")
     public TableDataInfo<DevBaseRegionVo> list(DevBaseRegionBo bo, @RequestBody PageQueryByName pageQuery) {
         if (StringUtils.isNotBlank(pageQuery.getName())) {
@@ -61,7 +63,7 @@ public class DevBaseRegionController extends BaseController {
     /**
      * 查询设备区域列表，不分页
      */
-    // @SaCheckPermission("zm:baseRegion:noPageList")
+    @SaCheckPermission("zm:baseRegion:noPageList")
     @GetMapping("/noPageList")
     public R<List<DevBaseRegionVo>> noPageList(DevBaseRegionBo bo) {
         return R.ok(iDevBaseRegionService.queryList(bo));
@@ -70,7 +72,7 @@ public class DevBaseRegionController extends BaseController {
     /**
      * 导出设备区域列表
      */
-    // @SaCheckPermission("zm:baseRegion:export")
+    @SaCheckPermission("zm:baseRegion:export")
     // @Log(title = "设备区域", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevBaseRegionBo bo, HttpServletResponse response) {
@@ -83,7 +85,7 @@ public class DevBaseRegionController extends BaseController {
      *
      * @param id 主键
      */
-    // @SaCheckPermission("zm:baseRegion:query")
+    @SaCheckPermission("zm:baseRegion:query")
     @GetMapping("/{id}")
     public R<DevBaseRegionVo> getInfo(@NotNull(message = "主键不能为空")
                                           @PathVariable Long id) {
@@ -93,7 +95,7 @@ public class DevBaseRegionController extends BaseController {
     /**
      * 新增设备区域
      */
-    // @SaCheckPermission("zm:baseRegion:add")
+    @SaCheckPermission("zm:baseRegion:add")
     // @Log(title = "设备区域", businessType = BusinessType.INSERT)
     @RepeatSubmit()
     @PostMapping("/add")
@@ -104,7 +106,7 @@ public class DevBaseRegionController extends BaseController {
     /**
      * 修改设备区域
      */
-    // @SaCheckPermission("zm:baseRegion:edit")
+    @SaCheckPermission("zm:baseRegion:edit")
     // @Log(title = "设备区域", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping("/edit")
@@ -117,7 +119,7 @@ public class DevBaseRegionController extends BaseController {
      *
      * @param ids 主键串
      */
-    // @SaCheckPermission("zm:baseRegion:remove")
+    @SaCheckPermission("zm:baseRegion:remove")
     // @Log(title = "设备区域", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")

@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaIgnore;
+
 import com.ruoyi.cache.OtherSwitchCache;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -15,7 +17,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-// @SaIgnore
+@SaIgnore
 @RestController
 @RequestMapping("/otherSwitch")
 @RequiredArgsConstructor

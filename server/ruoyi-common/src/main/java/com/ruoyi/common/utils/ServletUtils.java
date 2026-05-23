@@ -6,6 +6,7 @@ import cn.hutool.http.HttpStatus;
 import com.ruoyi.common.constant.Constants;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -29,6 +30,7 @@ import java.util.Map;
  *
  * @author ruoyi
  */
+@Slf4j
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ServletUtils extends ServletUtil {
 
@@ -138,7 +140,7 @@ public class ServletUtils extends ServletUtil {
             response.setCharacterEncoding(StandardCharsets.UTF_8.toString());
             response.getWriter().print(string);
         } catch (IOException e) {
-            e.printStackTrace();
+            log.error("渲染字符串到客户端失败", e);
         }
     }
 

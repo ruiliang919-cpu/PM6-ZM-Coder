@@ -36,6 +36,10 @@ public class Keys {
         DevBaseDeviceTCPVo tcpVo = (DevBaseDeviceTCPVo) this.redisTemplate.opsForValue().get(TCP_KEY + deviceId);
         if (ObjectUtils.isEmpty(tcpVo)) {
             DevBaseDevice device = this.deviceMapper.selectById(deviceId);
+            if (device == null) {
+                log.warn("Keys.getCreateTCP device not found, deviceId={}", deviceId);
+                return new DevBaseDeviceTCPVo();
+            }
             tcpVo = new DevBaseDeviceTCPVo();
             tcpVo.setId(device.getDeviceNo());
             tcpVo.setIp(device.getIp());

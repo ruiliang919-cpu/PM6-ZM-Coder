@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DListUtil {
     private final DevBaseDeviceMapper deviceMapper;
-    private List<DevBaseDevice> l = new ArrayList<>();
-    private List<Long> no = new ArrayList<>();
-    private Map<Long, String> nameMap = new HashMap<>();
-    private Map<String, Long> ipMap = new HashMap<>();
+    private volatile List<DevBaseDevice> l = new ArrayList<>();
+    private volatile List<Long> no = new ArrayList<>();
+    private volatile Map<Long, String> nameMap = new HashMap<>();
+    private volatile Map<String, Long> ipMap = new HashMap<>();
 
-    public List<DevBaseDevice> List() {
+    public synchronized List<DevBaseDevice> List() {
         if (ObjectUtils.isEmpty(l) || DeviceFlag.Flag(DeviceFlag.LIST)) {
             List<DevBaseDevice> devices = deviceMapper.selectList();
             if (!ObjectUtils.isEmpty(devices)) {
@@ -37,7 +37,7 @@ public class DListUtil {
         return l;
     }
 
-    public List<Long> Nos() {
+    public synchronized List<Long> Nos() {
         if (ObjectUtils.isEmpty(no) || DeviceFlag.Flag(DeviceFlag.NO)) {
             List<DevBaseDevice> devices = deviceMapper.selectList(new LambdaQueryWrapper<DevBaseDevice>()
                 .select(DevBaseDevice::getDeviceNo));
@@ -50,7 +50,7 @@ public class DListUtil {
         return no;
     }
 
-    public Map<Long, String> NameMap() {
+    public synchronized Map<Long, String> NameMap() {
         if (ObjectUtils.isEmpty(nameMap) || DeviceFlag.Flag(DeviceFlag.NAME)) {
             List<DevBaseDevice> devices = deviceMapper.selectList(new LambdaQueryWrapper<DevBaseDevice>()
                 .select(DevBaseDevice::getDeviceNo, DevBaseDevice::getDeviceName));
@@ -63,7 +63,7 @@ public class DListUtil {
         return nameMap;
     }
 
-    public Map<String, Long> ipMapX() {
+    public synchronized Map<String, Long> ipMapX() {
         if (ObjectUtils.isEmpty(ipMap) || DeviceFlag.Flag(DeviceFlag.IP)) {
             List<DevBaseDevice> devices = deviceMapper.selectList(new LambdaQueryWrapper<DevBaseDevice>()
                 .select(DevBaseDevice::getIp, DevBaseDevice::getDeviceNo));

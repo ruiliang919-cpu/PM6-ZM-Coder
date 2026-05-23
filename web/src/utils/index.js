@@ -337,8 +337,8 @@ export function debounce(func, wait, immediate) {
  * @returns {Object}
  */
 export function deepClone(source) {
-  if (!source && typeof source !== 'object') {
-    throw new Error('error arguments', 'deepClone')
+  if (source === null || typeof source !== 'object') {
+    throw new Error('error arguments')
   }
   const targetObj = source.constructor === Array ? [] : {}
   Object.keys(source).forEach(keys => {

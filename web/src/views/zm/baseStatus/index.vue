@@ -25,12 +25,15 @@
 
 import { lightList } from '@/api/zm/baseStatus'
 import card from './components/card/index.vue'
+import pollingMixin from '@/mixins/pollingMixin'
+import logger from '@/utils/logger'
 
 export default {
   name: 'Status',
   components: {
     card
   },
+  mixins: [pollingMixin],
   data() {
     return {
       // 遮罩层
@@ -46,8 +49,7 @@ export default {
         testKey: undefined,
         value: undefined,
         createTime: undefined
-      },
-      timer: null
+      }
     }
   },
   created() {
@@ -61,9 +63,7 @@ export default {
       this._get()
     },
     startTimer() {
-      this.timer = setInterval(() => {
-        this._get()
-      }, 5000)
+      this._startPolling(() => this._get(), 5000)
     },
     _get() {
       this.queryParams.params = {}
@@ -88,7 +88,7 @@ export default {
       return 'custom-cell-class-name custom-border-color'
     },
     handleHeaderRowStyle(row) {
-      console.log(row)
+      logger.log(row)
       return {
         backgroundColor: '#2280ec',
         color: '#fff',
@@ -98,7 +98,7 @@ export default {
     }
   },
   beforeDestroy() {
-    clearInterval(this.timer)
+    this._stopPolling()
   }
 }
 </script>

@@ -82,6 +82,9 @@ export default {
     _get() {
       getAlternating(this.queryParams).then(res => {
         this.form = res.data
+      }).catch((error) => {
+        console.error('getAlternating request failed:', error)
+        this.$message.error('数据加载失败')
       }).finally(() => {
         this.loading = false
       })

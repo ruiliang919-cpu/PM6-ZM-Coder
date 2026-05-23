@@ -75,15 +75,14 @@ export default {
     if (isInElectron()) {
       console.log('//////////////////////////////////')
       window.addEventListener('contextmenu', this.handleOpenContextMenu, false)
+      window.ipcRenderer.on('LogOut',this.handleLogOut)
     }
-
-    window.ipcRenderer.on('LogOut',this.handleLogOut)
   },
   beforeDestroy() {
     if (isInElectron()) {
       window.removeEventListener('contextmenu', this.handleOpenContextMenu, false)
+      window.ipcRenderer.off('LogOut',this.handleLogOut)
     }
-    window.ipcRenderer.off('LogOut',this.handleLogOut)
   }
 }
 </script>

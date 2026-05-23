@@ -78,12 +78,6 @@
         <artifactId>spring-boot-starter-integration</artifactId>
     </dependency>
 
-    <!-- Disruptor (high-performance inter-thread messaging) -->
-    <dependency>
-        <groupId>com.lmax</groupId>
-        <artifactId>disruptor</artifactId>
-        <version>3.4.4</version>
-    </dependency>
 
     <!-- 测试依赖 -->
     <dependency>

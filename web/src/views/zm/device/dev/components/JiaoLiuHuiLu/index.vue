@@ -45,7 +45,6 @@
 </template>
 
 <script>
-import { listDemo } from '@/api/demo/demo'
 import { acList } from '@/api/zm/device/dev'
 
 export default {
@@ -107,6 +106,10 @@ export default {
       acList(this.queryParams).then((response) => {
         this.demoList = response.rows || []
         this.total = response.total || 0
+      }).catch((error) => {
+        console.error('acList request failed:', error)
+        this.$message.error('数据加载失败')
+      }).finally(() => {
         this.loading = false
       })
     },

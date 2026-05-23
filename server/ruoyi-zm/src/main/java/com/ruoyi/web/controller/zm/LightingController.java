@@ -1,5 +1,7 @@
 package com.ruoyi.web.controller.zm;
 
+import cn.dev33.satoken.annotation.SaCheckPermission;
+
 import com.ruoyi.cache.LightingCache;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
@@ -23,14 +25,14 @@ public class LightingController {
     private final LightingCache cache;
 
     // 查询照明控制-控制分区列表
-    // @SaCheckPermission("zm:lighting:zoneControlList")
+    @SaCheckPermission("zm:lighting:zoneControlList")
     @PostMapping("/zoneControlList")
     public TableDataInfo<ConfigDistrictRespVo> zoneControlList(@RequestBody PageQuery pageQuery) {
         return configDistrictService.queryPageList(pageQuery);
     }
 
     // 照明状态-照明控制列表（查数据库，不查设备）
-    // @SaCheckPermission("zm:lighting:lightList")
+    @SaCheckPermission("zm:lighting:lightList")
     @PostMapping("/lightList")
     public TableDataInfo<WebLightStatusRespVO> lightList(@RequestBody PageQuery pageQuery) {
         TableDataInfo<WebLightStatusRespVO> lightList = cache.getLightList(pageQuery);

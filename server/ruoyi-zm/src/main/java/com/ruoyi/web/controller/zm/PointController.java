@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
 import java.util.Set;
 
 @Slf4j
@@ -26,12 +28,31 @@ public class PointController {
         return R.ok(false);
     }
 
+    /**
+     * 使用 SCAN 命令替代 KEYS，避免阻塞 Redis
+     */
+    private Set<String> scanKeys(String pattern) {
+        return redisTemplate.execute((org.springframework.data.redis.core.RedisCallback<Set<String>>) connection -> {
+            Set<String> keys = new HashSet<>();
+            org.springframework.data.redis.core.ScanOptions options = org.springframework.data.redis.core.ScanOptions.scanOptions()
+                .match(pattern)
+                .count(100)
+                .build();
+            try (org.springframework.data.redis.core.Cursor<byte[]> cursor = connection.scan(options)) {
+                while (cursor.hasNext()) {
+                    keys.add(new String(cursor.next(), StandardCharsets.UTF_8));
+                }
+            }
+            return keys;
+        });
+    }
+
     // 重置更新总点
     @GetMapping("/setStatus")
     public R<?> setStatus(Integer deviceId) {
         // redisTemplate.opsForValue().set("zm:update:" + deviceId + ":Update-the-total-points-1", "false");
         // redisTemplate.opsForValue().set("zm:update:" + deviceId + ":Update-the-total-points-2", "false");
-        Set<String> keys = redisTemplate.keys("zm:update:*");
+        Set<String> keys = scanKeys("zm:update:*");
         if (keys != null) {
             keys.forEach(key -> redisTemplate.opsForValue().set(key, "false"));
         }

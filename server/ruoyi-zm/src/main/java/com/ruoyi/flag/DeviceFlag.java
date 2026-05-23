@@ -5,10 +5,10 @@ public class DeviceFlag {
     public static final String LIST = "listUpdateFlag";
     public static final String NO = "noUpdateFlag";
     public static final String IP = "ipUpdateFlag";
-    private static boolean nameUpdateFlag = true;
-    private static boolean listUpdateFlag = true;
-    private static boolean noUpdateFlag = true;
-    private static boolean ipUpdateFlag = true;
+    private static volatile boolean nameUpdateFlag = true;
+    private static volatile boolean listUpdateFlag = true;
+    private static volatile boolean noUpdateFlag = true;
+    private static volatile boolean ipUpdateFlag = true;
 
     public static boolean Flag(String type) {
         switch (type) {
