@@ -49,8 +49,10 @@ public class ConfigDistrictServiceImpl implements ConfigDistrictService {
     }
 
     public <T> TableDataInfo<T> getPageTable(List<T> source, PageQuery page) {
-        int start = (page.getPageNum() - 1) * page.getPageSize();
-        int end = Math.min(start + page.getPageSize(), source.size());
+        int pageNum = page.getPageNum() != null ? page.getPageNum() : 1;
+        int pageSize = page.getPageSize() != null ? page.getPageSize() : 10;
+        int start = (pageNum - 1) * pageSize;
+        int end = Math.min(start + pageSize, source.size());
         TableDataInfo<T> table = TableDataInfo.build();
         table.setTotal(source.size());
         table.setRows(source.subList(start, end));

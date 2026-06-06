@@ -49,7 +49,7 @@ spring:
     database: 0
     timeout: 100s
     ssl: false
-    password: ${REDIS_PASSWORD}
+    # password: ${REDIS_PASSWORD}  # 本地Redis无密码，注释掉
 
 redisson:
   keyPrefix:

@@ -358,6 +358,8 @@ export default {
     testGetData() {
       testGetData().then(res => {
         this.$message.success(res.msg || '操作成功!')
+      }).catch(err => {
+        this.$message.warning('手动采集功能暂未开放')
       })
     }
   },

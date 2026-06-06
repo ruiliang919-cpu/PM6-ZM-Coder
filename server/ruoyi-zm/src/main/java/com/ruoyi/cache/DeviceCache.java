@@ -98,13 +98,18 @@ public class DeviceCache {
                         resp.setDimmerNum(0);
                     }
                     try {
-                        boolean typeB = this.key.getTelecommand(no)[822];
+                        boolean[] tc = this.key.getTelecommand(no);
+                        if (tc == null) {
+                            resp.setDcModuleNum(0);
+                        } else {
+                        boolean typeB = tc[822];
                         if (typeB)
                             // 电源柜 整流模块数量
                             resp.setDcModuleNum(((java.math.BigDecimal) this.keys.getTelemeter(no, "0x0026")).intValue());
                         else
                             // 配电柜 DC/DC模块数量
                             resp.setDcModuleNum(((java.math.BigDecimal) this.keys.getTelemeter(no, "0x0027")).intValue());
+                        }
                     } catch (Exception e) {
                         log.warn("获取DC模块数量异常, deviceId={}", no, e);
                         resp.setDcModuleNum(0);

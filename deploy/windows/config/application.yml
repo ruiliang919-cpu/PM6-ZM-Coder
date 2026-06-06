@@ -58,6 +58,7 @@ spring:
     database: 0
     timeout: 100s
     ssl: false
+    password: Hyd@qwe
 
 redisson:
   keyPrefix:
@@ -70,6 +71,7 @@ redisson:
     idleConnectionTimeout: 15000
     timeout: 25000
     subscriptionConnectionPoolSize: 5
+    password: Hyd@qwe
 
 ---
 mail:

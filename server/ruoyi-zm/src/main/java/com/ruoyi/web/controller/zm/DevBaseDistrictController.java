@@ -92,7 +92,7 @@ public class DevBaseDistrictController extends BaseController {
     @RepeatSubmit()
     @PostMapping("/add")
     public R<Void> add(@Validated(AddGroup.class) @RequestBody DevBaseDistrictBo bo) {
-        if (bo.getId() < 0 || bo.getId() > 32) return R.fail("分区码范围在0~31，添加失败");
+        if (bo.getId() == null || bo.getId() < 0 || bo.getId() > 32) return R.fail("分区码范围在0~31，添加失败");
         if (bo.getName() == null || bo.getName().isEmpty()) return R.warn("分区名称不能留空，修改失败");
         return toAjax(iDevBaseDistrictService.insertByBo(bo));
     }

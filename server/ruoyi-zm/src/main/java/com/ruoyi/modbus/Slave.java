@@ -7,8 +7,9 @@ import com.ruoyi.netty.handler.RtuHandler;
 import com.ruoyi.netty.handler.RtuWriteUtil;
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.ip.tcp.TcpSlave;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -18,7 +19,6 @@ import javax.annotation.PostConstruct;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class Slave {
     private final RtuHandler rtuHandler;
     private final RtuWriteUtil rtuWriteUtil;
@@ -26,6 +26,19 @@ public class Slave {
     private final Key key;
     private final DeviceUtilCache deviceUtilCache;
     private final RedisTemplate<String, Object> redisTemplate;
+
+    @Autowired
+    public Slave(RtuHandler rtuHandler, RtuWriteUtil rtuWriteUtil,
+                 @Qualifier("threadPoolTaskExecutor") TaskExecutor taskExecutor,
+                 Key key, DeviceUtilCache deviceUtilCache,
+                 RedisTemplate<String, Object> redisTemplate) {
+        this.rtuHandler = rtuHandler;
+        this.rtuWriteUtil = rtuWriteUtil;
+        this.taskExecutor = taskExecutor;
+        this.key = key;
+        this.deviceUtilCache = deviceUtilCache;
+        this.redisTemplate = redisTemplate;
+    }
     @Value("${init.slave:false}")
     public boolean flag;
     @Value("${slave.port:1504}")

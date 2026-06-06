@@ -72,12 +72,16 @@ public class DevBaseSceneServiceImpl implements IDevBaseSceneService {
     public Boolean insertByBo(DevBaseSceneBo bo) {
         DevBaseScene add = new DevBaseScene();
         add.setName(bo.getName());
-        // 让数据库自增主键生效，不手动设置ID，避免并发竞争条件
+        // 手动生成ID：查询当前最大ID并+1，空表从1开始
+        Long maxId = baseMapper.selectObjs(
+            new LambdaQueryWrapper<DevBaseScene>().select(DevBaseScene::getId)
+                .orderByDesc(DevBaseScene::getId).last("LIMIT 1")
+        ).stream().map(id -> ((Number) id).longValue()).findFirst().orElse(0L);
+        Long newId = maxId + 1;
+        add.setId(newId);
+        add.setSceneId(Math.toIntExact(newId));
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
-            // 插入后从自增ID回写sceneId
-            add.setSceneId(Math.toIntExact(add.getId()));
-            baseMapper.updateById(add);
             bo.setId(add.getId());
             bo.setSceneId(add.getSceneId());
         }
