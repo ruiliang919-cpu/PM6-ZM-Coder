@@ -1,0 +1,95 @@
+mqtt:
+  url: tcp://127.0.0.1:1883
+  username: admin
+  password: Hyd@qwe
+
+# Modbus TCP 通讯配置
+modbus:
+  tcp:
+    timeout: 1000
+    retries: 1
+    max-connections: 100
+    heartbeat-interval: 30
+    connection-ttl: 86400
+    port: 502
+
+spring.boot.admin.client:
+  enabled: false
+
+xxl.job:
+  enabled: false
+
+---
+spring:
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    dynamic:
+      primary: master
+      strict: true
+      datasource:
+        master:
+          type: ${spring.datasource.type}
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://127.0.0.1:3306/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          username: zm_root
+          password: Huiyeda98315
+        slave:
+          lazy: true
+          type: ${spring.datasource.type}
+          driverClassName: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://localhost:3306/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
+          username: zm_root
+          password: Huiyeda98315
+      hikari:
+        maxPoolSize: 35
+        minIdle: 5
+        connectionTimeout: 3000
+        validationTimeout: 3000
+        idleTimeout: 600
+        maxLifetime: 0
+        connectionTestQuery: SELECT 1
+        keepaliveTime: 300
+
+---
+spring:
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 0
+    timeout: 100s
+    ssl: false
+
+redisson:
+  keyPrefix:
+  threads: 10
+  nettyThreads: 10
+  singleServerConfig:
+    clientName: "prod"
+    connectionMinimumIdleSize: 30
+    connectionPoolSize: 50
+    idleConnectionTimeout: 15000
+    timeout: 25000
+    subscriptionConnectionPoolSize: 5
+
+---
+mail:
+  enabled: false
+
+recover:
+  password: 123456
+
+sms:
+  is-print: false
+
+checkOutValue: true
+
+slave.port: 1504
+
+---
+# 日志配置
+logging:
+  file:
+    name: LOGDIR_PLACEHOLDER/app.log
+  level:
+    com.ruoyi: info
+    org.springframework: warn
