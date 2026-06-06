@@ -27,6 +27,8 @@ import com.ruoyi.zm.service.IDevConfigSceneService;
 import com.ruoyi.zm.service.IDevStatusDccLoopService;
 import com.serotonin.modbus4j.exception.ModbusTransportException;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,6 +53,8 @@ import java.util.stream.IntStream;
 @RestController
 @RequestMapping("/zm/configGroup")
 public class DevConfigGroupController extends BaseController {
+
+    private static final Logger log = LoggerFactory.getLogger(DevConfigGroupController.class);
 
     private final IDevConfigGroupService iDevConfigGroupService;
     private final IDevConfigSceneService configSceneService;
@@ -139,8 +143,8 @@ public class DevConfigGroupController extends BaseController {
                     try {
                         int no = Integer.parseInt(item);
                         result.add(no);
-                    } catch (Exception ignored) {
-
+                    } catch (Exception e) {
+                        log.warn("解析回路编号异常, item={}", item, e);
                     }
                 });
         }

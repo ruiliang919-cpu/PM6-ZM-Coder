@@ -93,14 +93,14 @@ public class LightingCache {
                             transformedList.add(webLightStatusRespVO);
                         }
                     } catch (Exception e) {
-                        //                        log.error("LightingCache → getLightList", e);
+                        log.warn("获取照明状态列表异常, deviceNo={}", device.getDeviceNo(), e);
                     }
                     //                    System.out.println(transformedList);
                 }
                 return key.getPageTable(transformedList, pageQuery);
             }
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            log.warn("获取照明列表数据异常", e);
         }
         return null;
     }

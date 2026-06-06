@@ -21,7 +21,7 @@ public class Topic5 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int id = payload.get("id").getAsInt();
+        int id = payload.getInt("id");
         GroupNameVo g = new GroupNameVo();
         g.setGroupId(id);
         g.setName(n(deviceNo, id));

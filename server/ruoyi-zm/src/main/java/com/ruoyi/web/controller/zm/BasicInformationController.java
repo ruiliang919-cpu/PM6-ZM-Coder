@@ -4,7 +4,7 @@ package com.ruoyi.web.controller.zm;
 import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.dtflys.forest.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.cache.DeviceCache;
 import com.ruoyi.cache.Key;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -23,6 +23,8 @@ import com.ruoyi.zm.domain.vo.*;
 import com.ruoyi.zm.mapper.*;
 import com.ruoyi.zm.service.BasicService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
@@ -41,6 +43,8 @@ import static java.time.ZoneOffset.UTC;
 @RequiredArgsConstructor
 @RequestMapping("/zm/basic")
 public class BasicInformationController {
+    private static final Logger log = LoggerFactory.getLogger(BasicInformationController.class);
+
     private final BasicService basicService;
     private final DevBaseDeviceMapper deviceMapper;
     private final DevBaseSceneMapper baseSceneMapper;
@@ -65,7 +69,7 @@ public class BasicInformationController {
     @RequestMapping("/getSceneList")
     public TableDataInfo<DevBaseSceneVo> getSceneList(@RequestBody DevBaseScenePageVo reqVo) {
         List<DevBaseScene> sceneList = baseSceneMapper.selectList();
-        if (StringUtils.isNotBlank(reqVo.getName())) {
+        if (StrUtil.isNotBlank(reqVo.getName())) {
             sceneList = sceneList.stream().parallel().filter(item -> item.getName().contains(reqVo.getName())).collect(Collectors.toList());
         }
         List<DevBaseSceneVo> result = new ArrayList<>();
@@ -89,8 +93,8 @@ public class BasicInformationController {
         int sceneSelect = 0;
         try {
             sceneSelect = Integer.parseInt((String) redisTemplate.opsForValue().get("zm:global:scene:select"));
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            log.warn("解析场景选择值异常", e);
         }
         int finalSceneSelect = sceneSelect;
         sceneList.forEach(item -> {
@@ -117,19 +121,22 @@ public class BasicInformationController {
             try {
                 boolean typeB = this.key.getTelecommand(Math.toIntExact(row.getDeviceNo()))[817];
                 row.setType(typeB ? 1 : 0);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("获取机柜类型异常, deviceNo={}", row.getDeviceNo(), e);
                 row.setType(0);
             }
             try {
                 row.setRunMode(this.key.getTelecommand(Math.toIntExact(row.getDeviceNo()))[164] ? 1 : 0);
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("获取机柜运行模式异常, deviceNo={}", row.getDeviceNo(), e);
                 row.setRunMode(0);
             }
             try {
                 HashMap<String, Integer> map = cache.getDcDimNum(row.getDeviceNo());
                 row.setDcModuleNum(map.get("dcModuleNum") == null ? 0 : map.get("dcModuleNum"));
                 row.setDimmerNum(map.get("dimmerNum") == null ? 0 : map.get("dimmerNum"));
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("获取机柜模块数量异常, deviceNo={}", row.getDeviceNo(), e);
                 row.setDcModuleNum(0);
                 row.setDimmerNum(0);
             }

@@ -39,7 +39,8 @@ public class RecordPlus {
                 if (k.getTelecommand(Math.toIntExact(n), 164) == 0) {
                     runTime(Math.toIntExact(n));
                 }
-            } catch (Exception ignored) {
+            } catch (Exception e) {
+                log.warn("执行时控模块任务异常, deviceNo={}", n, e);
             }
         }));
     }

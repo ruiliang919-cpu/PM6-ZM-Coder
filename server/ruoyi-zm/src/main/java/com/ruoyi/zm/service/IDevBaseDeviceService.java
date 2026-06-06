@@ -1,5 +1,6 @@
 package com.ruoyi.zm.service;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.zm.domain.DevBaseDevice;
@@ -62,4 +63,19 @@ public interface IDevBaseDeviceService {
      * 查询机柜信息，用于首页展示
      */
     TableDataInfo<DeviceHomeVoResp> getCabinetList(PageQuery pageQuery);
+
+    /**
+     * 根据ID更新设备
+     */
+    int updateById(DevBaseDevice device);
+
+    /**
+     * 查询全部设备列表（无分页）
+     */
+    List<DevBaseDevice> listAll();
+
+    /**
+     * 根据条件查询单个设备
+     */
+    DevBaseDevice selectOne(LambdaQueryWrapper<DevBaseDevice> lqw);
 }

@@ -134,4 +134,14 @@ public class DevBaseDistrictServiceImpl implements IDevBaseDistrictService {
         }
         return baseMapper.deleteBatchIds(idList) > 0;
     }
+
+    @Override
+    public DevBaseDistrict selectById(Long id) {
+        return baseMapper.selectById(id);
+    }
+
+    @Override
+    public void insertOrUpdate(DevBaseDistrict district) {
+        baseMapper.insertOrUpdate(district);
+    }
 }

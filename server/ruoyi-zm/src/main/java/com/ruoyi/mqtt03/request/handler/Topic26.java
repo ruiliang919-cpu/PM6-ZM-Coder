@@ -22,7 +22,7 @@ public class Topic26 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int moduleId = payload.get("id").getAsInt();
+        int moduleId = payload.getInt("id");
         Map<String, Object> hwMap = (Map<String, Object>) k.getRemote(deviceNo, "0XAE7A");
         if (hwMap != null && !hwMap.isEmpty()) {
             List<DevConfigInfraredSensor> data = (List<DevConfigInfraredSensor>) hwMap.getOrDefault("data", null);

@@ -9,6 +9,8 @@ import com.ruoyi.zm.domain.bo.*;
 import com.ruoyi.zm.domain.vo.*;
 import com.ruoyi.zm.service.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.repository.query.Param;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +27,8 @@ import static com.ruoyi.utils.device.time.TimeUtil.second;
 @RequestMapping("/zm/energy")
 @RequiredArgsConstructor
 public class MeterEnergyController {
+    private static final Logger log = LoggerFactory.getLogger(MeterEnergyController.class);
+
     private final IDevEnergyMeterDayService energyMeterDayService;
     private final IDevEnergyMeterWeekService energyMeterWeekService;
     private final IDevEnergyMeterMonthService energyMeterMonthService;
@@ -153,8 +157,8 @@ public class MeterEnergyController {
         try {
             HashMap<String, Integer> dcDimNum = deviceCache.getDcDimNum(deviceId);
             result = dcDimNum.get("dimmerNum") + dcDimNum.get("dcModuleNum");
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            log.warn("获取电表回路数量异常, deviceId={}", deviceId, e);
         }
         return result;
     }

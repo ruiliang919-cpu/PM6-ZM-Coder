@@ -61,8 +61,8 @@ public class DeviceUtilCache {
                 try {
                     int status = key.getTelecommand(Math.toIntExact(deviceNo.getNo()), 162);
                     result.add(status);
-                } catch (Exception ignored) {
-
+                } catch (Exception e) {
+                    log.warn("获取设备运行状态异常, deviceNo={}", deviceNo.getNo(), e);
                 }
             }
             // System.out.println(deviceNos);
@@ -82,8 +82,8 @@ public class DeviceUtilCache {
                 try {
                     int type = key.getTelecommand(Math.toIntExact(deviceNo.getNo()), 822);
                     if (0 == type) result.add(Math.toIntExact(deviceNo.getNo()));
-                } catch (Exception ignored) {
-
+                } catch (Exception e) {
+                    log.warn("获取配电柜设备类型异常, deviceNo={}", deviceNo.getNo(), e);
                 }
             }
         } else if ("Power-cabinets".equals(typeTxt)) {
@@ -93,8 +93,8 @@ public class DeviceUtilCache {
                     // System.out.println(deviceNo.getNo() + ":::==>" + type);
                     if (1 == type) result.add(Math.toIntExact(deviceNo.getNo()));
                     // System.out.println(deviceNo + ":::" + type);
-                } catch (Exception ignored) {
-
+                } catch (Exception e) {
+                    log.warn("获取电源柜设备类型异常, deviceNo={}", deviceNo.getNo(), e);
                 }
             }
         }

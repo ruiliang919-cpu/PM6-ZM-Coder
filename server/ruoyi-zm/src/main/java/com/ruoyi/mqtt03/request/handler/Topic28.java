@@ -18,7 +18,7 @@ public class Topic28 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int id = payload.get("id").getAsInt();
+        int id = payload.getInt("id");
         UpdateLoopReqVo u = new UpdateLoopReqVo();
         u.setDeviceId(deviceNo);
         u.setGroupId(id);

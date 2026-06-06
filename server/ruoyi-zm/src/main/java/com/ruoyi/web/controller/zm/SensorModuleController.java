@@ -10,6 +10,8 @@ import com.ruoyi.common.core.domain.R;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.zm.domain.vo.*;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,8 @@ import java.util.*;
 @RequiredArgsConstructor
 @RequestMapping("/zm/sensorModule")
 public class SensorModuleController {
+    private static final Logger log = LoggerFactory.getLogger(SensorModuleController.class);
+
     private final InfraredCache infraredCache;
     private final IlluminanceCache illuminanceCache;
     private final Key key;
@@ -84,7 +88,8 @@ public class SensorModuleController {
     public R<Integer> illuminanceSelectList(Integer deviceId, Integer sensorId) {
         try {
             return R.ok(key.getTelecommand(deviceId, arr[sensorId - 1]) == 1 ? 0 : 1);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("获取照度传感器外控状态异常, deviceId={}, sensorId={}", deviceId, sensorId, e);
         }
         return R.ok(1);
     }

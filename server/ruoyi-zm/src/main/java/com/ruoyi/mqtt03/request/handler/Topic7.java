@@ -17,7 +17,7 @@ public class Topic7 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int id = payload.get("id").getAsInt();
+        int id = payload.getInt("id");
         int zoneId = d(deviceNo, id);
         CommonDataInt data = new CommonDataInt();
         data.setAddr("0xA5AE");

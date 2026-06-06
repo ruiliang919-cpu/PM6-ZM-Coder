@@ -19,7 +19,7 @@ public class Topic6 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int id = payload.get("id").getAsInt();
+        int id = payload.getInt("id");
         w.sceneName(deviceNo, id, n(deviceNo, id));
     }
 

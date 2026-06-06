@@ -25,7 +25,7 @@ public class Topic8 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int moduleId = payload.get("id").getAsInt();
+        int moduleId = payload.getInt("id");
         HashMap<String, Object> simple = (HashMap<String, Object>) k.getRemote(deviceNo, addr[moduleId]);
         if (simple != null && !simple.isEmpty()) {
             SimpleControlReqVo s = new SimpleControlReqVo();

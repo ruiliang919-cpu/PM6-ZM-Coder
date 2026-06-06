@@ -1,7 +1,7 @@
 mqtt:
    url: tcp://${MQTT_HOST:127.0.0.1}:1883
    username: ${MQTT_USERNAME:admin}
-   password: ${MQTT_PASSWORD:Hyd@qwe}
+   password: ${MQTT_PASSWORD}
 
 --- # 监控中心配置
 spring.boot.admin.client:
@@ -11,7 +11,7 @@ spring.boot.admin.client:
   instance:
     service-host-type: IP
   username: ruoyi
-  password: 123456
+  password: ${SPRING_ADMIN_PASSWORD}
 
 --- # xxl-job 配置
 xxl.job:
@@ -57,7 +57,7 @@ spring:
 #          url: jdbc:mysql://127.0.0.1:4406/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
           url: jdbc:mysql://192.168.20.109:3306/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true # 仅开发环境
           username: ${DB_USERNAME:root}
-          password: ${DB_PASSWORD:123456}
+          password: ${DB_PASSWORD}
         # 从库数据源
         slave:
           lazy: true
@@ -99,7 +99,7 @@ spring:
     timeout: 100s
     # 是否开启ssl
     ssl: false
-    password: ${REDIS_PASSWORD:ciH4N2}
+    password: ${REDIS_PASSWORD}
 
 #spring:
 #  redis:
@@ -111,7 +111,7 @@ spring:
 #    # 数据库索引
 #    database: 0
 #    # 密码(如没有密码请注释掉)
-#    password: ${REDIS_PASSWORD:ciH4N2}
+#    password: ${REDIS_PASSWORD}
 #    # 连接超时时间
 #    timeout: 30s
 #    # 是否开启ssl

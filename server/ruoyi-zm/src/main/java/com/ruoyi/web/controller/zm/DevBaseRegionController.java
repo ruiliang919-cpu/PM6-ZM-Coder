@@ -2,7 +2,7 @@ package com.ruoyi.web.controller.zm;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
 
-import com.dtflys.forest.utils.StringUtils;
+import cn.hutool.core.util.StrUtil;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.PageQuery;
@@ -45,7 +45,7 @@ public class DevBaseRegionController extends BaseController {
     @SaCheckPermission("zm:baseRegion:list")
     @PostMapping("/list")
     public TableDataInfo<DevBaseRegionVo> list(DevBaseRegionBo bo, @RequestBody PageQueryByName pageQuery) {
-        if (StringUtils.isNotBlank(pageQuery.getName())) {
+        if (StrUtil.isNotBlank(pageQuery.getName())) {
             bo.setName(pageQuery.getName());
         }
         PageQuery pageQuery1 = new PageQuery();

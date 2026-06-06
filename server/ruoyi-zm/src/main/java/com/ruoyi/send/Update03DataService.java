@@ -185,7 +185,6 @@ public class Update03DataService {
 
 
                 case "0x0014":
-                    // // // System.out.println("~~~~~~~~~~~~~~~~~~0x0014~~~~~~~~~~~~~~~~~~~：" + data);
                     DevStatusAc ia1 = new DevStatusAc();
                     ia1.setId(Long.valueOf((long) instruct.getSalveId() + "" + 1L));
                     ia1.setDeviceId((long) instruct.getSalveId());
@@ -218,7 +217,6 @@ public class Update03DataService {
                     acMapper.insertOrUpdate(ia2);
                     break;
                 case "0x0018":
-                    // // // System.out.println("~~~~~~~~~~~~~~~~~~0x0018~~~~~~~~~~~~~~~~~~~：" + data);
                     DevStatusAc ib2 = new DevStatusAc();
                     ib2.setId(Long.valueOf((long) instruct.getSalveId() + "" + 2L));
                     ib2.setDeviceId((long) instruct.getSalveId());
@@ -241,7 +239,6 @@ public class Update03DataService {
                     device1.setId((long) instruct.getSalveId());
                     device1.setDeviceNo((long) instruct.getSalveId());
                     device1.setDcBusVoltage((BigDecimal) data);
-                    // // // System.out.println("~~~~~~~~~~~~0x001A~~~~~~~~~device1~~~~~~~~~~~~~~~~~~~" + device1);
                     deviceMapper.updateById(device1);
                     break;
 
@@ -303,45 +300,37 @@ public class Update03DataService {
                     break;
 
                 case "0x0022":
-                    // // // System.out.println("~~~~~~~~~~~~0x0022~~~~~~~~~~~~：" + data);
                     DevBaseDevice device9 = new DevBaseDevice();
                     device9.setId((long) instruct.getSalveId());
                     device9.setDeviceNo((long) instruct.getSalveId());
                     device9.setDimmerNum(((BigDecimal) data).intValue());
-                    // System.out.println(device9);
 
                     deviceMapper.updateById(device9);
                     break;
 
                 case "0x0023":
-                    // // System.out.println("~~~~~~~~~~~0x0023~~~~~~~~~~~~~：" + data);
                     DevBaseDevice device10 = new DevBaseDevice();
                     device10.setId((long) instruct.getSalveId());
                     device10.setDeviceNo((long) instruct.getSalveId());
                     device10.setDcSwitchNum(((BigDecimal) data).intValue());
-                    // System.out.println(device10);
 
                     deviceMapper.updateById(device10);
                     break;
 
                 case "0x0024":
-                    // // // System.out.println("~~~~~~~~~0x0024~~~~~~~~~~:" + data);
                     DevBaseDevice device11 = new DevBaseDevice();
                     device11.setId((long) instruct.getSalveId());
                     device11.setDeviceNo((long) instruct.getSalveId());
                     device11.setAcLoopNum(((BigDecimal) data).intValue());
-                    // System.out.println(device11);
 
                     deviceMapper.updateById(device11);
                     break;
 
                 case "0x0025":
-                    // // // System.out.println("~~~~~~~~~0x0025~~~~~~~~~~:" + data);
                     DevBaseDevice device12 = new DevBaseDevice();
                     device12.setId((long) instruct.getSalveId());
                     device12.setDeviceNo((long) instruct.getSalveId());
                     device12.setOtherSwitchNum(((BigDecimal) data).intValue());
-                    // System.out.println(device12);
 
                     deviceMapper.updateById(device12);
                     break;
@@ -351,7 +340,6 @@ public class Update03DataService {
                     device13.setId((long) instruct.getSalveId());
                     device13.setDeviceNo((long) instruct.getSalveId());
                     device13.setAcModuleNum(((BigDecimal) data).intValue());
-                    // System.out.println(device13);
 
                     deviceMapper.updateById(device13);
                     break;
@@ -364,7 +352,6 @@ public class Update03DataService {
                     int dcModuleNum = ((BigDecimal) data).intValue();
                     device14.setDcModuleNum(dcModuleNum);
 
-                    // System.out.println(device14);
 
                     deviceMapper.updateById(device14);
                     break;
@@ -489,7 +476,6 @@ public class Update03DataService {
                 case "0X04F0":
                     ArrayList<DevStatusDccLoop> loop8result4 = new ArrayList<>();
 
-                    // // // System.out.println("~~~~~~~~~0X04F0~~~~~~~~~~:" + data);
                     for (int i = 0; i < ((ArrayList<BigDecimal>) data).size(); i++) {
                         DevStatusDccLoop loop8 = new DevStatusDccLoop();
                         loop8.setId(Long.valueOf(instruct.getSalveId() + "" + (i + 1)));
@@ -529,264 +515,199 @@ public class Update03DataService {
                     break;
 
                 case "0x0600":
-                    // // System.out.println("馈线支路名称01" + data);
                     updateBranch(1L, instruct, data);
                     break;
                 case "0x060A":
-                    // // System.out.println("馈线支路名称02" + data);
                     updateBranch(2L, instruct, data);
                     break;
                 case "0x0614":
-                    // // System.out.println("馈线支路名称03" + data);
                     updateBranch(3L, instruct, data);
                     break;
                 case "0x061E":
-                    // // System.out.println("馈线支路名称04" + data);
                     updateBranch(4L, instruct, data);
                     break;
                 case "0x0628":
-                    // // System.out.println("馈线支路名称05" + data);
                     updateBranch(5L, instruct, data);
                     break;
                 case "0x0632":
-                    // // System.out.println("馈线支路名称06" + data);
                     updateBranch(6L, instruct, data);
                     break;
                 case "0x063C":
-                    // // System.out.println("馈线支路名称07" + data);
                     updateBranch(7L, instruct, data);
                     break;
                 case "0x0646":
-                    // // System.out.println("馈线支路名称08" + data);
                     updateBranch(8L, instruct, data);
                     break;
                 case "0x0650":
-                    // // System.out.println("馈线支路名称09" + data);
                     updateBranch(9L, instruct, data);
                     break;
                 case "0x065A":
-                    // // System.out.println("馈线支路名称10" + data);
                     updateBranch(10L, instruct, data);
                     break;
                 case "0x0664":
-                    // // System.out.println("馈线支路名称11" + data);
                     updateBranch(11L, instruct, data);
                     break;
                 case "0x066E":
-                    // // System.out.println("馈线支路名称12" + data);
                     updateBranch(12L, instruct, data);
                     break;
                 case "0x0678":
-                    // // System.out.println("馈线支路名称13" + data);
                     updateBranch(13L, instruct, data);
                     break;
                 case "0x0682":
-                    // // System.out.println("馈线支路名称14" + data);
                     updateBranch(14L, instruct, data);
                     break;
                 case "0x068C":
-                    // // System.out.println("馈线支路名称15" + data);
                     updateBranch(15L, instruct, data);
                     break;
                 case "0x0696":
-                    // // System.out.println("馈线支路名称16" + data);
                     updateBranch(16L, instruct, data);
                     break;
                 case "0x06A0":
-                    // // System.out.println("馈线支路名称17" + data);
                     updateBranch(17L, instruct, data);
                     break;
                 case "0x06AA":
-                    // // System.out.println("馈线支路名称18" + data);
                     updateBranch(18L, instruct, data);
                     break;
                 case "0x06B4":
-                    // // System.out.println("馈线支路名称19" + data);
                     updateBranch(19L, instruct, data);
                     break;
                 case "0x06BE":
-                    // // System.out.println("馈线支路名称20" + data);
                     updateBranch(20L, instruct, data);
                     break;
                 case "0x06C8":
-                    // // System.out.println("馈线支路名称21" + data);
                     updateBranch(21L, instruct, data);
                     break;
                 case "0x06D2":
-                    // // System.out.println("馈线支路名称22" + data);
                     updateBranch(22L, instruct, data);
                     break;
                 case "0x06DC":
-                    // // System.out.println("馈线支路名称23" + data);
                     updateBranch(23L, instruct, data);
                     break;
                 case "0x06E6":
-                    // // System.out.println("馈线支路名称24" + data);
                     updateBranch(24L, instruct, data);
                     break;
                 case "0x06F0":
-                    // // System.out.println("馈线支路名称25" + data);
                     updateBranch(25L, instruct, data);
                     break;
                 case "0x06FA":
-                    // // System.out.println("馈线支路名称26" + data);
                     updateBranch(26L, instruct, data);
                     break;
                 case "0x0704":
-                    // // System.out.println("馈线支路名称27" + data);
                     updateBranch(27L, instruct, data);
                     break;
                 case "0x070E":
-                    // // System.out.println("馈线支路名称28" + data);
                     updateBranch(28L, instruct, data);
                     break;
                 case "0x0718":
-                    // // System.out.println("馈线支路名称29" + data);
                     updateBranch(29L, instruct, data);
                     break;
                 case "0x0722":
-                    // // System.out.println("馈线支路名称30" + data);
                     updateBranch(30L, instruct, data);
                     break;
                 case "0x072C":
-                    // // System.out.println("馈线支路名称31" + data);
                     updateBranch(31L, instruct, data);
                     break;
                 case "0x0736":
-                    // // System.out.println("馈线支路名称32" + data);
                     updateBranch(32L, instruct, data);
                     break;
                 case "0x0740":
-                    // // System.out.println("馈线支路名称33" + data);
                     updateBranch(33L, instruct, data);
                     break;
                 case "0x074A":
-                    // // System.out.println("馈线支路名称34" + data);
                     updateBranch(34L, instruct, data);
                     break;
                 case "0x0754":
-                    // // System.out.println("馈线支路名称35" + data);
                     updateBranch(35L, instruct, data);
                     break;
                 case "0x075E":
-                    // // System.out.println("馈线支路名称36" + data);
                     updateBranch(36L, instruct, data);
                     break;
                 case "0x0768":
-                    // // System.out.println("馈线支路名称37" + data);
                     updateBranch(37L, instruct, data);
                     break;
                 case "0x0772":
-                    // // System.out.println("馈线支路名称38" + data);
                     updateBranch(38L, instruct, data);
                     break;
                 case "0x077C":
-                    // // System.out.println("馈线支路名称39" + data);
                     updateBranch(39L, instruct, data);
                     break;
                 case "0x0786":
-                    // // System.out.println("馈线支路名称40" + data);
                     updateBranch(40L, instruct, data);
                     break;
                 case "0x0790":
-                    // // System.out.println("馈线支路名称41" + data);
                     updateBranch(41L, instruct, data);
                     break;
                 case "0x079A":
-                    // // System.out.println("馈线支路名称42" + data);
                     updateBranch(42L, instruct, data);
                     break;
                 case "0x07A4":
-                    // // System.out.println("馈线支路名称43" + data);
                     updateBranch(43L, instruct, data);
                     break;
                 case "0x07AE":
-                    // // System.out.println("馈线支路名称44" + data);
                     updateBranch(44L, instruct, data);
                     break;
                 case "0x07B8":
-                    // // System.out.println("馈线支路名称45" + data);
                     updateBranch(45L, instruct, data);
                     break;
                 case "0x07C2":
-                    // // System.out.println("馈线支路名称46" + data);
                     updateBranch(46L, instruct, data);
                     break;
                 case "0x07CC":
-                    // // System.out.println("馈线支路名称47" + data);
                     updateBranch(47L, instruct, data);
                     break;
                 case "0x07D6":
-                    // // System.out.println("馈线支路名称48" + data);
                     updateBranch(48L, instruct, data);
                     break;
                 case "0x07E0":
-                    // // System.out.println("馈线支路名称49" + data);
                     updateBranch(49L, instruct, data);
                     break;
                 case "0x07EA":
-                    // // System.out.println("馈线支路名称50" + data);
                     updateBranch(50L, instruct, data);
                     break;
                 case "0x07F4":
-                    // // System.out.println("馈线支路名称51" + data);
                     updateBranch(51L, instruct, data);
                     break;
                 case "0x07FE":
-                    // // System.out.println("馈线支路名称52" + data);
                     updateBranch(52L, instruct, data);
                     break;
                 case "0x0808":
-                    // // System.out.println("馈线支路名称53" + data);
                     updateBranch(53L, instruct, data);
                     break;
                 case "0x0812":
-                    // // System.out.println("馈线支路名称54" + data);
                     updateBranch(54L, instruct, data);
                     break;
                 case "0x081C":
-                    // // System.out.println("馈线支路名称55" + data);
                     updateBranch(55L, instruct, data);
                     break;
                 case "0x0826":
-                    // // System.out.println("馈线支路名称56" + data);
                     updateBranch(56L, instruct, data);
                     break;
                 case "0x0830":
-                    // // System.out.println("馈线支路名称57" + data);
                     updateBranch(57L, instruct, data);
                     break;
                 case "0x083A":
-                    // // System.out.println("馈线支路名称58" + data);
                     updateBranch(58L, instruct, data);
                     break;
                 case "0x0844":
-                    // // System.out.println("馈线支路名称59" + data);
                     updateBranch(59L, instruct, data);
                     break;
                 case "0x084E":
-                    // // System.out.println("馈线支路名称60" + data);
                     updateBranch(60L, instruct, data);
                     break;
                 case "0x0858":
-                    // // System.out.println("馈线支路名称61" + data);
                     updateBranch(61L, instruct, data);
                     break;
                 case "0x0862":
-                    // // System.out.println("馈线支路名称62" + data);
                     updateBranch(62L, instruct, data);
                     break;
                 case "0x086C":
-                    // // System.out.println("馈线支路名称63" + data);
                     updateBranch(63L, instruct, data);
                     break;
                 case "0x0876":
-                    // // System.out.println("馈线支路名称64" + data);
                     updateBranch(64L, instruct, data);
                     break;
 
                 case "0x2000":
-                    // // // System.out.println("~~~主监控版本~~~" + data);
                     DevBaseDevice device = new DevBaseDevice();
                     device.setId((long) instruct.getSalveId());
                     device.setDeviceNo((long) instruct.getSalveId());
@@ -837,7 +758,6 @@ public class Update03DataService {
                     break;
 
                 case "0x23B4":
-                    // // System.out.println("系统设置 -回路分组-分组选择：" + data);
                     List<DevConfigGroup> listtt = new ArrayList<>();
                     if (data.toString().length() >= 2) {
                         for (int i = 0; i < data.toString().length(); i += 2) {
@@ -846,7 +766,6 @@ public class Update03DataService {
                                 groupId = groupId.substring(1);
                             }
                             DevConfigGroup group = new DevConfigGroup();
-                            // System.out.println("~~~~~~~~~test groupId~~~~~~~~" + groupId);
                             group.setId(Long.valueOf(instruct.getSalveId() + groupId));
                             // group.setDeviceId((long) instruct.getSalveId());
                             group.setGroupId(Long.valueOf(groupId));
@@ -857,67 +776,51 @@ public class Update03DataService {
                     break;
 
                 case "0x23F5":
-                    // System.out.println("系统设置 -回路分组-分组回路编号01：" + data);
                     updateGroupLoop(1L, instruct, data);
                     break;
                 case "0x241D":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号02：" + data);
                     updateGroupLoop(2L, instruct, data);
                     break;
                 case "0x2445":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号03：" + data);
                     updateGroupLoop(3L, instruct, data);
                     break;
                 case "0x246D":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号04：" + data);
                     updateGroupLoop(4L, instruct, data);
                     break;
                 case "0x2495":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号05：" + data);
                     updateGroupLoop(5L, instruct, data);
                     break;
                 case "0x24BD":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号06：" + data);
                     updateGroupLoop(6L, instruct, data);
                     break;
                 case "0x24E5":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号07：" + data);
                     updateGroupLoop(7L, instruct, data);
                     break;
                 case "0x250D":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号08：" + data);
                     updateGroupLoop(8L, instruct, data);
                     break;
                 case "0x2535":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号09：" + data);
                     updateGroupLoop(9L, instruct, data);
                     break;
                 case "0x255D":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号10：" + data);
                     updateGroupLoop(10L, instruct, data);
                     break;
                 case "0x2585":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号11：" + data);
                     updateGroupLoop(11L, instruct, data);
                     break;
                 case "0x25AD":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号12：" + data);
                     updateGroupLoop(12L, instruct, data);
                     break;
                 case "0x25D5":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号13：" + data);
                     updateGroupLoop(13L, instruct, data);
                     break;
                 case "0x25FD":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号14：" + data);
                     updateGroupLoop(14L, instruct, data);
                     break;
                 case "0x2625":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号15：" + data);
                     updateGroupLoop(15L, instruct, data);
                     break;
                 case "0x264D":
-                    // // System.out.println("系统设置 -回路分组-分组回路编号16：" + data);
                     updateGroupLoop(16L, instruct, data);
                     break;
 
@@ -937,7 +840,6 @@ public class Update03DataService {
                     break;
 
                 case "0xA1F0":
-                    // System.out.println("~~~~~0xA1F0~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     updateGroupName(1L, instruct, data);
                     break;
                 case "0xA1FA":
@@ -1020,7 +922,6 @@ public class Update03DataService {
                 case "0xA5AE":
                     try {
                         short[] list = (short[]) data;
-                        // System.out.println("~~~~~~~~~~~~~~0xA5AE~~~~~~~~~~" + Arrays.toString(list));
                         List<DevConfigDistrict> districtList = new ArrayList<>();
                         List<DevConfigGroup> groupList = new ArrayList<>();
                         for (int i = 0; i < list.length; i++) {
@@ -1048,7 +949,6 @@ public class Update03DataService {
                 case "0XA853":
                 case "0XA89C":
                     try {
-                        // System.out.println("~~~~~~~~~~~~~~~0XA853~~~~~~~~~~~~~" + Arrays.toString((short[])data));
                         // 系统设置-控制方式-普通模式-时控？-时段信息？-亮度
                         Map<String, Object> resul12t = (Map<String, Object>) data;
                         ArrayList<DevConfigTimeControl> timeControls = (ArrayList<DevConfigTimeControl>) resul12t.get("data1");
@@ -1077,7 +977,6 @@ public class Update03DataService {
                     break;
 
                 case "0XAE7A":
-                    // System.out.println(data);
                     ArrayList<DevConfigInfraredSensor> infraredSensors = (ArrayList<DevConfigInfraredSensor>) ((Map<String, Object>) data).get("data");
                     infraredSensorMapper.insertOrUpdateBatch(infraredSensors);
                     // 设置分组与红外传感器对应表的数据
@@ -1132,7 +1031,6 @@ public class Update03DataService {
                 case "0xB0A9":
                 case "0xB0CA":
                 case "0xB0EB":
-                    // System.out.println("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
                     updateSceneConfig(data);
                     break;
 
@@ -1214,7 +1112,6 @@ public class Update03DataService {
      * 更新场景配置信息
      */
     private void updateSceneConfig(Object data) {
-        // System.out.println("~~~~~~~~~~~~~~~updateSceneConfig~~~~~~~~~~~~~" + (ArrayList<DevConfigScene>) data);
         ArrayList<DevConfigScene> source = (ArrayList<DevConfigScene>) data;
         sceneMapper.insertOrUpdateBatch(source);
     }
@@ -1307,7 +1204,6 @@ public class Update03DataService {
     // sensorId：传感器模式的ID
     @Async
     public void writeSensorGroupData(DevInstruct instruct, int[] data, int type, int sensorId) {
-        // System.out.println("~~~~~~~~~~~~~writeSensorGroupData~~~~~~~~~~~~~"+ Arrays.toString(data));
         try {
             if (type == 1) {
                 List<DevInfraredGroup> list = new ArrayList<>();

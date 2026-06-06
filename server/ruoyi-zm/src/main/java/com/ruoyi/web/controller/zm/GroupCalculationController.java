@@ -337,7 +337,9 @@ public class GroupCalculationController {
                     try {
                         Set<Integer> loops = getLoops(Math.toIntExact(no), zoneIds);
                         total = total.add(getEnergy(Math.toIntExact(no), loops, type));
-                    } catch (Exception ignored) { }
+                    } catch (Exception e) {
+                        log.warn("获取分区组合耗电量异常, deviceNo={}, type={}", no, type, e);
+                    }
                 }
             }
             data.setPower(String.valueOf(total.setScale(2, RoundingMode.HALF_UP)));

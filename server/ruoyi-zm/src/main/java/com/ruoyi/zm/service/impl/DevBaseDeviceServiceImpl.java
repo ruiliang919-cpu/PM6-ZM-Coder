@@ -239,5 +239,19 @@ public class DevBaseDeviceServiceImpl implements IDevBaseDeviceService {
         return TableDataInfo.build(resultList);
     }
 
+    @Override
+    public int updateById(DevBaseDevice device) {
+        return baseMapper.updateById(device);
+    }
+
+    @Override
+    public List<DevBaseDevice> listAll() {
+        return baseMapper.selectList();
+    }
+
+    @Override
+    public DevBaseDevice selectOne(LambdaQueryWrapper<DevBaseDevice> lqw) {
+        return baseMapper.selectOne(lqw);
+    }
 
 }

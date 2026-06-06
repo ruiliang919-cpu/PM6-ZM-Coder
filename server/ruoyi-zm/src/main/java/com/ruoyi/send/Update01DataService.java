@@ -10,7 +10,7 @@ import com.ruoyi.zm.domain.DevInstruct;
 import com.ruoyi.zm.domain.vo.DevFaultRecordVo;
 import com.ruoyi.zm.mapper.DevFaultRecordMapper;
 import com.ruoyi.zm.utils.Addr01Util;
-import groovy.lang.IntRange;
+import java.util.function.IntPredicate;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -109,15 +109,19 @@ public class Update01DataService {
         }
     }
 
-        final List<IntRange> FaultRanges = Arrays.asList(
-        new IntRange(0, 140),    // 0x0000 ~ 0x0135
-        new IntRange(143, 162),  // 0x0138 ~ 0x014B
-        new IntRange(171, 172),  // 0x0154 ~ 0x0155
-        new IntRange(194, 433),  // 0x0200 ~ 0x0425
-        new IntRange(694, 821),  // 0x0800 ~ 0x0A1C
-        new IntRange(827, 844)   // 0x0B36 ~ 0x0B47
+        final List<IntPredicate> FaultRanges = Arrays.asList(
+        inRange(0, 140),    // 0x0000 ~ 0x0135
+        inRange(143, 162),  // 0x0138 ~ 0x014B
+        inRange(171, 172),  // 0x0154 ~ 0x0155
+        inRange(194, 433),  // 0x0200 ~ 0x0425
+        inRange(694, 821),  // 0x0800 ~ 0x0A1C
+        inRange(827, 844)   // 0x0B36 ~ 0x0B47
     );
-    final IntRange EventRange = new IntRange(530, 629); // 0x0600 ~ 0x0663
+    final IntPredicate EventRange = inRange(530, 629); // 0x0600 ~ 0x0663
+
+    private static IntPredicate inRange(int from, int to) {
+        return i -> i >= from && i <= to;
+    }
     private static final Map<String, int[]> mArr = new HashMap<String, int[]>() {{
         put("data", new int[100]);
     }};
@@ -129,17 +133,19 @@ public class Update01DataService {
                 m.put("data", 0);
                 mqttPublisher.publish(deviceNo, PublishKey.设置更新标志位, m);
             }
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("发布设置更新标志位异常, deviceNo={}", deviceNo, e);
         }
         try {
             mqttPublisher.publish(deviceNo, PublishKey.事件记录, mArr);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("发布事件记录异常, deviceNo={}", deviceNo, e);
         }
         IntStream.range(0, data.length)
             .forEach(i -> {
                 try {
-                    boolean isFault = FaultRanges.stream().anyMatch(range -> range.contains(i));
-                    boolean isEvent = EventRange.contains(i);
+                    boolean isFault = FaultRanges.stream().anyMatch(range -> range.test(i));
+                    boolean isEvent = EventRange.test(i);
 
                     if (isFault || isEvent) {
                         // 1-故障，2-事件

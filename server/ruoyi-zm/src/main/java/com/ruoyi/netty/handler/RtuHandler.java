@@ -301,8 +301,8 @@ public class RtuHandler {
                         if (1 == Integer.parseInt(sceneSelectArr[i])) {
                             sceneId = 16 - i;
                         }
-                    } catch (Exception ignored) {
-
+                    } catch (Exception e) {
+                        log.warn("解析场景选择二进制位异常, index={}", i, e);
                     }
                 }
                 if (sceneId != 0) {

@@ -12,6 +12,7 @@ import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
 import com.ruoyi.zm.mapper.DevBaseDeviceMapper;
 import com.ruoyi.zm.mapper.DevProtocol01Mapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class Key {
@@ -104,7 +106,7 @@ public class Key {
         } catch (Exception e) {
             log.error("getCreateTCP failed, deviceNo={}", deviceNo, e);
             DevBaseDeviceTCPVo fallback = new DevBaseDeviceTCPVo();
-            fallback.setId(deviceNo);
+            fallback.setId(deviceNo.longValue());
             return fallback;
         }
     }

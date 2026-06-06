@@ -29,7 +29,7 @@ public class Topic9 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int moduleId = payload.get("id").getAsInt();
+        int moduleId = payload.getInt("id");
         SceneControlReqVo s = new SceneControlReqVo();
         s.setControlId(moduleId);
         s.setDeviceId(deviceNo);

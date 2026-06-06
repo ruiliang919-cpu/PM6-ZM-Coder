@@ -9,6 +9,8 @@ import com.ruoyi.zm.mapper.DevBaseDistrictMapper;
 import com.ruoyi.zm.mapper.DevLightZoneCombinationMapper;
 import com.ruoyi.zm.mapper.DevZoneCombinationMapper;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +24,8 @@ import java.util.stream.Collectors;
 @Component
 @RequiredArgsConstructor
 public class ZoneInit {
+    private static final Logger log = LoggerFactory.getLogger(ZoneInit.class);
+
     private final DevBaseDistrictMapper devBaseDistrictMapper;
     private final DevLightZoneCombinationMapper devLightZoneCombinationMapper;
     private final DevZoneCombinationMapper combinationMapper;
@@ -118,7 +122,7 @@ public class ZoneInit {
                     }
                 }
             } catch (Exception e) {
-
+                log.warn("初始化照明分区组合数据异常", e);
             }
         }
     }

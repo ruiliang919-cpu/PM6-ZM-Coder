@@ -5,12 +5,15 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.zm.domain.DevBaseDevice;
 import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
 import com.ruoyi.zm.mapper.DevBaseDeviceMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.util.ObjectUtils;
 
 import java.util.List;
 
 public class Keys {
+    private static final Logger log = LoggerFactory.getLogger(Keys.class);
     final String QUEUE_KEY = "zm:queue:zm:cache:";
     final String TCP_KEY = "zm:create-tcp:";
     final String TELEMETER_KEY = QUEUE_KEY + "3:";

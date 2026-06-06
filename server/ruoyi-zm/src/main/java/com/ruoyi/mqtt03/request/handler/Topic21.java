@@ -24,7 +24,7 @@ public class Topic21 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int moduleId = payload.get("id").getAsInt();
+        int moduleId = payload.getInt("id");
         Addr0xA483.Data d = (Addr0xA483.Data) redisTemplate.opsForHash().get(Addr0xA483Handler.writeKey + deviceNo, moduleId + "m");
         if (d != null) {
             SceneParamsReqVo s = new SceneParamsReqVo();

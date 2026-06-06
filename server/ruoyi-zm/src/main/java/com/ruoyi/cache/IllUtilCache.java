@@ -49,7 +49,7 @@ public class IllUtilCache {
                     newMappings.put(ipLastSegment, Math.toIntExact(device.getDeviceNo()));
                 }
             } catch (NumberFormatException e) {
-                //                log.warn("Invalid IP address format for device: {}", device.getIp());
+                log.warn("无效的IP地址格式, deviceIp={}", device.getIp(), e);
             }
         }
         m.clear();
@@ -80,7 +80,8 @@ public class IllUtilCache {
                                     Thread.sleep(2000);
                                 }
                             }
-                        } catch (Exception ignored) {
+                        } catch (Exception e) {
+                            log.warn("照度外控值处理异常, deviceNo={}, sensorId={}", no, i, e);
                         }
                     }
                 });

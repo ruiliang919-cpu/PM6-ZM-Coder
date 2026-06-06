@@ -2,6 +2,7 @@ package com.ruoyi.web.controller.zm.write;
 
 import com.ruoyi.cache.Key;
 import com.ruoyi.cache.ModuleGuard;
+import com.ruoyi.cache.WriteQueueCache;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.mqtt.MqttPublisher;
 import com.ruoyi.mqtt.PublishKey;
@@ -10,14 +11,11 @@ import com.ruoyi.mqttwrite.module.ModuleSelect;
 import com.ruoyi.zm.utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.ruoyi.cache.Key.REMOTE_KEY;
 
 @Slf4j
 @RestController
@@ -26,7 +24,7 @@ import static com.ruoyi.cache.Key.REMOTE_KEY;
 public class WriteModuleController {
 
     private final Key key;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final WriteQueueCache writeQueueCache;
     private final MqttPublisher mqttPublisher;
 
 
@@ -45,7 +43,7 @@ public class WriteModuleController {
         if (timeModule == 1) remote.setTimeModule("noEnabled");
         else if (timeModule == 2) remote.setTimeModule("simple");
         else if (timeModule == 3) remote.setTimeModule("scene");
-        redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
+        writeQueueCache.setRemoteKey(key.getCreateTCP(deviceId).getIp(), deviceId, "0XB715", remote);
         ModuleSelect v = new ModuleSelect();
         v.setData(Collections.singletonList(remote));
         mqttPublisher.publish(deviceId, PublishKey.模式选择, v);
@@ -57,7 +55,7 @@ public class WriteModuleController {
         if (moduleGuard.isInRemoteMode()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         remote.setInfraredSensorModule(enabled);
-        redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
+        writeQueueCache.setRemoteKey(key.getCreateTCP(deviceId).getIp(), deviceId, "0XB715", remote);
         ModuleSelect v = new ModuleSelect();
         v.setData(Collections.singletonList(remote));
         mqttPublisher.publish(deviceId, PublishKey.模式选择, v);
@@ -69,7 +67,7 @@ public class WriteModuleController {
         if (moduleGuard.isInRemoteMode()) return R.ok("遥控状态,请先取消");
         Addr0XB715.Data remote = (Addr0XB715.Data) key.getRemote(deviceId, "0XB715");
         remote.setIlluminanceSensorModule(enabled);
-        redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
+        writeQueueCache.setRemoteKey(key.getCreateTCP(deviceId).getIp(), deviceId, "0XB715", remote);
         ModuleSelect v = new ModuleSelect();
         v.setData(Collections.singletonList(remote));
         mqttPublisher.publish(deviceId, PublishKey.模式选择, v);
@@ -83,7 +81,7 @@ public class WriteModuleController {
         if (handModule == 1) remote.setHandModule("loop");
         else if (handModule == 2) remote.setHandModule("group");
         else if (handModule == 3) remote.setHandModule("scene");
-        redisTemplate.opsForValue().set(REMOTE_KEY + key.getCreateTCP(deviceId).getIp() + ":" + deviceId + ":" + "0XB715", remote);
+        writeQueueCache.setRemoteKey(key.getCreateTCP(deviceId).getIp(), deviceId, "0XB715", remote);
         ModuleSelect v = new ModuleSelect();
         v.setData(Collections.singletonList(remote));
         mqttPublisher.publish(deviceId, PublishKey.模式选择, v);
@@ -109,7 +107,7 @@ public class WriteModuleController {
         m.put("addr", "0xC001");
         m.put("data", workModule);
         mqttPublisher.publish(deviceId, PublishKey.工作模式, m);
-        redisTemplate.opsForHash().put("zm:workModule", String.valueOf(deviceId), workModule);
+        writeQueueCache.setWorkModule(deviceId, workModule);
         return R.ok("指令下发成功");
     }
 }

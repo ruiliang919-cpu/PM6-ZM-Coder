@@ -22,7 +22,7 @@ public class Topic11 implements RequestHandler {
 
     @Override
     public void handle(Integer deviceNo, JSONObject payload) {
-        int moduleId = payload.get("id").getAsInt();
+        int moduleId = payload.getInt("id");
         Map<String, Object> zdMap = (Map<String, Object>) k.getRemote(deviceNo, "0XAE8F");
         if (zdMap != null && !zdMap.isEmpty()) {
             List<DevConfigIlluminanceSensor> data = (List<DevConfigIlluminanceSensor>) zdMap.getOrDefault("data", null);

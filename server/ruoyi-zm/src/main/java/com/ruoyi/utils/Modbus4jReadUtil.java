@@ -118,8 +118,8 @@ public class Modbus4jReadUtil {
         batch.addLocator(1, BaseLocator.inputStatus(1, 0));
         batch.setContiguousRequests(true);
         BatchResults<Integer> results = master.send(batch);
-        System.out.println("batchRead:" + results.getValue(0));
-        System.out.println("batchRead:" + results.getValue(1));
+        log.debug("batchRead: {}", results.getValue(0));
+        log.debug("batchRead: {}", results.getValue(1));
     }
 
 }

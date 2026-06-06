@@ -55,6 +55,7 @@ public class ScheduleTask {
             devices.forEach(it -> {
                 try {
                 } catch (Exception e) {
+                    log.warn("启动01定时任务异常, deviceNo={}", it.getDeviceNo(), e);
                 }
             });
             // log.info("定时任务：start01Task 已启动");
@@ -83,7 +84,7 @@ public class ScheduleTask {
                         send03Schedule.Processor(Math.toIntExact(it.getDeviceNo())), Duration.ofMillis(delay));
                     scheduled03Tasks.put(it.getDeviceNo(), future);
                 } catch (Exception e) {
-                    // log.error("出错！", e);
+                    log.warn("启动03定时任务异常, deviceNo={}", it.getDeviceNo(), e);
                 }
             });
             // log.info("定时任务：start03Task 已启动");

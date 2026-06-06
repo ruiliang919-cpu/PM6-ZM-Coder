@@ -1,8 +1,11 @@
 package com.ruoyi.zm.utils;
 
 import com.serotonin.modbus4j.ModbusMaster;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public interface Addr01Util {
+    Logger log = LoggerFactory.getLogger(Addr01Util.class);
     int ADDR0 = 0;
     int ADDR256 = 256;
     int ADDR512 = 512;
@@ -38,7 +41,9 @@ public interface Addr01Util {
 //                int copyLength = Math.min(temp.length, Lengths[i]);
 //                System.arraycopy(temp, 0, arr, currentPosition, copyLength);
 //                currentPosition += Lengths[i];
-            } catch (Exception ignored){}
+            } catch (Exception e) {
+                log.warn("读取Modbus线圈数据异常, slaveId={}, address={}", slaveId, Addresses[i], e);
+            }
         }
         return arr;
     }

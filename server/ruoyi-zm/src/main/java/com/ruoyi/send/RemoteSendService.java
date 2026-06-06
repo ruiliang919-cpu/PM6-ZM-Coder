@@ -47,8 +47,8 @@ public class RemoteSendService {
             map.put(RedisPublisher.CODE63 + slaveId, instructs);
             // publisher.Publish(RedisPublisher.CODE63, slaveId, instructs);
             return map.get(RedisPublisher.CODE63 + slaveId);
-        } catch (Exception ignored) {
-
+        } catch (Exception e) {
+            log.warn("获取TCP连接信息异常, slaveId={}", slaveId, e);
         }
         return null;
     }

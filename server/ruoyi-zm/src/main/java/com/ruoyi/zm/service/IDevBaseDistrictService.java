@@ -45,4 +45,14 @@ public interface IDevBaseDistrictService {
      * 校验并批量删除控制分区信息
      */
     Boolean deleteWithValidByIds(Long[] ids);
+
+    /**
+     * 根据ID查询控制分区
+     */
+    DevBaseDistrict selectById(Long id);
+
+    /**
+     * 新增或更新控制分区
+     */
+    void insertOrUpdate(DevBaseDistrict district);
 }

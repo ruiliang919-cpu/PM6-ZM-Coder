@@ -1,7 +1,7 @@
 mqtt:
   url: tcp://127.0.0.1:1883
   username: ${MQTT_USERNAME:admin}
-  password: ${MQTT_PASSWORD:Hyd@qwe}
+  password: ${MQTT_PASSWORD}
 
 spring.boot.admin.client:
   enabled: false
@@ -22,14 +22,14 @@ spring:
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://127.0.0.1:${DB_PORT:3306}/zm?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
           username: ${DB_USERNAME:zm_root}
-          password: ${DB_PASSWORD:Huiyeda98315}
+          password: ${DB_PASSWORD}
         slave:
           lazy: true
           type: ${spring.datasource.type}
           driverClassName: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:${DB_PORT:3306}/ry-vue?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8&autoReconnect=true&rewriteBatchedStatements=true
           username: ${DB_USERNAME:zm_root}
-          password: ${DB_PASSWORD:Huiyeda98315}
+          password: ${DB_PASSWORD}
       hikari:
         maxPoolSize: 35
         minIdle: 5

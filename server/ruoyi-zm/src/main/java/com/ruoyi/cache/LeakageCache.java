@@ -28,7 +28,8 @@ public class LeakageCache {
         try {
             Num = Integer.parseInt(key.getTelemeter(deviceId, "0x2740") + "");
             // log.info("Num is：{}", Num);
-        } catch (Exception ignored) {
+        } catch (Exception e) {
+            log.warn("解析漏电流数量异常", e);
         }
         // 馈线支路名称
 //        List<String> names = (List<String>) key.multiGetTelemeter(deviceId, BRANCH_NAMES);

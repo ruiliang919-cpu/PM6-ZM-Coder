@@ -81,17 +81,20 @@ public class DeviceCache {
                         resp.setRunStatus(this.keys.getTelecommand(no)[163] ? 1 : 0);
                         resp.setDeviceStatus(this.keys.getTelecommand(no)[162] ? 1 : 0);
                         resp.setRunMode(this.keys.getTelecommand(no)[164] ? 1 : 0);
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("获取设备运行状态异常, deviceId={}", no, e);
                         resp.setDeviceStatus(1);
                     }
                     try {
                         resp.setDcBusVoltage(((java.math.BigDecimal) this.keys.getTelemeter(no, "0x001A")).setScale(1, RoundingMode.HALF_UP));
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("获取直流母线电压异常, deviceId={}", no, e);
                         resp.setDcBusVoltage(new BigDecimal(0));
                     }
                     try {
                         resp.setDimmerNum(((java.math.BigDecimal) this.keys.getTelemeter(no, "0x0022")).intValue());
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("获取调光器数量异常, deviceId={}", no, e);
                         resp.setDimmerNum(0);
                     }
                     try {
@@ -102,7 +105,8 @@ public class DeviceCache {
                         else
                             // 配电柜 DC/DC模块数量
                             resp.setDcModuleNum(((java.math.BigDecimal) this.keys.getTelemeter(no, "0x0027")).intValue());
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("获取DC模块数量异常, deviceId={}", no, e);
                         resp.setDcModuleNum(0);
                     }
                     int acLoopNum = 0;
@@ -111,10 +115,12 @@ public class DeviceCache {
                     resp.setAcSwitchNum(acLoopNum);
                     try {
                         resp.setVersion(t.getVersion());
-                    } catch (Exception ignored) {
+                    } catch (Exception e) {
+                        log.warn("获取设备版本号异常, deviceId={}", no, e);
                         resp.setVersion("V0.0.0");
                     }
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    log.warn("获取机柜信息异常, deviceId={}", no, e);
                 }
                 result.add(resp);
             });

@@ -14,11 +14,11 @@ import com.ruoyi.zm.domain.DevConfigInfraredSensor;
 import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
 import com.ruoyi.zm.domain.vo.IlluminanceParamsTable;
 import com.ruoyi.zm.domain.vo.InfraredParamsTable;
-import com.ruoyi.zm.mapper.DevBaseDeviceMapper;
+import com.ruoyi.zm.service.IDevBaseDeviceService;
 import com.ruoyi.zm.utils.IdGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import com.ruoyi.cache.WriteQueueCache;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -29,8 +29,8 @@ import java.util.*;
 @RequestMapping("/zm/write/device")
 public class WriteDeviceController {
 
-    private final DevBaseDeviceMapper deviceMapper;
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final IDevBaseDeviceService deviceService;
+    private final WriteQueueCache writeQueueCache;
     private final MqttPublisher mqttPublisher;
     private final Key key;
 
@@ -38,15 +38,15 @@ public class WriteDeviceController {
 
     @PostMapping("/deviceSave")
     public R<?> deviceSave(@RequestBody DevBaseDevice device) {
-        int index = deviceMapper.updateById(device);
+        int index = deviceService.updateById(device);
         return index > 0 ? R.ok("保存成功") : R.fail("保存失败");
     }
 
     @PostMapping("/communicateSave")
     public R<?> communicateSave(@RequestBody DevBaseDevice device) {
-        redisTemplate.delete("zm:create-tcp:" + device.getId());
-        redisTemplate.delete("zm:dev_base_devices:list");
-        int index = deviceMapper.updateById(device);
+        writeQueueCache.deleteCreateTcp(device.getId());
+        writeQueueCache.deleteDeviceList();
+        int index = deviceService.updateById(device);
         return index > 0 ? R.ok("保存成功") : R.fail("保存失败");
     }
 
@@ -118,7 +118,7 @@ public class WriteDeviceController {
         sensors.put("data", data);
 
         DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(deviceId);
-        redisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0XAE7A", sensors);
+        writeQueueCache.setQueueCache(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0XAE7A", sensors);
 
         return R.ok("指令已下发");
     }
@@ -183,7 +183,7 @@ public class WriteDeviceController {
         sensors.put("data", data);
 
         DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(deviceId);
-        redisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0XAE8F", sensors);
+        writeQueueCache.setQueueCache(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0XAE8F", sensors);
 
         return R.ok("指令已下发");
     }

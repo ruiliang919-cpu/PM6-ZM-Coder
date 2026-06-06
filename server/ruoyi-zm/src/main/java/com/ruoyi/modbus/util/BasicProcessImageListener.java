@@ -110,8 +110,31 @@ public class BasicProcessImageListener implements ProcessImageListener {
         }
     }
 
+    /**
+     * 校验时间参数是否为纯数字且长度合法（防止命令注入）
+     */
+    private boolean isValidDateTimeComponent(String value, int maxLen) {
+        if (value == null || value.isEmpty() || value.length() > maxLen) {
+            return false;
+        }
+        for (int i = 0; i < value.length(); i++) {
+            if (!Character.isDigit(value.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void setSystemDateTime(String year, String month, String day,
                                     String hour, String minute, String second) {
+        // 白名单校验：所有时间分量必须为纯数字，防止命令注入
+        if (!isValidDateTimeComponent(year, 4) || !isValidDateTimeComponent(month, 2)
+                || !isValidDateTimeComponent(day, 2) || !isValidDateTimeComponent(hour, 2)
+                || !isValidDateTimeComponent(minute, 2) || !isValidDateTimeComponent(second, 2)) {
+            log.error("Modbus对时 参数校验失败，拒绝执行。year={}, month={}, day={}, hour={}, minute={}, second={}",
+                    year, month, day, hour, minute, second);
+            return;
+        }
         try {
             String dateStr = year + "-" + month + "-" + day;
             log.info("Modbus对时 设置日期: {}", dateStr);

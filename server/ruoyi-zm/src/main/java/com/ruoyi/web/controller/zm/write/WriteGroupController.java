@@ -4,24 +4,23 @@ import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
 import com.ruoyi.cache.Key;
 import com.ruoyi.cache.ModuleGuard;
 import com.ruoyi.cache.LoopByGroupCache;
+import com.ruoyi.cache.WriteQueueCache;
 import com.ruoyi.common.core.domain.R;
 import com.ruoyi.mqtt.MqttPublisher;
 import com.ruoyi.mqtt.PublishKey;
-import com.ruoyi.mqtt03.addr03.AddrHandlerFactory;
 import com.ruoyi.mqttwrite.common.CommonDataInt;
 import com.ruoyi.mqttwrite.common.CommonDataString;
 import com.ruoyi.mqttwrite.loopcontrol.LoopControlVO;
-import com.ruoyi.zm.domain.DevBaseDeviceTCPVo;
+import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
 import com.ruoyi.zm.domain.DevBaseDistrict;
 import com.ruoyi.zm.domain.vo.GroupNameVo;
 import com.ruoyi.zm.domain.vo.UpdateLoopReqVo;
 import com.ruoyi.zm.domain.vo.WriteGroupReqVo;
-import com.ruoyi.zm.mapper.DevBaseDistrictMapper;
+import com.ruoyi.zm.service.IDevBaseDistrictService;
 import com.ruoyi.zm.utils.ScaleUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.util.Arrays;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -35,11 +34,9 @@ import static com.ruoyi.zm.utils.ScaleUtil.combineIDs;
 public class WriteGroupController {
 
     private final MqttPublisher mqttPublisher;
-    private final RedisTemplate<String, Object> redisTemplate;
-    private final RedisTemplate<String, int[]> intArrayRedisTemplate;
-    private final RedisTemplate<String, short[]> shortArrayRedisTemplate;
+    private final WriteQueueCache writeQueueCache;
     private final Key key;
-    private final DevBaseDistrictMapper districtMapper;
+    private final IDevBaseDistrictService districtService;
 
     public static final Integer[] DELETE_LOOP_NOS = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
         14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33,
@@ -64,7 +61,7 @@ public class WriteGroupController {
 
         DevBaseDeviceTCPVo tcpVo = key.getCreateTCP(groupNameVo.getDeviceId());
 
-        List<String> names = (List<String>) redisTemplate.opsForValue().get(AddrHandlerFactory.getKey(tcpVo.getIp(), "0xA1F0", groupNameVo.getDeviceId()));
+        List<String> names = (List<String>) writeQueueCache.getAddrHandlerKey(tcpVo.getIp(), "0xA1F0", groupNameVo.getDeviceId());
         if (names == null || names.isEmpty()) {
             names = new ArrayList<>();
             for (int i = 0; i < 16; i++) names.add("分组" + (i + 1));
@@ -82,9 +79,9 @@ public class WriteGroupController {
                 names.add(groupNameVo.getName());
             }
         }
-        redisTemplate.opsForValue().set(AddrHandlerFactory.getKey(tcpVo.getIp(), "0xA1F0", groupNameVo.getDeviceId()), names);
+        writeQueueCache.setAddrHandlerKey(tcpVo.getIp(), "0xA1F0", groupNameVo.getDeviceId(), names);
 
-        DevBaseDistrict devBaseDistrict = districtMapper.selectById(groupNameVo.getId());
+        DevBaseDistrict devBaseDistrict = districtService.selectById((long) groupNameVo.getId());
         short[] codes = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
         try {
             short[] temp = key.getRemoteByArr(groupNameVo.getDeviceId(), "0xA5AE");
@@ -95,7 +92,7 @@ public class WriteGroupController {
         } catch (Exception e) {
             log.error("Error reading remote array for groupName", e);
         }
-        shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA5AE", codes);
+        writeQueueCache.setQueueCacheShortArr(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0xA5AE", codes);
 
         return R.ok("指令已下发");
     }
@@ -132,12 +129,12 @@ public class WriteGroupController {
                     } else l.add(0);
                 }
                 m.put("loopNo", l);
-                redisTemplate.opsForValue().set("zm:queue:zm:cache:3:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":" + LoopByGroupCache.LOOP_NUMS_ADDR_ARR[reqVo.getGroupId() - 1], resultGroupStr.toString());
+                writeQueueCache.setQueueCache3(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), LoopByGroupCache.LOOP_NUMS_ADDR_ARR[reqVo.getGroupId() - 1], resultGroupStr.toString());
             } else
-                redisTemplate.opsForValue().set("zm:queue:zm:cache:3:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":" + LoopByGroupCache.LOOP_NUMS_ADDR_ARR[reqVo.getGroupId() - 1], "");
+                writeQueueCache.setQueueCache3(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), LoopByGroupCache.LOOP_NUMS_ADDR_ARR[reqVo.getGroupId() - 1], "");
             mqttPublisher.publish(reqVo.getDeviceId(), PublishKey.保存回路, m);
 
-            List<Long> loops = (List<Long>) redisTemplate.opsForValue().get(AddrHandlerFactory.getKey(tcpVo.getIp(), "0x23F5num", reqVo.getDeviceId()));
+            List<Long> loops = (List<Long>) writeQueueCache.getAddrHandlerKey(tcpVo.getIp(), "0x23F5num", reqVo.getDeviceId());
             if (loops == null || loops.isEmpty()) {
                 loops = new ArrayList<>();
                 for (int i = 0; i < 16; i++) loops.add(0L);
@@ -155,7 +152,7 @@ public class WriteGroupController {
                     loops.add((long) reqVo.getLoopNo().length);
                 }
             }
-            redisTemplate.opsForValue().set(AddrHandlerFactory.getKey(tcpVo.getIp(), "0x23F5num", reqVo.getDeviceId()), loops);
+            writeQueueCache.setAddrHandlerKey(tcpVo.getIp(), "0x23F5num", reqVo.getDeviceId(), loops);
 
             if (reqVo.getZoneId() != null) {
                 CommonDataInt data = new CommonDataInt();
@@ -173,7 +170,7 @@ public class WriteGroupController {
                 } catch (Exception e) {
                     log.error("Error reading remote array for updateLoop", e);
                 }
-                shortArrayRedisTemplate.opsForValue().set("zm:queue:zm:cache:63:" + tcpVo.getIp() + ":" + tcpVo.getId() + ":0xA5AE", codes);
+                writeQueueCache.setQueueCacheShortArr(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0xA5AE", codes);
             }
         }
         return R.ok("指令已下发");
@@ -204,7 +201,7 @@ public class WriteGroupController {
         v.setData(d);
         mqttPublisher.publish(reqVo.getDeviceId(), PublishKey.分组控制总开关, v);
 
-        intArrayRedisTemplate.opsForValue().set("zm:select:group:" + reqVo.getDeviceId(), groupSelectArr);
+        writeQueueCache.setGroupSelect(reqVo.getDeviceId(), groupSelectArr);
 
         return R.ok("操作成功");
     }
@@ -234,7 +231,7 @@ public class WriteGroupController {
         v.setData(d);
         mqttPublisher.publish(reqVo.getDeviceId(), PublishKey.分组控制总开关, v);
 
-        intArrayRedisTemplate.opsForValue().set("zm:select:group:" + reqVo.getDeviceId(), groupSelectArr);
+        writeQueueCache.setGroupSelect(reqVo.getDeviceId(), groupSelectArr);
 
         return R.ok("指令下发成功");
     }

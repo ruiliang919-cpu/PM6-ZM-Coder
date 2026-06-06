@@ -70,7 +70,7 @@ public class TelemeterSendServiceByQueue {
         instruct.setCode(CODE);
         instruct.setType(TYPE);
         String s = addrUtil.AddrByName(MAP03, addrName);
-        if (s.equals("<None>")) System.out.println("<None>::" + addrName);
+        if ("<None>".equals(s)) { log.debug("<None>::{}", addrName); }
         instruct.setAddr(s);
         instruct.setAddrNum(addrNum);
         return instruct;
