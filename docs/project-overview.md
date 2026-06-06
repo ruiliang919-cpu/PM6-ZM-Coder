@@ -215,7 +215,7 @@ com/ruoyi/                          ← 636个Java文件，分成4层
 │   └── netty/                6个  ← 废弃的Netty方案，不用管
 │
 ├ ★ 基础设施层（用到再看）
-│   ├── cache/               21个  ← Redis缓存读写
+│   ├── cache/               22个  ← Redis缓存读写（含 WriteQueueCache）
 │   ├── pubsub/               3个  ← Redis消息订阅
 │   ├── config/               3个  ← MQTT Broker连接、Modbus连接池
 │   ├── schedule/            10个  ← 定时任务
@@ -327,11 +327,11 @@ import lombok.RequiredArgsConstructor;             // 用到 @RequiredArgsConstr
 public class XxxController {          // 【变，手写】类名，跟 URL 对应
 
     // ===== 第4块：注入依赖 =====
-    // 【变，手写】你需要调哪个 Service/Mapper，就在这里声明，Spring 自动传进来
-    private final IXxxService service;       // 查数据库的业务逻辑
-    private final XxxMapper mapper;          // 直接操作数据库（少用）
+    // 【变，手写】你需要调哪个 Service/Cache，就在这里声明，Spring 自动传进来
+    private final IXxxService service;       // 查数据库的业务逻辑（通过 Service 层，不直接调 Mapper）
+    private final WriteQueueCache cache;     // Redis 缓存操作（通过 Cache 层，不直接用 RedisTemplate）
     private final MqttPublisher publisher;   // 发 MQTT 命令给监控屏
-    private final Key key;                   // 缓存工具
+    private final Key key;                   // 缓存工具（遥测/遥信数据读取）
     // ... 需要什么就加一行
 
     // ===== 第5块：方法（每个接口一个方法）=====
@@ -391,9 +391,9 @@ public class DevBaseDeviceController extends BaseController {
 @RequiredArgsConstructor
 public class HomeController {
 
-    // 注入：Redis + Service + Mapper + 工具类（比上面多了Redis）
-    private final RedisTemplate<String, Object> redisTemplate;
+    // 注入：Service + Cache + 工具类
     private final IDevBaseDeviceService deviceService;
+    private final DeviceCache deviceCache;
     private final Key key;
 
     // 方法：查版本号、查电量、查机柜列表
@@ -411,17 +411,16 @@ public class HomeController {
 @RequiredArgsConstructor
 public class WriteControlController {
 
-    // 注入：多了 MqttPublisher（因为要发命令给监控屏）
-    private final MqttPublisher mqttPublisher;
-    private final Key key;
-    private final RedisTemplate<String, Object> redisTemplate;
+    // 注入：业务逻辑委托给 Service，Redis 操作委托给 WriteQueueCache
+    private final WriteControlService writeControlService;
+    private final WriteQueueCache writeQueueCache;
+    private final ModuleGuard moduleGuard;
 
-    // 方法：更新各种控制参数，最终调 mqttPublisher.publish()
+    // 方法：校验权限后委托给 Service 处理
     @PostMapping("/updateSimpleControl")
-    public R<?> updateSimpleControl(...) {
-        // ... 处理参数
-        mqttPublisher.publish(deviceId, PublishKey.普通时控, simpleValue);
-        return R.ok();
+    public R<?> updateSimpleControl(@RequestParam Integer deviceId, @RequestBody SimpleValue simpleValue) {
+        if (moduleGuard.isInRemoteMode()) return R.warn("设备处于远程控制模式，不能下发指令");
+        return writeControlService.updateSimpleControl(deviceId, simpleValue);
     }
 }
 ```
@@ -433,7 +432,7 @@ public class WriteControlController {
 | 1. `package` | 变 | 在哪个文件夹写哪个路径 |
 | 2. `import` | 变 | IDE 自动加，不用手写 |
 | 3. 类声明 `@RestController` + `@RequiredArgsConstructor` + `@RequestMapping` | 前两个不变，第三个变 | 固定套路，URL 前缀跟着功能走 |
-| 4. `private final Xxx` 依赖 | 变 | 用到什么 Service/Mapper 就注入什么 |
+| 4. `private final Xxx` 依赖 | 变 | 用到什么 Service/Cache 就注入什么（Controller 不直接用 Mapper/RedisTemplate） |
 | 5. 方法 `@GetMapping/@PostMapping` + 方法体 | 变 | 每个接口一个方法，调 Service 或发 MQTT |
 
 > 看 Controller 时直接跳过 import 段，看第 4 块（注入）知道它依赖谁，看第 5 块（方法）知道它能干什么。
@@ -479,7 +478,7 @@ import lombok.RequiredArgsConstructor;    // 自动生成构造函数
 ```java
 import org.springframework.web.bind.annotation.*;          // @RestController、@GetMapping 等
 import org.springframework.validation.annotation.Validated; // @Validated 参数校验
-import org.springframework.data.redis.core.RedisTemplate;   // Redis 操作
+// import org.springframework.data.redis.core.RedisTemplate;  // 已封装到 WriteQueueCache，Controller 不直接用
 ```
 
 **Sa-Token 框架（权限）：**
@@ -507,14 +506,12 @@ import com.ruoyi.common.core.controller.BaseController;  // 基类
 
 **本项目自己写的（`com.ruoyi.zm.` 开头，能点进去看源码）：**
 ```java
-import com.ruoyi.zm.service.IDevBaseDeviceService;   // Service
-import com.ruoyi.zm.mapper.DevBaseDeviceMapper;       // Mapper
-import com.ruoyi.zm.mapper.DevBaseRegionMapper;       // Mapper
+import com.ruoyi.zm.service.IDevBaseDeviceService;   // Service（Controller 通过 Service 访问数据）
 import com.ruoyi.zm.domain.DevBaseDevice;             // 实体
 import com.ruoyi.zm.domain.bo.DevBaseDeviceBo;        // 请求参数
 import com.ruoyi.zm.domain.vo.DevBaseDeviceVo;        // 返回对象
-import com.ruoyi.cache.AcSwitchCache;                 // 缓存
-import com.ruoyi.cache.Key;                           // 缓存工具
+import com.ruoyi.cache.WriteQueueCache;               // Redis 操作封装（Controller 不直接用 RedisTemplate）
+import com.ruoyi.cache.Key;                           // 缓存工具（遥测/遥信数据读取）
 ```
 
 ### 按包名前缀一眼判断
@@ -528,7 +525,8 @@ import com.ruoyi.cache.Key;                           // 缓存工具
 | `cn.hutool.` | Hutool | 抄已有代码 |
 | `com.baomidou.` | MyBatis-Plus | 抄已有代码 |
 | `com.ruoyi.common.` | 若依框架 | 抄已有代码 |
-| `com.ruoyi.zm.` | 本项目自己 | 项目内搜 |
+| `com.ruoyi.cache.` | 本项目缓存层 | WriteQueueCache、Key 等 |
+| `com.ruoyi.zm.` | 本项目业务层 | Service、实体、VO |
 
 > 除了 `java.` 是基础，剩下全靠在已有代码里抄。写 Java 不是靠背，是靠抄。抄多了自然记住了。
 
@@ -780,4 +778,4 @@ GET /zm/baseDevice/list?pageNum=1&pageSize=10
 
 ---
 
-*生成日期：2026-05-23*
+*生成日期：2026-05-23 | 更新日期：2026-06-06*
