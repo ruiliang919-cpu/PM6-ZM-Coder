@@ -86,6 +86,7 @@ public class SensorModuleController {
     // 照度传感器启用外控
     @RequestMapping("/illuminanceEnabled")
     public R<Integer> illuminanceSelectList(Integer deviceId, Integer sensorId) {
+        if (sensorId == null || sensorId < 1 || sensorId > arr.length) return R.ok(1);
         try {
             return R.ok(key.getTelecommand(deviceId, arr[sensorId - 1]) == 1 ? 0 : 1);
         } catch (Exception e) {
@@ -158,20 +159,25 @@ public class SensorModuleController {
     // 根据照度传感器的外部通道与外部地址获取照度传感器当前照度值
     @GetMapping("/getIllLux")
     public R<Integer> getIllLux(Integer deviceId, Integer moduleId, Integer sourceId) {
-        if (deviceId == null || moduleId == null) return R.ok(0);
+        if (deviceId == null || moduleId == null || moduleId < 1 || moduleId > 5) return R.ok(0);
         return R.ok(lux(illUtilCache.getDeviceId(deviceId), moduleId));
     }
 
     // 根据照度传感器模式获取当前照度值，不启用外控下，需要一直读取
     @GetMapping("/getIllBaseLux")
     public R<Integer> getIllBaseLux(Integer deviceId, Integer moduleId) {
+        if (deviceId == null || moduleId == null || moduleId < 1 || moduleId > 5) return R.ok(0);
         return R.ok(baseLux(deviceId, moduleId));
     }
 
-    private static final Map<String, Integer> map = new HashMap<String, Integer>() {{
-        put("outChannel", 0);
-        put("outAddress", 0);
-    }};
+    private static final Map<String, Integer> defaultAddressMap;
+
+    static {
+        Map<String, Integer> m = new HashMap<>();
+        m.put("outChannel", 0);
+        m.put("outAddress", 0);
+        defaultAddressMap = Collections.unmodifiableMap(m);
+    }
 
     // 根据设备ID和照度模式ID获取照度传感器的外部通道和外部地址
     @GetMapping("/getAddress")
@@ -181,19 +187,39 @@ public class SensorModuleController {
 
     public int lux(int deviceId, Integer sensorId) {
         Object lux = redisTemplate.opsForHash().get("zm:power:ill:" + deviceId + ":" + sensorId, "lux");
-        if (lux != null) return Integer.parseInt(lux + "");
+        if (lux != null) {
+            try {
+                return Integer.parseInt(lux + "");
+            } catch (NumberFormatException e) {
+                log.warn("Redis lux 反序列化失败, deviceId={}, sensorId={}", deviceId, sensorId);
+            }
+        }
         return 0;
     }
 
     public int baseLux(int deviceId, Integer sensorId) {
         Object lux = redisTemplate.opsForHash().get("zm:power:ill:" + deviceId + ":" + sensorId, "lux");
-        if (lux != null) return Integer.parseInt(lux + "");
+        if (lux != null) {
+            try {
+                return Integer.parseInt(lux + "");
+            } catch (NumberFormatException e) {
+                log.warn("Redis baseLux 反序列化失败, deviceId={}, sensorId={}", deviceId, sensorId);
+            }
+        }
         return 0;
     }
 
     public Map<String, Integer> address(int deviceId, Integer sensorId) {
         Object address = redisTemplate.opsForHash().get("zm:power:ill:" + deviceId + ":" + sensorId, "address");
-        if (address != null) return (Map<String, Integer>) address;
-        return map;
+        if (address instanceof Map) {
+            try {
+                @SuppressWarnings("unchecked")
+                Map<String, Integer> result = (Map<String, Integer>) address;
+                return result;
+            } catch (ClassCastException e) {
+                log.warn("Redis address 反序列化类型转换失败, deviceId={}, sensorId={}", deviceId, sensorId);
+            }
+        }
+        return defaultAddressMap;
     }
 }

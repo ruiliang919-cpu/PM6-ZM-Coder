@@ -52,7 +52,7 @@ export default {
   methods: {
     handleCurrentIndexChange(e) {
       this.$router.replace({
-        path: this.$route.fullPath,
+        path: this.$route.path,
         query: {
           currentIndex: this.currentIndex
         }

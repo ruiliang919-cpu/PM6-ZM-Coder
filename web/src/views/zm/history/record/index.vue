@@ -98,7 +98,6 @@
 </template>
 
 <script>
-import { listDemo } from '@/api/demo/demo'
 import { getFaultAll } from '@/api/zm/history/record'
 import { formatDate } from '@/utils'
 
@@ -134,12 +133,6 @@ export default {
     /** 查询测试单表列表 */
     getList() {
       this.loading = true
-      this.queryParams.params = {}
-      if (null != this.daterangeCreateTime && '' != this.daterangeCreateTime) {
-        this.queryParams.params['beginCreateTime'] =
-          this.daterangeCreateTime[0]
-        this.queryParams.params['endCreateTime'] = this.daterangeCreateTime[1]
-      }
       getFaultAll(this.queryParams).then((response) => {
         this.demoList = response.rows
         this.total = response.total

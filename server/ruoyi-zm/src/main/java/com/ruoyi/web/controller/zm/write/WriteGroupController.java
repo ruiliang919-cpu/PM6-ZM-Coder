@@ -88,7 +88,9 @@ public class WriteGroupController {
             if (temp[0] != -1) {
                 codes = temp;
             }
-            codes[groupNameVo.getGroupId() - 1] = (short) ((long) devBaseDistrict.getId());
+            if (devBaseDistrict != null) {
+                codes[groupNameVo.getGroupId() - 1] = (short) ((long) devBaseDistrict.getId());
+            }
         } catch (Exception e) {
             log.error("Error reading remote array for groupName", e);
         }
@@ -114,8 +116,8 @@ public class WriteGroupController {
             m.put("loopNo", ints);
             if (reqVo.getGroupId() < 10) groupId = "0" + reqVo.getGroupId();
             else groupId = "" + reqVo.getGroupId();
-            if (reqVo.getLoopNo() != null && reqVo.getLoopNo().length > 0) {
-                Integer[] loopNos = reqVo.getLoopNo();
+            Integer[] loopNos = reqVo.getLoopNo();
+            if (loopNos != null && loopNos.length > 0) {
                 String groupStr = combineIDs(groupId, loopNos);
                 StringBuilder resultGroupStr = new StringBuilder();
                 for (String s : ScaleUtil.splitIntoPairs(groupStr.substring(2))) {
@@ -138,18 +140,20 @@ public class WriteGroupController {
             if (loops == null || loops.isEmpty()) {
                 loops = new ArrayList<>();
                 for (int i = 0; i < 16; i++) loops.add(0L);
+                int loopLen = (loopNos != null) ? loopNos.length : 0;
                 if (reqVo.getGroupId() <= 16) {
                     if (loops.size() > reqVo.getGroupId() - 1) {
-                        loops.set(reqVo.getGroupId() - 1, (long) reqVo.getLoopNo().length);
+                        loops.set(reqVo.getGroupId() - 1, (long) loopLen);
                     } else loops.add(0L);
                 }
             } else {
+                int loopLen = (loopNos != null) ? loopNos.length : 0;
                 if (reqVo.getGroupId() > 0 && reqVo.getGroupId() <= loops.size()) {
-                    loops.set(reqVo.getGroupId() - 1, (long) reqVo.getLoopNo().length);
+                    loops.set(reqVo.getGroupId() - 1, (long) loopLen);
                 } else {
                     while (loops.size() < reqVo.getGroupId())
-                        loops.add((long) reqVo.getLoopNo().length);
-                    loops.add((long) reqVo.getLoopNo().length);
+                        loops.add((long) loopLen);
+                    loops.add((long) loopLen);
                 }
             }
             writeQueueCache.setAddrHandlerKey(tcpVo.getIp(), "0x23F5num", reqVo.getDeviceId(), loops);

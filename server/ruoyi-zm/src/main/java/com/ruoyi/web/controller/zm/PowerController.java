@@ -43,16 +43,16 @@ public class PowerController {
     private final DevEnergyMeterQuarterMapper energyMeterQuarterMapper;
     private final DevEnergyMeterYearMapper energyMeterYearMapper;
     private final RedisTemplate<String, Object> redisTemplate;
-    private final static DevBaseLoss nullLoss = new DevBaseLoss();
-    private final static PowerTimeRespVo nullTimeResp = new PowerTimeRespVo();
+    // 不再使用static可变对象，避免并发数据污染；每次请求新建对象
 
     // 根据设备ID获取机柜的总功率
     @RequestMapping("/getOneTotalPower")
     public R<DevBaseLoss> getOneTotalPower(Integer deviceId) {
         DevBaseLoss loss = (DevBaseLoss) redisTemplate.opsForValue().get("zm:power:loss:" + deviceId);
         if (loss!=null) return R.ok(loss);
-        nullLoss.setLoss(BigDecimal.ZERO);
-        return R.ok(nullLoss);
+        DevBaseLoss fallback = new DevBaseLoss();
+        fallback.setLoss(BigDecimal.ZERO);
+        return R.ok(fallback);
     }
 
     // 根据设备ID获取机柜的总耗电量
@@ -60,8 +60,9 @@ public class PowerController {
     public R<PowerTimeRespVo> getOneTotalElectricByDeviceId(Integer deviceId) {
         PowerTimeRespVo vo = (PowerTimeRespVo) redisTemplate.opsForValue().get("zm:power:power:" + deviceId);
         if (vo!=null) return R.ok(vo);
-        nullTimeResp.setPower(BigDecimal.ZERO);
-        return R.ok(nullTimeResp);
+        PowerTimeRespVo fallback = new PowerTimeRespVo();
+        fallback.setPower(BigDecimal.ZERO);
+        return R.ok(fallback);
     }
 
     // 类型 1:总电量 2:日耗电量 3:周耗电量 4:月耗电量 5:季耗电量 6:年耗电量

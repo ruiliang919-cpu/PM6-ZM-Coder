@@ -21,7 +21,6 @@ export function updateZoneLightSwitch(data = {
   return request({
     url: '/zm/write/updateZoneLightSwitch',
     method: 'get',
-    data: data,
     params: data
   })
 }
@@ -38,7 +37,6 @@ export function updateZoneLightLux(data = {
   return request({
     url: '/zm/write/updateZoneLightLux',
     method: 'get',
-    data: data,
     params: data
   })
 }

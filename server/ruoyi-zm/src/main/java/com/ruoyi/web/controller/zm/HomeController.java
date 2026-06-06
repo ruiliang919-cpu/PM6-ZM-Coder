@@ -152,6 +152,6 @@ public class HomeController {
         DeviceCache cache = new DeviceCache(redisTemplate, shortArrayRedisTemplate, booleanArrayRedisTemplate, deviceMapper, dListUtil, regionMapper, key);
         List<DeviceHomeVoResp> cabinetList = cache.getCabinetList();
         if (cabinetList != null) redisTemplate.opsForValue().set("zm:home:cabinetList", cabinetList);
-        else redisTemplate.opsForValue().set("cabinetList", Collections.EMPTY_LIST);
+        else redisTemplate.opsForValue().set("zm:home:cabinetList", Collections.EMPTY_LIST);
     }
 }

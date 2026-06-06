@@ -243,15 +243,12 @@ public class WriteSceneController {
         short[] data = new short[2];
         data[0] = (short) (reqVo.getControlId() - 1);
 
-        short[] saveArr = {1};
-
-        if (reqVo.getEnabled() == true) {
+        if (Boolean.TRUE.equals(reqVo.getEnabled())) {
             data[1] = (short) ((int) reqVo.getControlId());
             writeQueueCache.setQueueCacheShortArr(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0XABAF", new short[]{(short) data[1]});
         } else {
-            short[] value = writeQueueCache.getQueueCacheShortArr(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0XABAF");
-            if (value != null && value.length > 0) {
-            }
+            writeQueueCache.setQueueCacheShortArr(tcpVo.getIp(), Math.toIntExact(tcpVo.getId()), "0XABAF", new short[]{0});
+            log.info("场景时控禁用, deviceId={}, controlId={}, 缓存已清除", reqVo.getDeviceId(), reqVo.getControlId());
         }
         return R.ok("指令已下发");
     }

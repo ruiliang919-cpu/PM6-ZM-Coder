@@ -166,7 +166,7 @@ public class MeterEnergyController {
     @PostConstruct
     public void clear() {
         long second = second();
-        if (second <= 0) second += 10;
+        if (second <= 0) second = 10;
         redisTemplate.opsForValue().set("zm:clear:power", "", second, TimeUnit.SECONDS);
     }
 }
