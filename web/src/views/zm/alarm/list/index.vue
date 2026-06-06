@@ -86,7 +86,6 @@
 </template>
 
 <script>
-import { listDemo } from '@/api/demo/demo'
 import { getFaultSeven } from '@/api/zm/alarm/list'
 import { formatDate } from '@/utils'
 
@@ -174,8 +173,7 @@ export default {
       }
       return 'custom-cell-class-name custom-border-color'
     },
-    handleHeaderRowStyle(row) {
-      console.log(row)
+    handleHeaderRowStyle() {
       return {
         backgroundColor: '#2280ec',
         color: '#fff',

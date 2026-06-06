@@ -135,11 +135,6 @@ export default {
     getList() {
       this.loading = true
       this.queryParams.params = {}
-      if (null != this.daterangeCreateTime && '' != this.daterangeCreateTime) {
-        this.queryParams.params['beginCreateTime'] =
-          this.daterangeCreateTime[0]
-        this.queryParams.params['endCreateTime'] = this.daterangeCreateTime[1]
-      }
       getRecordSeven(this.queryParams).then((response) => {
         this.demoList = response.rows
         this.total = response.total
@@ -179,8 +174,7 @@ export default {
       }
       return 'custom-cell-class-name custom-border-color'
     },
-    handleHeaderRowStyle(row) {
-      console.log(row)
+    handleHeaderRowStyle() {
       return {
         backgroundColor: '#2280ec',
         color: '#fff',

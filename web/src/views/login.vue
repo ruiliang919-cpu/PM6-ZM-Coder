@@ -146,8 +146,8 @@ export default {
             isInElectron() ? CookiesInElectron.set('rememberMe', this.loginForm.rememberMe, { expires: 30 }) : Cookies.set('rememberMe', this.loginForm.rememberMe, { expires: 30 })
           } else {
             isInElectron() ? CookiesInElectron.remove('username') : Cookies.remove('username')
-            isInElectron() ? CookiesInElectron.remove('username') : Cookies.remove('password')
-            isInElectron() ? CookiesInElectron.remove('username') : Cookies.remove('rememberMe')
+            isInElectron() ? CookiesInElectron.remove('password') : Cookies.remove('password')
+            isInElectron() ? CookiesInElectron.remove('rememberMe') : Cookies.remove('rememberMe')
           }
           this.$store.dispatch('Login', this.loginForm).then(() => {
             console.log('登录执行完成')

@@ -1,4 +1,3 @@
-import { color } from 'echarts';
 <template>
   <div class="card">
     <div class="title_box">
@@ -26,7 +25,7 @@ import { color } from 'echarts';
 
       </div>
 
-      <div class="empty_box" v-if="!data.dcList.length">
+      <div class="empty_box" v-if="!data.dcList || !data.dcList.length">
         <el-empty description="无数据" style="padding: 0" ></el-empty>
       </div>
     </div>
@@ -49,7 +48,7 @@ import { color } from 'echarts';
           </div>
         </div>
       </div>
-      <div class="empty_box" v-if="!data.acList.length">
+      <div class="empty_box" v-if="!data.acList || !data.acList.length">
         <el-empty description="无数据" style="padding: 0" ></el-empty>
       </div>
     </div>

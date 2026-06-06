@@ -17,10 +17,17 @@ web/node_modules/
 archive/
 releases/
 
-# ===== 部署包（全部排除，准备重写） =====
-deploy/windows/*
+# ===== 部署包 =====
+# 跟踪部署源码：脚本、配置、打包工具
+# 排除：构建输出、运行时包、日志、临时文件
+deploy/windows/output/
+deploy/windows/packages/
+deploy/windows/logs/
+deploy/windows/pid/
+deploy/windows/temp/
+deploy/windows/__pycache__/
 
-# ===== 旧部署包路径（兼容） =====
+# 旧部署包路径（兼容）
 deploy/windows/jdk8.msi
 deploy/windows/mysql.msi
 deploy/windows/ruoyi-admin.zip
@@ -48,3 +55,6 @@ skills-lock.json
 # ===== 嵌套子模块构建产物 =====
 server/ruoyi-extend/**/target/
 .omc/
+deploy/windows/app/
+deploy/windows/sql/
+*.jar

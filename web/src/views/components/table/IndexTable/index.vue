@@ -137,8 +137,7 @@ export default {
       }
       return 'custom-cell-class-name custom-border-color'
     },
-    handleHeaderRowStyle(row) {
-      console.log(row)
+    handleHeaderRowStyle() {
       return {
         backgroundColor: '#2280ec',
         color: '#fff',

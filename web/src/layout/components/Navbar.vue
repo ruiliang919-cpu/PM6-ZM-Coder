@@ -15,15 +15,11 @@
     <top-nav id="topmenu-container" class="topmenu-container" v-if="topNav"/>
     <div class="alert-message">
       <div class="alert" v-show="news" @click="$router.push({path:'/alarm/list'})">
-        <!-- //TODO 告警信息 -->
         <span><i class="el-icon-message-solid"></i></span>
         <span>告警信息:{{ news }}</span>
       </div>
     </div>
-
-
     <div class="operations" v-if="show">
-      <!-- //TODO 告警信息 -->
       <el-select
         style="width: 220px"
         class="select"
@@ -33,15 +29,10 @@
         @change="handleChange"
       >
         <el-option :value="item.deviceId" :label="item.deviceName" v-for="item in cabinetList" :key="item.deviceId"/>
-
       </el-select>
     </div>
     <div class="operations">
       <div>
-        <template v-if="show">
-          <!-- //TODO 告警信息 -->
-          <span style="padding: 0 5px"></span>
-        </template>
         <el-button type="text" @click="$router.push({path:'/base/baseInstructs'})">
           <span style="color: #a4b9cb" class="btn_text">报文</span>
         </el-button>
@@ -50,12 +41,6 @@
           <span style="color: #a4b9cb" class="btn_text">手动采集设备电量</span>
         </el-button>
         <span style="padding: 0 5px">|</span>
-
-
-        <!--        <el-button type="text">-->
-        <!--          <span style="color: #a4b9cb" class="btn_text">通讯</span>-->
-        <!--        </el-button>-->
-        <!--        <span style="padding: 0 5px">|</span>-->
         <el-button type="text" @click="setModule(0)" :loading="loadingModule">
           <span style="color: #a4b9cb" class="btn_text">就地</span>
         </el-button>
@@ -69,7 +54,6 @@
         </el-button>
       </div>
       <div>
-
         <span style="font-size: 15px">
           当前模式: <span v-if="mode === 0">就地</span><span v-else-if="mode === 1">远程</span><span v-else>未知</span>
         </span>
@@ -77,35 +61,11 @@
       </div>
     </div>
     <div class="right-menu">
-      <!-- <template v-if="device!=='mobile'">
-        <search id="header-search" class="right-menu-item" />
-
-        <el-tooltip content="源码地址" effect="dark" placement="bottom">
-          <ruo-yi-git id="ruoyi-git" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <el-tooltip content="文档地址" effect="dark" placement="bottom">
-          <ruo-yi-doc id="ruoyi-doc" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-        <screenfull id="screenfull" class="right-menu-item hover-effect" />
-
-        <el-tooltip content="布局大小" effect="dark" placement="bottom">
-          <size-select id="size-select" class="right-menu-item hover-effect" />
-        </el-tooltip>
-
-      </template> -->
-
       <el-dropdown
         class="avatar-container right-menu-item hover-effect"
         trigger="hover"
       >
         <span class="avatar-logo">{{ name ? name.split('')[0] : 'N' }}</span>
-        <!--        <div class="avatar-wrapper">-->
-        <!--          -->
-        <!--          <img :src="avatar" class="user-avatar" />-->
-        <!--           <i class="el-icon-caret-bottom" /> -->
-        <!--        </div>-->
         <el-dropdown-menu slot="dropdown">
           <router-link to="/user/profile">
             <el-dropdown-item>个人中心</el-dropdown-item>
@@ -149,11 +109,6 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import TopNav from '@/components/TopNav'
 import Hamburger from '@/components/Hamburger'
-import Screenfull from '@/components/Screenfull'
-import SizeSelect from '@/components/SizeSelect'
-import Search from '@/components/HeaderSearch'
-import RuoYiGit from '@/components/RuoYi/Git'
-import RuoYiDoc from '@/components/RuoYi/Doc'
 import { cabinetList, getModule, getVersion } from '@/api/index'
 import { getNews } from '@/api/zm/alarm/list'
 import { getToken } from '@/utils/auth'
@@ -165,12 +120,7 @@ export default {
   components: {
     Breadcrumb,
     TopNav,
-    Hamburger,
-    Screenfull,
-    SizeSelect,
-    Search,
-    RuoYiGit,
-    RuoYiDoc
+    Hamburger
   },
   data() {
     return {
@@ -228,45 +178,6 @@ export default {
   },
   methods: {
     isInElectron,
-    /**
-     * @description 文字转语音方法
-     * @public
-     * @param { text, speechRate, lang, volume, pitch } object
-     * @param  text 要合成的文字内容，字符串
-     * @param  lang 读取文字时的语言
-     * @param  volume  读取时声音的音量 0~1  正常1
-     * @param  pitch  读取时声音的音高 0~2  正常1
-     * @param endEvent
-     * @param startEvent
-     * @returns SpeechSynthesisUtterance
-     */
-    speak({ text = '', speechRate = 1, lang = 'zh-CN', volume = 1, pitch = 1 }, endEvent = () => {
-    }, startEvent = {}) {
-      if (!window.SpeechSynthesisUtterance) {
-        console.warn('当前浏览器不支持文字转语音服务')
-        return null
-      }
-
-      if (!text) {
-        return null
-      }
-
-      const speechUtterance = new SpeechSynthesisUtterance()
-      speechUtterance.text = text
-      speechUtterance.rate = speechRate || 1
-      speechUtterance.lang = lang || 'zh-CN'
-      speechUtterance.volume = volume || 1
-      speechUtterance.pitch = pitch || 1
-      speechUtterance.onend = function() {
-        endEvent && endEvent()
-      }
-      speechUtterance.onstart = function() {
-        startEvent && startEvent()
-      }
-      speechSynthesis.speak(speechUtterance)
-
-      return speechUtterance
-    },
     toggleSideBar() {
       this.$store.dispatch('app/toggleSideBar')
     },
@@ -275,10 +186,8 @@ export default {
         pageNum: 1,
         pageSize: 1000
       }).then(res => {
-        // console.log(res)
         this.cabinetList = res.rows || []
         if (this.cabinetList.length) {
-          console.log('this.cabinetList[0].id ========>', this.cabinetList[0].deviceId)
           this.handleChange(this.cabinetList[0].deviceId)
         }
       })
@@ -290,29 +199,18 @@ export default {
         type: 'warning'
       }).then(() => {
         this.$store.dispatch('LogOut').then(() => {
-          // location.href = process.env.VUE_APP_CONTEXT_PATH
           this.$router.replace('/login')
         })
       }).catch(() => {
       })
     },
     handleChange(e) {
-      console.log(e)
       this.navibarDeviceValue = e
-      console.log(this.$root.$children[0])
-
       this.$root.$children[0]?.setNavibarDeviceValue(e)
     },
     async getNews() {
       await getNews().then(res => {
         this.news = res.data || undefined
-        // this.speak({
-        //   text: '告警信息:' + this.news,
-        //   speechRate: 1,
-        //   lang: 'zh-CN',
-        //   volume: 1,
-        //   pitch: 1
-        // }, null, null)
       })
       await delay(2000)
       await getModule().then(res => {
@@ -334,7 +232,6 @@ export default {
       this.upload.isUploading = false
       this.$refs.upload.clearFiles()
       this.$alert(response.msg, '导入结果', { dangerouslyUseHTMLString: true })
-      // this.getList();
     },
     //导入遥测协议
     handleImport() {
@@ -366,7 +263,6 @@ export default {
   async created() {
     await this.getList()
     this.timer = setInterval(() => {
-      // this.getList()
       this.getNews()
     }, 10 * 1000)
     this.getNews()
@@ -402,7 +298,6 @@ export default {
   .hamburger-container {
     line-height: 46px;
     height: 100%;
-    //float: left;
     cursor: pointer;
     transition: background 0.3s;
     -webkit-tap-highlight-color: transparent;
@@ -421,13 +316,7 @@ export default {
     left: 50px;
   }
 
-  .errLog-container {
-    display: inline-block;
-    vertical-align: top;
-  }
-
   .alert {
-    //float: left;
     padding-left: 100px;
     display: flex;
     height: 100%;
@@ -436,20 +325,15 @@ export default {
   }
 
   .operations {
-    //float: right;
-    // padding-left: 100px;
     display: flex;
     flex-direction: column;
-    //flex: 1;
     justify-content: center;
     align-items: flex-end;
     color: #a4b9cb;
   }
 
   .right-menu {
-    //float: right;
     height: 100%;
-    //line-height: 50px;
 
     &:focus {
       outline: none;
@@ -475,26 +359,6 @@ export default {
 
     .avatar-container {
       margin: 0 10px;
-
-      .avatar-wrapper {
-        margin-top: 5px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-        }
-
-        .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
-          font-size: 12px;
-        }
-      }
     }
   }
 
@@ -517,22 +381,15 @@ export default {
 
   .alert {
     margin-left: 10px;
-    //display: flex;
-    //align-items: center;
     padding: 5px;
     border-radius: 15px;
     color: white;
     background-color: #ff4d51;
-    //border: 0.8px solid #fff;
     font-size: 12px;
 
     &:hover {
       background: #b9383c;
     }
-
-    //&:active{
-    //  background: #641f22;
-    //}
 
     & > span:nth-child(1) {
       padding: 0 5px;

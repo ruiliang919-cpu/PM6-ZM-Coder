@@ -66,7 +66,6 @@ public class DevBaseDistrictController extends BaseController {
      * 导出控制分区列表
      */
     @SaCheckPermission("zm:baseDistrict:export")
-    // @Log(title = "控制分区", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(DevBaseDistrictBo bo, HttpServletResponse response) {
         List<DevBaseDistrictVo> list = iDevBaseDistrictService.queryList(bo);
@@ -101,7 +100,6 @@ public class DevBaseDistrictController extends BaseController {
      * 修改控制分区
      */
     @SaCheckPermission("zm:baseDistrict:edit")
-    // @Log(title = "控制分区", businessType = BusinessType.UPDATE)
     @RepeatSubmit()
     @PutMapping("/edit")
     public R<Void> edit(@RequestBody DevBaseDistrictBo bo) {
@@ -116,7 +114,6 @@ public class DevBaseDistrictController extends BaseController {
      * @param ids 主键串
      */
     @SaCheckPermission("zm:baseDistrict:remove")
-    // @Log(title = "控制分区", businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public R<Void> remove(@NotEmpty(message = "主键不能为空")
                           @PathVariable Long[] ids) {

@@ -36,7 +36,6 @@ public class DevBaseSceneServiceImpl implements IDevBaseSceneService {
     @Override
     public DevBaseSceneVo queryById(Long id) {
         return baseMapper.selectVoById(id);
-        // return  null;
     }
 
     /**
@@ -109,20 +108,10 @@ public class DevBaseSceneServiceImpl implements IDevBaseSceneService {
     }
 
     /**
-     * 保存前的数据校验
-     */
-    private void validEntityBeforeSave(DevBaseScene entity) {
-        // TODO 做一些数据校验,如唯一约束
-    }
-
-    /**
      * 批量删除场景
      */
     @Override
     public Boolean deleteWithValidByIds(Collection<Long> ids, Boolean isValid) {
-        if (isValid) {
-            // TODO 做一些业务上的校验,判断是否需要校验
-        }
         return baseMapper.deleteBatchIds(ids) > 0;
     }
 }

@@ -60,6 +60,3 @@ public class ConfigDistrictServiceImpl implements ConfigDistrictService {
     }
 }
 
-
-
-

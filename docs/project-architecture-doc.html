@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM6-ZM 直流照明监控系统 — 项目架构与业务分析文档</title>
+<style>
+  :root {
+    --primary: #1a73e8;
+    --primary-light: #e8f0fe;
+    --accent: #34a853;
+    --warn: #fbbc04;
+    --danger: #ea4335;
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --text: #202124;
+    --text-sec: #5f6368;
+    --border: #dadce0;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+  }
+  /* ──── Header ──── */
+  .hero {
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 40%, #01579b 100%);
+    color: #fff; padding: 60px 0 48px; text-align: center;
+  }
+  .hero h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 8px; }
+  .hero .sub { font-size: 1.1rem; opacity: .85; }
+  .hero .badge-row { margin-top: 18px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: .82rem; font-weight: 600; }
+  .badge-blue { background: rgba(255,255,255,.2); color: #fff; border: 1px solid rgba(255,255,255,.35); }
+  .badge-green { background: rgba(52,168,83,.25); color: #b7e1c8; border: 1px solid rgba(52,168,83,.4); }
+
+  /* ──── Layout ──── */
+  .container { max-width: 1140px; margin: 0 auto; padding: 0 24px; }
+  .main-grid { display: grid; grid-template-columns: 260px 1fr; gap: 32px; margin-top: -32px; }
+
+  /* ──── Sidebar / TOC ──── */
+  .toc { position: sticky; top: 20px; align-self: start; background: var(--card); border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 20px 0; max-height: calc(100vh - 40px); overflow-y: auto; }
+  .toc-title { font-size: .75rem; text-transform: uppercase; letter-spacing: 1.2px; color: var(--text-sec);
+    padding: 0 20px 10px; border-bottom: 1px solid var(--border); margin-bottom: 6px; }
+  .toc a { display: block; padding: 7px 20px; font-size: .88rem; color: var(--text-sec); text-decoration: none;
+    border-left: 3px solid transparent; transition: all .15s; }
+  .toc a:hover, .toc a.active { color: var(--primary); background: var(--primary-light); border-left-color: var(--primary); }
+
+  /* ──── Content ──── */
+  .content { min-width: 0; }
+  section { background: var(--card); border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.06);
+    padding: 32px 36px; margin-bottom: 28px; }
+  section h2 { font-size: 1.5rem; color: var(--primary); margin-bottom: 18px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light); display: flex; align-items: center; gap: 10px; }
+  section h2 .icon { font-size: 1.3rem; }
+  h3 { font-size: 1.15rem; margin: 22px 0 10px; color: #1a237e; }
+  h4 { font-size: 1rem; margin: 16px 0 8px; color: var(--text); }
+  p, li { font-size: .95rem; color: var(--text); }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 22px; margin-bottom: 12px; }
+  li { margin-bottom: 4px; }
+
+  /* ──── Tables ──── */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 18px; font-size: .9rem; }
+  th { background: #e8eaf6; color: #283593; font-weight: 600; text-align: left; padding: 10px 14px; }
+  td { padding: 9px 14px; border-bottom: 1px solid #eee; }
+  tr:hover td { background: #f5f7ff; }
+
+  /* ──── Code blocks ──── */
+  pre { background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 18px 22px;
+    overflow-x: auto; font-size: .85rem; line-height: 1.6; margin: 12px 0 16px; font-family: "Fira Code", "Cascadia Code", Consolas, monospace; }
+  code { font-family: "Fira Code", "Cascadia Code", Consolas, monospace; }
+  :not(pre) > code { background: #eef; padding: 2px 6px; border-radius: 4px; font-size: .88rem; color: #5c2d91; }
+
+  /* ──── Cards / boxes ──── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin: 16px 0; }
+  .card { background: #f8f9ff; border: 1px solid #e0e4f5; border-radius: 10px; padding: 18px 20px; }
+  .card h4 { margin: 0 0 8px; color: #1a237e; display: flex; align-items: center; gap: 6px; }
+  .card p { font-size: .88rem; color: var(--text-sec); margin: 0; }
+
+  .info-box { background: #e3f2fd; border-left: 4px solid #1565c0; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: .9rem; }
+  .warn-box { background: #fff8e1; border-left: 4px solid #f9a825; padding: 14px 18px; border-radius: 0 8px 8px 0; margin: 14px 0; font-size: .9rem; }
+
+  /* ──── Diagram / ASCII art ──── */
+  .diagram { background: #1e1e2e; color: #89b4fa; border-radius: 10px; padding: 24px 28px;
+    font-family: "Fira Code", Consolas, monospace; font-size: .82rem; line-height: 1.55;
+    overflow-x: auto; margin: 16px 0; white-space: pre; }
+  .diagram .hl { color: #f9e2af; }
+  .diagram .grn { color: #a6e3a1; }
+  .diagram .red { color: #f38ba8; }
+  .dim { color: #6c7086; }
+
+  /* ──── Tag ──── */
+  .tag { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: .78rem; font-weight: 600; margin-right: 4px; }
+  .tag-blue { background: #e3f2fd; color: #1565c0; }
+  .tag-green { background: #e8f5e9; color: #2e7d32; }
+  .tag-orange { background: #fff3e0; color: #e65100; }
+  .tag-purple { background: #f3e5f5; color: #7b1fa2; }
+  .tag-red { background: #ffebee; color: #c62828; }
+
+  /* ──── Footer ──── */
+  .footer { text-align: center; padding: 32px 0; color: var(--text-sec); font-size: .82rem; }
+
+  /* ──── Responsive ──── */
+  @media (max-width: 860px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .toc { position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════ HERO ════════════════ -->
+<header class="hero">
+  <div class="container">
+    <h1>⚡ PM6-ZM 直流照明监控系统</h1>
+    <p class="sub">项目架构与业务分析文档 · 基于 RuoYi-Vue-Plus v4.8.0 二次开发</p>
+    <div class="badge-row">
+      <span class="badge badge-blue">Spring Boot 2.7</span>
+      <span class="badge badge-blue">MyBatis-Plus 3.5</span>
+      <span class="badge badge-green">MQTT + Modbus TCP</span>
+      <span class="badge badge-blue">Vue 2 + Element UI</span>
+      <span class="badge badge-blue">Electron 桌面端</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+<div class="main-grid">
+
+<!-- ════════════════ TOC ════════════════ -->
+<nav class="toc">
+  <div class="toc-title">目录导航</div>
+  <a href="#overview">1. 项目概述</a>
+  <a href="#tech-stack">2. 技术栈全景</a>
+  <a href="#architecture">3. 系统架构</a>
+  <a href="#modules">4. 后端模块拆解</a>
+  <a href="#business">5. 核心业务分析</a>
+  <a href="#entities">6. 领域模型 / 实体</a>
+  <a href="#protocol">7. 通信协议层</a>
+  <a href="#cache">8. 缓存架构</a>
+  <a href="#frontend">9. 前端架构</a>
+  <a href="#api">10. API 接口总览</a>
+  <a href="#deploy">11. 部署架构</a>
+  <a href="#data-flow">12. 数据流全景</a>
+  <a href="#roadmap">13. 架构评价与建议</a>
+</nav>
+
+<!-- ════════════════ CONTENT ════════════════ -->
+<div class="content">
+
+<!-- ──── 1. 项目概述 ──── -->
+<section id="overview">
+<h2><span class="icon">📋</span> 1. 项目概述</h2>
+<p><strong>PM6-ZM</strong> 是一套面向直流照明场景的 <strong>集中监控管理系统</strong>，用于对配电柜/电源柜、照明回路、传感器、场景策略等进行统一监控与远程控制。</p>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🏭 应用场景</h4>
+    <p>隧道、地铁、管廊、工厂等需要直流照明集中管控的工业场景</p>
+  </div>
+  <div class="card">
+    <h4>📡 通信协议</h4>
+    <p>同时支持 MQTT (1883)、Modbus TCP (1503/1504)、HTTP REST (8081) 三种协议</p>
+  </div>
+  <div class="card">
+    <h4>🖥️ 多端支持</h4>
+    <p>Web 管理后台 + Electron 桌面客户端，支持 Windows 部署</p>
+  </div>
+  <div class="card">
+    <h4>📊 实时监控</h4>
+    <p>WebSocket 实时推送设备状态，ECharts 可视化数据看板</p>
+  </div>
+</div>
+
+<h3>项目目录结构</h3>
+<pre>PM6-ZM/
+├── <span class="hl">server/</span>          <span class="dim">// 后端 Java 源码 (Spring Boot 2.7 + MyBatis-Plus, Maven 多模块)</span>
+│   ├── ruoyi-admin/       <span class="dim">// 启动模块 & Web 控制器入口</span>
+│   ├── ruoyi-framework/   <span class="dim">// 框架核心 (安全/缓存/日志/线程池)</span>
+│   ├── ruoyi-system/      <span class="dim">// 系统管理 (用户/角色/菜单/部门/字典)</span>
+│   ├── ruoyi-zm/          <span class="dim">// ★ 核心业务模块 (设备/分区/场景/协议/MQTT)</span>
+│   ├── ruoyi-common/      <span class="dim">// 公共工具类 & 基础设施</span>
+│   ├── ruoyi-job/         <span class="dim">// 定时任务 (XXL-JOB)</span>
+│   ├── ruoyi-generator/   <span class="dim">// 代码生成器</span>
+│   ├── ruoyi-oss/         <span class="dim">// 对象存储 (AWS S3)</span>
+│   ├── ruoyi-sms/         <span class="dim">// 短信服务 (SMS4J)</span>
+│   └── ruoyi-extend/      <span class="dim">// 扩展服务 (Spring Boot Admin / XXL-JOB Admin)</span>
+├── <span class="hl">web/</span>             <span class="dim">// 前端 Vue 2 源码</span>
+├── <span class="hl">docs/</span>            <span class="dim">// 项目文档 (协议/需求/会议/测试/手册)</span>
+├── <span class="hl">deploy/</span>          <span class="dim">// 部署包 (Windows / Docker)</span>
+├── <span class="hl">database/</span>        <span class="dim">// 数据库初始化脚本 (zm.sql)</span>
+├── <span class="hl">releases/</span>        <span class="dim">// 历史版本发布包</span>
+├── <span class="hl">tools/</span>           <span class="dim">// 开发工具与本地测试</span>
+└── <span class="hl">archive/</span>         <span class="dim">// 历史归档备份</span>
+</pre>
+</section>
+
+<!-- ──── 2. 技术栈 ──── -->
+<section id="tech-stack">
+<h2><span class="icon">🔧</span> 2. 技术栈全景</h2>
+
+<table>
+  <tr><th>层级</th><th>技术选型</th><th>版本</th><th>用途</th></tr>
+  <tr><td>后端框架</td><td>Spring Boot</td><td>2.7.13</td><td>应用容器 & 自动装配</td></tr>
+  <tr><td>ORM</td><td>MyBatis-Plus</td><td>3.5.3.1</td><td>数据访问层，支持多数据源</td></tr>
+  <tr><td>权限认证</td><td>Sa-Token + JWT</td><td>1.37.0</td><td>登录认证、RBAC 权限控制</td></tr>
+  <tr><td>多数据源</td><td>dynamic-datasource</td><td>3.5.2</td><td>运行时动态切换数据源</td></tr>
+  <tr><td>缓存</td><td>Redis + Redisson + Caffeine</td><td>3.20.1</td><td>分布式缓存 + 本地缓存二级架构</td></tr>
+  <tr><td>分布式锁</td><td>Lock4j + Redisson</td><td>2.2.3</td><td>并发控制</td></tr>
+  <tr><td>MQTT</td><td>Spring Integration MQTT</td><td>-</td><td>设备消息收发 (端口 1883)</td></tr>
+  <tr><td>Modbus</td><td>modbus4j</td><td>-</td><td>Modbus TCP 从站/主站通信 (1503/1504)</td></tr>
+  <tr><td>Netty</td><td>Netty</td><td>-</td><td>TCP 长连接处理</td></tr>
+  <tr><td>定时任务</td><td>XXL-JOB</td><td>2.4.0</td><td>分布式任务调度</td></tr>
+  <tr><td>API 文档</td><td>SpringDoc OpenAPI</td><td>1.6.15</td><td>Swagger 风格 API 文档</td></tr>
+  <tr><td>对象存储</td><td>AWS S3 SDK</td><td>1.12.400</td><td>文件上传/存储</td></tr>
+  <tr><td>短信</td><td>SMS4J</td><td>2.2.0</td><td>短信通知服务</td></tr>
+  <tr><td>前端框架</td><td>Vue 2.6 + Element UI 2.15</td><td>-</td><td>管理后台 SPA</td></tr>
+  <tr><td>图表</td><td>ECharts 5.4</td><td>-</td><td>数据可视化</td></tr>
+  <tr><td>桌面端</td><td>Electron 13</td><td>-</td><td>Windows 桌面客户端</td></tr>
+  <tr><td>数据库</td><td>MySQL 8.0</td><td>-</td><td>关系型数据存储</td></tr>
+  <tr><td>构建</td><td>Maven (后端) / Webpack (前端)</td><td>-</td><td>项目构建与打包</td></tr>
+</table>
+</section>
+
+<!-- ──── 3. 系统架构 ──── -->
+<section id="architecture">
+<h2><span class="icon">🏗️</span> 3. 系统架构</h2>
+
+<h3>3.1 整体分层架构</h3>
+<div class="diagram">┌─────────────────────────────────────────────────────────────────────────┐
+│                         <span class="hl">客户端层 (Client Layer)</span>                           │
+│   ┌──────────────┐   ┌──────────────┐   ┌──────────────────────────┐   │
+│   │  Vue 2 SPA   │   │  Electron    │   │  第三方 BAS / 集成系统    │   │
+│   │  (Web 管理)   │   │  (桌面客户端) │   │  (Modbus TCP / HTTP)     │   │
+│   └──────┬───────┘   └──────┬───────┘   └────────────┬─────────────┘   │
+└──────────┼──────────────────┼────────────────────────┼──────────────────┘
+           │ HTTP/WS          │ HTTP/WS                │ Modbus TCP
+┌──────────▼──────────────────▼────────────────────────▼──────────────────┐
+│                       <span class="grn">接入层 (Gateway Layer)</span>                            │
+│   ┌──────────────────────────────────────────────────────────────────┐  │
+│   │              Nginx 反向代理 / Spring Boot 内嵌容器               │  │
+│   │              HTTP :8081  │  WebSocket :8081/ws  │  Modbus :1504 │  │
+│   └──────────────────────────────────────────────────────────────────┘  │
+└──────────────────────────────┬──────────────────────────────────────────┘
+                               │
+┌──────────────────────────────▼──────────────────────────────────────────┐
+│                    <span class="hl">控制层 (Controller Layer)</span>                           │
+│   ┌─────────────────┐  ┌─────────────────┐  ┌───────────────────────┐  │
+│   │ System 控制器    │  │ ZM 业务控制器    │  │  Write 写入控制器     │  │
+│   │ 用户/角色/菜单   │  │ 设备/分区/场景   │  │  遥控/遥调指令下发    │  │
+│   └────────┬────────┘  └────────┬────────┘  └───────────┬───────────┘  │
+└────────────┼────────────────────┼───────────────────────┼──────────────┘
+             │                    │                       │
+┌────────────▼────────────────────▼───────────────────────▼──────────────┐
+│                     <span class="grn">业务层 (Service Layer)</span>                            │
+│   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+│   │ IDevBase      │ │ WriteBusiness│ │ HomeService  │ │ Lighting     │ │
+│   │ DeviceService │ │ Service      │ │              │ │ Service      │ │
+│   └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ └──────┬───────┘ │
+└──────────┼────────────────┼────────────────┼────────────────┼─────────┘
+           │                │                │                │
+┌──────────▼────────────────▼────────────────▼────────────────▼─────────┐
+│                   <span class="hl">数据层 (Data Access Layer)</span>                          │
+│   ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ │
+│   │ MyBatis-Plus │ │  Redis /     │ │  Caffeine    │ │  MQTT        │ │
+│   │ Mapper       │ │  Redisson    │ │  本地缓存     │ │  消息队列     │ │
+│   └──────┬───────┘ └──────┬───────┘ └──────────────┘ └──────┬───────┘ │
+└──────────┼────────────────┼─────────────────────────────────┼─────────┘
+           │                │                                 │
+┌──────────▼────────────────▼─────────────────────────────────▼─────────┐
+│                     <span class="grn">存储层 (Storage Layer)</span>                            │
+│      MySQL 8.0          Redis              EMQX Broker               │
+│      (持久化)           (缓存/状态)         (MQTT 消息代理)            │
+└──────────────────────────────────────────────────────────────────────┘</div>
+
+<h3>3.2 Maven 模块依赖关系</h3>
+<div class="diagram"><span class="hl">ruoyi-admin</span> (启动入口)
+  ├── ruoyi-framework  (框架核心)
+  │     └── ruoyi-system  (系统管理)
+  │           └── ruoyi-common  (公共工具)
+  ├── <span class="grn">ruoyi-zm</span>  (★ 照明业务核心)
+  │     └── ruoyi-common
+  ├── ruoyi-job  (定时任务)
+  ├── ruoyi-generator  (代码生成)
+  ├── ruoyi-oss  (对象存储)
+  └── ruoyi-sms  (短信服务)</div>
+</section>
+
+<!-- ──── 4. 后端模块拆解 ──── -->
+<section id="modules">
+<h2><span class="icon">📦</span> 4. 后端模块拆解</h2>
+
+<table>
+  <tr><th>模块</th><th>职责</th><th>关键类</th></tr>
+  <tr>
+    <td><span class="tag tag-blue">ruoyi-admin</span></td>
+    <td>Spring Boot 启动入口，Web 控制器聚合层</td>
+    <td><code>RuoYiApplication</code>, <code>DeviceInfoController</code>, <code>SysLoginController</code></td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-blue">ruoyi-framework</span></td>
+    <td>框架核心：安全过滤链、缓存配置、线程池、全局异常处理</td>
+    <td>Sa-Token 配置、Redis 配置、WebMvc 配置</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-blue">ruoyi-system</span></td>
+    <td>系统管理：用户、角色、菜单、部门、字典、日志、OSS</td>
+    <td><code>SysUserServiceImpl</code>, <code>SysRoleServiceImpl</code>, <code>SysMenuServiceImpl</code></td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-green">ruoyi-zm</span></td>
+    <td>★ 照明业务核心：设备管理、分区、场景、传感器、协议处理、MQTT 通信</td>
+    <td><code>MqttMessageHandler</code>, <code>WriteBusinessService</code>, <code>Slave</code></td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-blue">ruoyi-common</span></td>
+    <td>公共工具：统一响应、分页、工具类、基础实体</td>
+    <td><code>BaseEntity</code>, <code>R</code> (统一响应), 工具类</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-purple">ruoyi-job</span></td>
+    <td>定时任务模块，集成 XXL-JOB</td>
+    <td>设备在线检测、数据采集调度</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-purple">ruoyi-generator</span></td>
+    <td>代码生成器，Velocity 模板驱动</td>
+    <td>CRUD 代码一键生成</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-orange">ruoyi-extend</span></td>
+    <td>扩展服务：Spring Boot Admin 监控、XXL-JOB Admin 调度中心</td>
+    <td><code>ruoyi-monitor-admin</code>, <code>ruoyi-xxl-job-admin</code></td>
+  </tr>
+</table>
+</section>
+
+<!-- ──── 5. 核心业务分析 ──── -->
+<section id="business">
+<h2><span class="icon">💡</span> 5. 核心业务分析</h2>
+
+<h3>5.1 业务域划分</h3>
+<p>系统围绕 <strong>"设备 → 回路 → 分区 → 场景"</strong> 四级层次构建照明管控能力：</p>
+
+<div class="diagram"><span class="hl">场景 (Scene)</span>         ← 最高层：一键切换整体照明方案
+    │
+    ├── <span class="grn">分区 (District)</span>   ← 中间层：按物理区域分组控制
+    │       │
+    │       ├── <span class="red">回路 (Loop/Branch)</span> ← 执行层：单条照明线路开关/调光
+    │       │
+    │       └── 传感器 (Sensor)   ← 感知层：红外/照度传感自动触发
+    │
+    └── 机柜 (Device/Cabinet)    ← 底层：配电柜/电源柜硬件实体</div>
+
+<h3>5.2 核心业务功能矩阵</h3>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🖥️ 设备管理</h4>
+    <p>机柜注册、上下线检测、运行状态监控（母线电压/电流/温度/绝缘阻值）、设备参数远程读写</p>
+  </div>
+  <div class="card">
+    <h4>💡 照明控制</h4>
+    <p>单回路开关、分组控制、调光控制、一键全亮/全灭、AC/DC 切换</p>
+  </div>
+  <div class="card">
+    <h4>📍 分区管理</h4>
+    <p>物理区域划分、分区亮度设置、分区开关状态、分区与回路绑定</p>
+  </div>
+  <div class="card">
+    <h4>🎬 场景管理</h4>
+    <p>场景创建/编辑、场景切换、场景时控、场景与分区关联</p>
+  </div>
+  <div class="card">
+    <h4>⏱️ 定时控制</h4>
+    <p>时控策略配置、普通时控/场景时控、AC 定时控制、周期性任务调度</p>
+  </div>
+  <div class="card">
+    <h4>📊 能耗统计</h4>
+    <p>电表数据采集（瞬时/日/周/月/季/年）、功率计算、能耗分析报表</p>
+  </div>
+  <div class="card">
+    <h4>⚠️ 告警管理</h4>
+    <p>故障记录（ACDC/DCDC/母线/回路）、漏电检测、告警列表与历史查询</p>
+  </div>
+  <div class="card">
+    <h4>📡 传感器</h4>
+    <p>红外传感器组配置、照度传感器组配置、传感器联动策略</p>
+  </div>
+</div>
+
+<h3>5.3 设备运行模式</h3>
+<table>
+  <tr><th>模式</th><th>runModeType</th><th>说明</th></tr>
+  <tr><td>普通时控</td><td>1</td><td>按时间表自动开关灯</td></tr>
+  <tr><td>场景时控</td><td>2</td><td>按时间表自动切换场景</td></tr>
+  <tr><td>红外传感</td><td>3</td><td>红外传感器检测到人/车时自动亮灯</td></tr>
+  <tr><td>照度传感</td><td>4</td><td>根据环境光照度自动调节亮度</td></tr>
+</table>
+
+<h3>5.4 设备状态模型</h3>
+<table>
+  <tr><th>字段</th><th>含义</th><th>取值</th></tr>
+  <tr><td><code>onlineStatus</code></td><td>通信状态</td><td>0=离线(红), 1=在线</td></tr>
+  <tr><td><code>deviceStatus</code></td><td>设备健康</td><td>0=正常, 1=故障/告警</td></tr>
+  <tr><td><code>runStatus</code></td><td>运行开关</td><td>0=关, 1=开</td></tr>
+  <tr><td><code>runMode</code></td><td>运行模式</td><td>0=自动, 1=手动</td></tr>
+  <tr><td><code>type</code></td><td>机柜类型</td><td>0=配电柜, 1=电源柜</td></tr>
+</table>
+</section>
+
+<!-- ──── 6. 领域模型 ──── -->
+<section id="entities">
+<h2><span class="icon">🗃️</span> 6. 领域模型 / 实体</h2>
+
+<h3>6.1 核心实体关系</h3>
+<div class="diagram">┌──────────────────┐       ┌──────────────────┐
+│   DevBaseDevice  │       │   DevBaseRegion  │
+│   (机柜/设备)     │──────▶│   (区域)          │
+│                  │ N:1   │                  │
+│  id, deviceName  │       │  id, name        │
+│  deviceNo        │       └──────────────────┘
+│  onlineStatus    │
+│  runStatus       │       ┌──────────────────┐
+│  dcBusVoltage    │       │   DevBaseScene   │
+│  temperature ... │       │   (场景)          │
+└──────┬───────────┘       │  id, sceneId     │
+       │                   │  name            │
+       │ 1:N               └────────┬─────────┘
+       ▼                            │
+┌──────────────────┐               │ N:M
+│   DevBaseBranch  │       ┌───────▼───────────┐
+│   (回路/支路)     │       │ DevBaseSceneCtrl  │
+│                  │       │ (场景控制关系)      │
+│  id, deviceId    │       └───────────────────┘
+│  switchStatus    │
+│  brightness ...  │       ┌──────────────────┐
+└──────────────────┘       │   DevBaseDistrict │
+                           │   (控制分区)       │
+┌──────────────────┐       │  id, name, lux    │
+│ DevConfigGroup   │       │  switchStatus     │
+│ (回路分组)        │       └──────────────────┘
+│  id, groupName   │
+│  deviceId        │       ┌──────────────────┐
+└──────────────────┘       │ DevConfigTimeCtrl │
+                           │ (定时控制配置)     │
+┌──────────────────┐       │  时间表 + 动作     │
+│ DevStatusDcc     │       └──────────────────┘
+│ (DC/DC 状态)     │
+│  voltage, current│       ┌──────────────────┐
+│  power ...       │       │   DevFaultRecord  │
+└──────────────────┘       │   (故障记录)       │
+                           │  类型/时间/描述    │
+┌──────────────────┐       └──────────────────┘
+│ DevStatusAc      │
+│ (AC/DC 状态)     │       ┌──────────────────┐
+│  voltage, current│       │ DevEnergyMeter*  │
+└──────────────────┘       │ (能耗计量系列)     │
+                           │  Day/Week/Month/  │
+                           │  Quarter/Year     │
+                           └──────────────────┘</div>
+
+<h3>6.2 实体清单（ruoyi-zm 模块）</h3>
+<table>
+  <tr><th>分类</th><th>实体类</th><th>数据表</th><th>说明</th></tr>
+  <tr><td rowspan="5"><span class="tag tag-blue">设备基础</span></td>
+    <td><code>DevBaseDevice</code></td><td>dev_base_device</td><td>机柜/设备主表</td></tr>
+  <tr><td><code>DevBaseRegion</code></td><td>dev_base_region</td><td>区域</td></tr>
+  <tr><td><code>DevBaseBranch</code></td><td>dev_base_branch</td><td>回路/支路</td></tr>
+  <tr><td><code>DevBaseDistrict</code></td><td>dev_base_district</td><td>控制分区</td></tr>
+  <tr><td><code>DevBaseScene</code></td><td>dev_base_scene</td><td>场景</td></tr>
+
+  <tr><td rowspan="4"><span class="tag tag-green">运行状态</span></td>
+    <td><code>DevStatusDcc</code></td><td>dev_status_dcc</td><td>DC/DC 状态</td></tr>
+  <tr><td><code>DevStatusDccLoop</code></td><td>dev_status_dcc_loop</td><td>DC 回路状态</td></tr>
+  <tr><td><code>DevStatusAc</code></td><td>dev_status_ac</td><td>AC/DC 状态</td></tr>
+  <tr><td><code>DevStatusAcLoop</code></td><td>dev_status_ac_loop</td><td>AC 回路状态</td></tr>
+
+  <tr><td rowspan="6"><span class="tag tag-purple">配置参数</span></td>
+    <td><code>DevConfigGroup</code></td><td>dev_config_group</td><td>回路分组</td></tr>
+  <tr><td><code>DevConfigTimeControl</code></td><td>dev_config_time_control</td><td>定时控制</td></tr>
+  <tr><td><code>DevConfigTimeControlScene</code></td><td>dev_config_time_control_scene</td><td>场景定时</td></tr>
+  <tr><td><code>DevConfigTimeControlAc</code></td><td>dev_config_time_control_ac</td><td>AC 定时</td></tr>
+  <tr><td><code>DevConfigInfraredSensor</code></td><td>dev_config_infrared_sensor</td><td>红外传感器</td></tr>
+  <tr><td><code>DevConfigIlluminanceSensor</code></td><td>dev_config_illuminance_sensor</td><td>照度传感器</td></tr>
+
+  <tr><td rowspan="3"><span class="tag tag-orange">能耗计量</span></td>
+    <td><code>DevEnergyMeter{Day,Week,Month,Quarter,Year,Total,Power}</code></td>
+    <td>dev_energy_meter_*</td><td>多粒度能耗数据</td></tr>
+  <tr><td><code>DevProtocol01/03/05/06</code></td><td>dev_protocol_01/03/05/06</td><td>协议原始数据存储</td></tr>
+  <tr><td><code>DevFaultRecord / DevFaultAcdc / DevFaultDcdc</code></td><td>dev_fault_*</td><td>故障记录</td></tr>
+
+  <tr><td><span class="tag tag-red">控制指令</span></td>
+    <td><code>DevInstruct / DevWriteInstruct</code></td><td>dev_instruct / dev_write_instruct</td><td>遥调/遥控指令队列</td></tr>
+</table>
+</section>
+
+<!-- ──── 7. 通信协议层 ──── -->
+<section id="protocol">
+<h2><span class="icon">📡</span> 7. 通信协议层</h2>
+
+<p>系统支持三种并行通信方式，分别服务于不同的设备接入场景：</p>
+
+<h3>7.1 MQTT 协议 (端口 1883)</h3>
+<ul>
+  <li><strong>Broker</strong>：EMQX，通过 Spring Integration MQTT 集成</li>
+  <li><strong>消息入口</strong>：<code>MqttMessageHandler</code> — 使用 <code>@ServiceActivator(inputChannel = "mqttInputChannel")</code> 接收</li>
+  <li><strong>消息发布</strong>：<code>MqttPublisher</code> — 发布遥调/遥控指令</li>
+  <li><strong>心跳检测</strong>：<code>DeviceOnlineCheckTask</code> — 定时检查设备在线状态</li>
+  <li><strong>协议解析</strong>：<code>mqtt03/addr03/</code> 目录下按寄存器地址分发处理器（工厂模式）</li>
+  <li><strong>心跳数据</strong>：<code>Heart</code> VO — 设备周期上报的状态包</li>
+</ul>
+
+<div class="info-box">MQTT 消息按 Topic 分层路由：<code>设备类型/设备ID/功能码</code>，由 <code>MqttMessageHandler</code> 解析 Topic 后分发到对应的处理链。</div>
+
+<h3>7.2 Modbus TCP (端口 1503/1504)</h3>
+<ul>
+  <li><strong>从站模式</strong>：<code>Slave</code> 类 — 启动 Modbus TCP Slave (端口 1504)，供 BAS 等第三方系统读取数据</li>
+  <li><strong>主站模式</strong>：<code>ModbusTCPManager</code> — 主动连接设备 Modbus 端口 (1503)，下发读写指令</li>
+  <li><strong>功能码支持</strong>：
+    <ul>
+      <li><code>FC01/03</code> — 读线圈/读寄存器 (遥测)</li>
+      <li><code>FC05</code> — 写单线圈 (遥控，开关控制)</li>
+      <li><code>FC06</code> — 写单寄存器 (遥调，参数设置)</li>
+    </ul>
+  </li>
+  <li><strong>指令队列</strong>：<code>DevInstruct</code> → <code>WriteBusinessService</code> → Modbus 写入 → <code>DevWriteInstruct</code> (结果记录)</li>
+</ul>
+
+<h3>7.3 HTTP REST (端口 8081)</h3>
+<ul>
+  <li>前端 Vue 应用通过 HTTP API 与后端交互</li>
+  <li>遵循 RESTful 风格，统一响应格式 <code>R&lt;T&gt;</code></li>
+  <li>Sa-Token + JWT 认证，RBAC 权限控制</li>
+</ul>
+
+<h3>7.4 WebSocket</h3>
+<ul>
+  <li><code>DeviceStatusPushService</code> — 设备状态变更时实时推送到前端</li>
+  <li>前端通过 WebSocket 接收设备在线/离线、告警等实时事件</li>
+</ul>
+
+<h3>7.5 协议数据流</h3>
+<div class="diagram"><span class="hl">设备端</span>                                    <span class="grn">服务端</span>                              <span class="red">前端</span>
+   │                                            │                                     │
+   │──── MQTT 心跳/数据上报 ─────────────────────▶│                                     │
+   │                                            │  MqttMessageHandler                  │
+   │                                            │  ├── 解析 Topic                       │
+   │                                            │  ├── 更新 Redis 缓存                  │
+   │                                            │  ├── 写入 MySQL                       │
+   │                                            │  └── WebSocket 推送 ──────────────────▶│
+   │                                            │                                     │
+   │◀─── MQTT 遥控/遥调指令 ─────────────────────│  MqttPublisher                       │
+   │                                            │                                     │
+   │──── Modbus TCP 上报 ────────────────────────▶│  ModbusTCPManager (主站)             │
+   │                                            │                                     │
+   │◀──── Modbus TCP 写入 (FC05/FC06) ──────────│  WriteBusinessService                │
+   │                                            │                                     │
+   │                                            │◀──── HTTP REST API ─────────────────│
+   │                                            │  Controller → Service → Mapper       │</div>
+</section>
+
+<!-- ──── 8. 缓存架构 ──── -->
+<section id="cache">
+<h2><span class="icon">⚡</span> 8. 缓存架构</h2>
+
+<p>系统采用 <strong>Redis + Caffeine 二级缓存</strong> 架构，针对高频读取的设备状态数据做了深度优化：</p>
+
+<h3>8.1 缓存类清单</h3>
+<table>
+  <tr><th>缓存类</th><th>缓存对象</th><th>用途</th></tr>
+  <tr><td><code>DeviceCache / DeviceCachePlus</code></td><td>设备基础信息</td><td>设备列表快速查询</td></tr>
+  <tr><td><code>DeviceProcessorCache</code></td><td>设备处理器</td><td>协议处理链缓存</td></tr>
+  <tr><td><code>LightingCache</code></td><td>照明状态</td><td>回路开关/亮度状态</td></tr>
+  <tr><td><code>GroupCache</code></td><td>分组信息</td><td>回路分组数据</td></tr>
+  <tr><td><code>SceneCache / SceneControlCache</code></td><td>场景数据</td><td>场景配置与控制</td></tr>
+  <tr><td><code>AcDcCache / AcSwitchCache</code></td><td>AC/DC 状态</td><td>交直流切换状态</td></tr>
+  <tr><td><code>IlluminanceCache / IllUtilCache</code></td><td>照度数据</td><td>传感器实时照度</td></tr>
+  <tr><td><code>InfraredCache</code></td><td>红外数据</td><td>红外传感器状态</td></tr>
+  <tr><td><code>LeakageCache</code></td><td>漏电数据</td><td>漏电检测值</td></tr>
+  <tr><td><code>WriteQueueCache</code></td><td>写入队列</td><td>待发送指令队列</td></tr>
+  <tr><td><code>SimpleControlCache</code></td><td>简单控制</td><td>快速控制操作</td></tr>
+  <tr><td><code>OtherSwitchCache</code></td><td>其他开关</td><td>非照明开关状态</td></tr>
+  <tr><td><code>LoopByGroupCache / ZoneUtilCache</code></td><td>回路/分区</td><td>分区回路映射</td></tr>
+</table>
+
+<h3>8.2 缓存 Key 设计</h3>
+<p><code>Key</code> 和 <code>Keys</code> 类统一管理 Redis Key 前缀，避免 Key 冲突。典型 Key 模式：</p>
+<pre>zm:device:{deviceId}          <span class="dim">// 设备状态</span>
+zm:lighting:{deviceId}        <span class="dim">// 照明状态</span>
+zm:group:{deviceId}           <span class="dim">// 分组数据</span>
+zm:scene:{deviceId}           <span class="dim">// 场景数据</span>
+zm:update:{deviceId}:*        <span class="dim">// 更新标记</span>
+zm:instruct:{slaveId}:*       <span class="dim">// 指令队列</span></pre>
+
+<div class="warn-box">⚠️ 缓存数据通过 MQTT 心跳和 Modbus 轮询实时更新，<code>ModuleGuard</code> 负责缓存一致性守护。</div>
+</section>
+
+<!-- ──── 9. 前端架构 ──── -->
+<section id="frontend">
+<h2><span class="icon">🎨</span> 9. 前端架构</h2>
+
+<h3>9.1 技术栈</h3>
+<table>
+  <tr><th>类别</th><th>技术</th></tr>
+  <tr><td>框架</td><td>Vue 2.6 + Vue Router + Vuex</td></tr>
+  <tr><td>UI 组件</td><td>Element UI 2.15</td></tr>
+  <tr><td>图表</td><td>ECharts 5.4</td></tr>
+  <tr><td>HTTP</td><td>Axios</td></tr>
+  <tr><td>桌面</td><td>Electron 13 (vue-cli-plugin-electron-builder)</td></tr>
+  <tr><td>构建</td><td>Vue CLI / Webpack</td></tr>
+</table>
+
+<h3>9.2 前端目录结构</h3>
+<pre>web/src/
+├── api/                 <span class="dim">// API 接口定义</span>
+│   ├── zm/              <span class="dim">// ★ 照明业务 API</span>
+│   │   ├── baseDevice.js       <span class="dim">// 设备管理</span>
+│   │   ├── baseDistrict.js     <span class="dim">// 分区管理</span>
+│   │   ├── baseScene.js        <span class="dim">// 场景管理</span>
+│   │   ├── baseControl.js      <span class="dim">// 控制操作</span>
+│   │   ├── baseStatus.js       <span class="dim">// 状态查询</span>
+│   │   ├── baseRegion.js       <span class="dim">// 区域管理</span>
+│   │   ├── navbar.js           <span class="dim">// 导航栏</span>
+│   │   ├── device/             <span class="dim">// 设备详情/控制/设置/记录</span>
+│   │   ├── alarm/              <span class="dim">// 告警列表</span>
+│   │   └── history/            <span class="dim">// 历史记录/能耗</span>
+│   ├── system/           <span class="dim">// 系统管理 API</span>
+│   └── monitor/          <span class="dim">// 监控 API</span>
+├── views/
+│   ├── zm/               <span class="dim">// ★ 照明业务页面</span>
+│   │   ├── baseDevice/          <span class="dim">// 设备列表</span>
+│   │   ├── baseDistrict/        <span class="dim">// 分区管理</span>
+│   │   ├── baseScene/           <span class="dim">// 场景管理</span>
+│   │   ├── baseControl/         <span class="dim">// 集中控制面板</span>
+│   │   │   ├── components/
+│   │   │   │   ├── changjing/   <span class="dim">// 场景控制组件</span>
+│   │   │   │   ├── fenqu/       <span class="dim">// 分区控制组件</span>
+│   │   │   │   └── lightsOnOrOff/ <span class="dim">// 开关灯组件</span>
+│   │   ├── baseStatus/          <span class="dim">// 设备状态看板</span>
+│   │   ├── device/              <span class="dim">// 设备详情/控制/设置/记录</span>
+│   │   │   ├── dev-control/     <span class="dim">// 控制面板</span>
+│   │   │   │   ├── ZhaoMingKongZhi/   <span class="dim">// 照明控制</span>
+│   │   │   │   ├── MoKuaiKongZhi/     <span class="dim">// 模块控制</span>
+│   │   │   │   ├── JiaoLiuKaiGuanKongZhi/ <span class="dim">// 交流开关控制</span>
+│   │   │   │   └── QiTaKaiGuanKongZhi/   <span class="dim">// 其他开关控制</span>
+│   │   ├── alarm/               <span class="dim">// 告警列表</span>
+│   │   └── history/             <span class="dim">// 历史数据/能耗</span>
+│   │       ├── event/           <span class="dim">// 事件记录</span>
+│   │       ├── record/          <span class="dim">// 操作记录</span>
+│   │       └── powerCalculation/<span class="dim">// 功率计算</span>
+│   ├── dashboard/         <span class="dim">// 首页看板</span>
+│   ├── system/            <span class="dim">// 系统管理页面</span>
+│   └── monitor/           <span class="dim">// 系统监控</span>
+├── components/           <span class="dim">// 公共组件</span>
+├── layout/               <span class="dim">// 页面布局</span>
+├── store/                <span class="dim">// Vuex 状态管理</span>
+├── router/               <span class="dim">// 路由配置</span>
+├── directive/            <span class="dim">// 自定义指令 (权限等)</span>
+├── utils/                <span class="dim">// 工具函数</span>
+└── assets/               <span class="dim">// 静态资源</span></pre>
+</section>
+
+<!-- ──── 10. API 接口总览 ──── -->
+<section id="api">
+<h2><span class="icon">🔌</span> 10. API 接口总览</h2>
+
+<h3>10.1 ZM 业务控制器 (43 个)</h3>
+<table>
+  <tr><th>控制器</th><th>职责</th><th>标签</th></tr>
+  <tr><td><code>HomeController</code></td><td>首页数据聚合</td><td><span class="tag tag-green">看板</span></td></tr>
+  <tr><td><code>DevBaseDeviceController</code></td><td>设备 CRUD</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>DevBaseRegionController</code></td><td>区域管理</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>DevBaseDistrictController</code></td><td>分区管理</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>DevBaseSceneController</code></td><td>场景管理</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>DevConfigGroupController</code></td><td>分组配置</td><td><span class="tag tag-purple">配置</span></td></tr>
+  <tr><td><code>LightingController</code></td><td>照明状态查询</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>LightZoneController</code></td><td>照明分区操作</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>SceneController</code></td><td>场景操作</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>FullyBrightController</code></td><td>一键全亮</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>RecoverController</code></td><td>恢复操作</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>ACSController</code></td><td>AC/DC 切换</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>OtherSwitchController</code></td><td>其他开关控制</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteController</code></td><td>通用写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteControlController</code></td><td>控制指令写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteDeviceController</code></td><td>设备参数写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteGroupController</code></td><td>分组写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteModuleController</code></td><td>模块写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>WriteSceneController</code></td><td>场景写入</td><td><span class="tag tag-orange">控制</span></td></tr>
+  <tr><td><code>BranchController</code></td><td>回路管理</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>PointController</code></td><td>点位管理</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>PowerController</code></td><td>功率数据</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>LeakageController</code></td><td>漏电检测</td><td><span class="tag tag-red">告警</span></td></tr>
+  <tr><td><code>RecordFaultController</code></td><td>故障记录</td><td><span class="tag tag-red">告警</span></td></tr>
+  <tr><td><code>MeterEnergyController</code></td><td>能耗计量</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>TimeControlController</code></td><td>定时控制</td><td><span class="tag tag-purple">配置</span></td></tr>
+  <tr><td><code>TaskController</code></td><td>任务管理</td><td><span class="tag tag-purple">配置</span></td></tr>
+  <tr><td><code>SensorInfoController</code></td><td>传感器信息</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>SensorModuleController</code></td><td>传感器模块</td><td><span class="tag tag-purple">配置</span></td></tr>
+  <tr><td><code>BasicInformationController</code></td><td>基础信息</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>CabinetInformationController</code></td><td>机柜信息</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>CabinetCalculationController</code></td><td>机柜计算</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>GroupCalculationController</code></td><td>分组计算</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>DeviceProcessorController</code></td><td>设备处理器</td><td><span class="tag tag-blue">设备</span></td></tr>
+  <tr><td><code>DevStatusDccController</code></td><td>DC/DC 状态</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>DevStatusDccLoopController</code></td><td>DC 回路状态</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>DevStatusAcController</code></td><td>AC/DC 状态</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>DevStatusAcLoopController</code></td><td>AC 回路状态</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>DevProtocol01/03/05/06Controller</code></td><td>协议数据查询</td><td><span class="tag tag-green">状态</span></td></tr>
+  <tr><td><code>MethodTimeController</code></td><td>方法耗时统计</td><td><span class="tag tag-purple">监控</span></td></tr>
+  <tr><td><code>FileController</code></td><td>文件上传</td><td><span class="tag tag-purple">工具</span></td></tr>
+</table>
+</section>
+
+<!-- ──── 11. 部署架构 ──── -->
+<section id="deploy">
+<h2><span class="icon">🚀</span> 11. 部署架构</h2>
+
+<h3>11.1 部署方式</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>🖥️ Windows 单机部署</h4>
+    <p>Java JAR 直接运行 + Nginx 反向代理前端静态资源，适合小型项目/演示环境</p>
+  </div>
+  <div class="card">
+    <h4>🐳 Docker Compose</h4>
+    <p>MySQL + Redis + EMQX + 应用容器编排，一键启动完整环境</p>
+  </div>
+</div>
+
+<h3>11.2 端口规划</h3>
+<table>
+  <tr><th>服务</th><th>端口</th><th>协议</th></tr>
+  <tr><td>Nginx (前端)</td><td>80</td><td>HTTP</td></tr>
+  <tr><td>Spring Boot (后端 API)</td><td>8081</td><td>HTTP</td></tr>
+  <tr><td>MQTT Broker (EMQX)</td><td>1883</td><td>MQTT</td></tr>
+  <tr><td>Modbus TCP (主站)</td><td>1503</td><td>Modbus TCP</td></tr>
+  <tr><td>Modbus TCP (从站/BAS)</td><td>1504</td><td>Modbus TCP</td></tr>
+  <tr><td>MySQL</td><td>3306</td><td>TCP</td></tr>
+  <tr><td>Redis</td><td>6379</td><td>TCP</td></tr>
+  <tr><td>XXL-JOB Admin</td><td>8082</td><td>HTTP</td></tr>
+  <tr><td>Spring Boot Admin</td><td>9090</td><td>HTTP</td></tr>
+</table>
+
+<h3>11.3 多环境配置</h3>
+<table>
+  <tr><th>环境</th><th>Profile</th><th>说明</th></tr>
+  <tr><td>本地开发</td><td><code>local</code></td><td>开发机本地调试</td></tr>
+  <tr><td>开发环境</td><td><code>dev</code></td><td>默认激活，开发服务器</td></tr>
+  <tr><td>生产环境</td><td><code>prod</code></td><td>生产部署</td></tr>
+</table>
+</section>
+
+<!-- ──── 12. 数据流全景 ──── -->
+<section id="data-flow">
+<h2><span class="icon">🔄</span> 12. 数据流全景</h2>
+
+<h3>12.1 设备数据上行流</h3>
+<div class="diagram">设备硬件
+  │
+  │ ① MQTT 心跳上报 (JSON)
+  ▼
+EMQX Broker (:1883)
+  │
+  │ ② Spring Integration MQTT
+  ▼
+MqttMessageHandler
+  │
+  ├──③ 解析 Topic → 设备ID + 功能码
+  │
+  ├──④ 分发到 AddrHandler (mqtt03/addr03/handler/addr0x****/)
+  │     ├── Addr0x0000 — 基础状态
+  │     ├── Addr0x0004 — DC 回路状态
+  │     ├── Addr0x0022 — AC 状态
+  │     ├── Addr0x2100 — 能耗数据
+  │     └── ... (20+ 地址处理器)
+  │
+  ├──⑤ 更新 Redis 缓存 (DeviceCache, LightingCache, etc.)
+  │
+  ├──⑥ 写入 MySQL (DevStatusDcc, DevStatusAc, DevFaultRecord, etc.)
+  │
+  └──⑦ WebSocket 推送 → 前端实时刷新
+       │
+       ▼
+     Vue 页面 (baseStatus, device/dev)</div>
+
+<h3>12.2 控制指令下行流</h3>
+<div class="diagram">前端操作 (点击开关/设置参数)
+  │
+  │ ① HTTP POST /api/zm/write/*
+  ▼
+WriteControlController / WriteDeviceController
+  │
+  │ ② Service 层组装指令
+  ▼
+DevInstruct (指令队列入库)
+  │
+  │ ③ 异步发送
+  ├──▶ MQTT: MqttPublisher.publish() → EMQX → 设备
+  │
+  └──▶ Modbus TCP: WriteBusinessService.Business()
+        ├── FC05 (写线圈 — 开关控制)
+        └── FC06 (写寄存器 — 参数设置)
+              │
+              ▼
+        DevWriteInstruct (写入结果记录)</div>
+</section>
+
+<!-- ──── 13. 架构评价 ──── -->
+<section id="roadmap">
+<h2><span class="icon">📐</span> 13. 架构评价与建议</h2>
+
+<h3>13.1 架构优势</h3>
+<div class="card-grid">
+  <div class="card">
+    <h4>✅ 成熟框架</h4>
+    <p>基于 RuoYi-Vue-Plus v4.8.0，开箱即用的 RBAC 权限、日志、代码生成等基础能力</p>
+  </div>
+  <div class="card">
+    <h4>✅ 多协议支持</h4>
+    <p>MQTT + Modbus TCP + HTTP REST 三协议并行，灵活对接各类设备与第三方系统</p>
+  </div>
+  <div class="card">
+    <h4>✅ 高性能缓存</h4>
+    <p>Redis + Caffeine 二级缓存，20+ 精细化缓存类覆盖所有高频读取场景</p>
+  </div>
+  <div class="card">
+    <h4>✅ 实时推送</h4>
+    <p>WebSocket 设备状态实时推送，用户无需轮询即可获取最新状态</p>
+  </div>
+</div>
+
+<h3>13.2 改进建议</h3>
+<table>
+  <tr><th>类别</th><th>现状</th><th>建议</th></tr>
+  <tr>
+    <td><span class="tag tag-orange">前端框架</span></td>
+    <td>Vue 2.6 已进入维护模式</td>
+    <td>中期规划迁移至 Vue 3 + Composition API，Element Plus</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-orange">模块职责</span></td>
+    <td>ruoyi-zm 模块承载了通信、缓存、业务全部逻辑</td>
+    <td>可拆分为 ruoyi-zm-device (设备)、ruoyi-zm-protocol (协议)、ruoyi-zm-control (控制)</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-orange">单元测试</span></td>
+    <td>测试覆盖较少</td>
+    <td>补充 Service 层单元测试，特别是协议解析与缓存逻辑</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-purple">可观测性</span></td>
+    <td>已有 Spring Boot Admin</td>
+    <td>可接入 Prometheus + Grafana 做更细粒度的指标监控</td>
+  </tr>
+  <tr>
+    <td><span class="tag tag-purple">文档</span></td>
+    <td>docs/ 目录已有协议文档</td>
+    <td>补充 API 接口文档 (可利用 SpringDoc 自动生成)、部署运维手册</td>
+  </tr>
+</table>
+</section>
+
+</div><!-- .content -->
+</div><!-- .main-grid -->
+</div><!-- .container -->
+
+<footer class="footer">
+  <div class="container">
+    <p>PM6-ZM 直流照明监控系统 · 项目架构文档 · 生成于 2026-06-06</p>
+    <p>基于代码仓库自动分析生成，如有疑问请以源码为准</p>
+  </div>
+</footer>
+
+<!-- Smooth scroll -->
+<script>
+document.querySelectorAll('.toc a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.toc a').forEach(x => x.classList.remove('active'));
+    a.classList.add('active');
+  });
+});
+// Highlight on scroll
+const sections = document.querySelectorAll('section[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('active'));
+      const active = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+      if (active) active.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach(s => observer.observe(s));
+</script>
+</body>
+</html>

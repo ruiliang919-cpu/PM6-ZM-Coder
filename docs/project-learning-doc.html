@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM6-ZM 直流照明监控系统 — 深度学习文档</title>
+<style>
+  :root {
+    --primary: #1565c0;
+    --primary-dark: #0d47a1;
+    --primary-light: #e3f2fd;
+    --accent: #2e7d32;
+    --accent-light: #e8f5e9;
+    --warn: #e65100;
+    --warn-light: #fff3e0;
+    --danger: #c62828;
+    --danger-light: #ffebee;
+    --purple: #6a1b9a;
+    --purple-light: #f3e5f5;
+    --bg: #f5f6fa;
+    --card: #fff;
+    --text: #1a1a2e;
+    --text-sec: #555;
+    --border: #e0e0e0;
+    --code-bg: #1e1e2e;
+    --code-text: #cdd6f4;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75; font-size: 15px; }
+
+  /* ─── Hero ─── */
+  .hero { background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 40%, #415a77 100%);
+    color: #fff; padding: 56px 0 44px; text-align: center; }
+  .hero h1 { font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px; }
+  .hero .sub { font-size: 1rem; opacity: .7; margin-top: 6px; }
+  .hero .badges { margin-top: 16px; display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .hero .b { display: inline-block; padding: 3px 12px; border-radius: 16px; font-size: .78rem; font-weight: 600;
+    border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.08); }
+
+  /* ─── Layout ─── */
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+  .main-grid { display: grid; grid-template-columns: 240px 1fr; gap: 28px; margin-top: -28px; }
+
+  /* ─── TOC ─── */
+  .toc { position: sticky; top: 16px; align-self: start; background: var(--card); border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06); padding: 16px 0; max-height: calc(100vh - 32px); overflow-y: auto; }
+  .toc-h { font-size: .7rem; text-transform: uppercase; letter-spacing: 1px; color: #999; padding: 0 16px 8px; border-bottom: 1px solid #eee; }
+  .toc a { display: block; padding: 5px 16px; font-size: .82rem; color: var(--text-sec); text-decoration: none;
+    border-left: 3px solid transparent; transition: .15s; }
+  .toc a:hover, .toc a.on { color: var(--primary); background: var(--primary-light); border-left-color: var(--primary); }
+  .toc .sub-a { padding-left: 28px; font-size: .78rem; }
+
+  /* ─── Sections ─── */
+  .content { min-width: 0; }
+  section { background: var(--card); border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    padding: 28px 32px; margin-bottom: 24px; }
+  section > h2 { font-size: 1.4rem; color: var(--primary-dark); margin-bottom: 16px; padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-light); }
+  h3 { font-size: 1.1rem; color: #1a237e; margin: 20px 0 10px; }
+  h4 { font-size: 1rem; color: var(--text); margin: 14px 0 6px; }
+  p { margin-bottom: 10px; }
+  ul, ol { padding-left: 20px; margin-bottom: 12px; }
+  li { margin-bottom: 3px; }
+
+  /* ─── Tables ─── */
+  table { width: 100%; border-collapse: collapse; margin: 12px 0 16px; font-size: .88rem; }
+  th { background: #e8eaf6; color: #283593; font-weight: 600; text-align: left; padding: 8px 12px; }
+  td { padding: 7px 12px; border-bottom: 1px solid #f0f0f0; }
+  tr:hover td { background: #f8f9ff; }
+
+  /* ─── Code ─── */
+  pre { background: var(--code-bg); color: var(--code-text); border-radius: 8px; padding: 16px 20px;
+    overflow-x: auto; font-size: .82rem; line-height: 1.6; margin: 10px 0 14px;
+    font-family: "Fira Code", "Cascadia Code", Consolas, monospace; }
+  code { font-family: "Fira Code", "Cascadia Code", Consolas, monospace; }
+  :not(pre) > code { background: #eef; padding: 1px 5px; border-radius: 3px; font-size: .85rem; color: #5c2d91; }
+
+  /* ─── Diagram ─── */
+  .diagram { background: #0d1117; color: #79c0ff; border-radius: 10px; padding: 22px 26px;
+    font-family: "Fira Code", Consolas, monospace; font-size: .78rem; line-height: 1.5;
+    overflow-x: auto; margin: 14px 0; white-space: pre; }
+  .diagram .hl { color: #ffa657; }
+  .diagram .grn { color: #7ee787; }
+  .diagram .red { color: #ff7b72; }
+  .diagram .pur { color: #d2a8ff; }
+  .diagram .dim { color: #484f58; }
+  .diagram .cyn { color: #a5d6ff; }
+  .diagram .ylw { color: #e3b341; }
+
+  /* ─── Boxes ─── */
+  .info-box { background: #e3f2fd; border-left: 4px solid #1565c0; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: .9rem; }
+  .warn-box { background: #fff8e1; border-left: 4px solid #f9a825; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: .9rem; }
+  .key-box { background: #f3e5f5; border-left: 4px solid #7b1fa2; padding: 12px 16px; border-radius: 0 6px 6px 0; margin: 12px 0; font-size: .9rem; }
+
+  /* ─── Tags ─── */
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: .75rem; font-weight: 600; margin-right: 3px; }
+  .tag-b { background: #e3f2fd; color: #1565c0; }
+  .tag-g { background: #e8f5e9; color: #2e7d32; }
+  .tag-o { background: #fff3e0; color: #e65100; }
+  .tag-p { background: #f3e5f5; color: #7b1fa2; }
+  .tag-r { background: #ffebee; color: #c62828; }
+
+  /* ─── Cards ─── */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; margin: 14px 0; }
+  .card { background: #f8f9ff; border: 1px solid #e8eaf6; border-radius: 8px; padding: 16px; }
+  .card h4 { margin: 0 0 6px; color: #283593; }
+  .card p { font-size: .85rem; color: var(--text-sec); margin: 0; }
+
+  /* ─── Flow step ─── */
+  .flow { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+  .flow-step { display: flex; gap: 14px; position: relative; }
+  .flow-step::before { content: ''; position: absolute; left: 15px; top: 32px; bottom: -8px; width: 2px; background: #e0e0e0; }
+  .flow-step:last-child::before { display: none; }
+  .flow-dot { width: 32px; height: 32px; border-radius: 50%; background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0; z-index: 1; }
+  .flow-body { padding: 4px 0 20px; }
+  .flow-body strong { color: var(--primary-dark); }
+  .flow-body .file { color: var(--purple); font-size: .82rem; }
+
+  /* ─── Footer ─── */
+  .footer { text-align: center; padding: 28px 0; color: #999; font-size: .78rem; }
+
+  @media (max-width: 860px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .toc { position: static; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container">
+    <h1>⚡ PM6-ZM 直流照明监控系统</h1>
+    <p class="sub">深度学习文档 · 从架构到源码的完整数据流解析</p>
+    <div class="badges">
+      <span class="b">总分总结构</span>
+      <span class="b">数据流追踪</span>
+      <span class="b">源码级解析</span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+<div class="main-grid">
+
+<!-- ══════════════════ TOC ══════════════════ -->
+<nav class="toc">
+  <div class="toc-h">目录导航</div>
+  <a href="#part1"><strong>上篇 · 全局鸟瞰</strong></a>
+  <a href="#p1-1" class="sub-a">1.1 系统全景图</a>
+  <a href="#p1-2" class="sub-a">1.2 核心数据流总览</a>
+  <a href="#p1-3" class="sub-a">1.3 模块依赖地图</a>
+  <a href="#part2"><strong>中篇 · 模块深潜</strong></a>
+  <a href="#p2-1" class="sub-a">2.1 MQTT 消息处理链</a>
+  <a href="#p2-2" class="sub-a">2.2 AddrHandler 工厂分发</a>
+  <a href="#p2-3" class="sub-a">2.3 缓存体系</a>
+  <a href="#p2-4" class="sub-a">2.4 控制指令下行流</a>
+  <a href="#p2-5" class="sub-a">2.5 Modbus TCP 通信</a>
+  <a href="#p2-6" class="sub-a">2.6 数据持久化</a>
+  <a href="#p2-7" class="sub-a">2.7 设备在线检测</a>
+  <a href="#p2-8" class="sub-a">2.8 WebSocket 实时推送</a>
+  <a href="#part3"><strong>下篇 · 融会贯通</strong></a>
+  <a href="#p3-1" class="sub-a">3.1 Redis Key 全景表</a>
+  <a href="#p3-2" class="sub-a">3.2 完整链路追踪</a>
+  <a href="#p3-3" class="sub-a">3.3 架构设计模式</a>
+</nav>
+
+<!-- ══════════════════ CONTENT ══════════════════ -->
+<div class="content">
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    上篇 · 全局鸟瞰                           ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+
+<section id="part1">
+<h2>🔭 上篇 · 全局鸟瞰</h2>
+<p>在深入任何模块之前，先建立整体认知。本章用三张图让你知道：这个系统在做什么、数据怎么流动、模块之间怎么咬合。</p>
+</section>
+
+<section id="p1-1">
+<h3>1.1 系统全景图 — 这个系统到底在干什么？</h3>
+<p>PM6-ZM 的核心使命是：<strong>让多台直流照明机柜的开关、调光、场景、定时、告警，在一个平台上集中管控</strong>。</p>
+
+<div class="diagram"><span class="dim">┌─────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│</span>                         <span class="hl">物理世界 (Physical World)</span>                              <span class="dim">│</span>
+<span class="dim">│</span>                                                                                 <span class="dim">│</span>
+<span class="dim">│</span>   ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐          <span class="dim">│</span>
+<span class="dim">│</span>   │  <span class="grn">电源柜 #1</span>   │  │  <span class="grn">配电柜 #2</span>   │  │  <span class="grn">配电柜 #3</span>   │  │  <span class="grn">配电柜 #N</span>   │          <span class="dim">│</span>
+<span class="dim">│</span>   │             │  │  ┌──┐┌──┐   │  │  ┌──┐┌──┐   │  │             │          <span class="dim">│</span>
+<span class="dim">│</span>   │ AC/DC模块   │  │  │灯││灯│   │  │  │灯││灯│   │  │   ...       │          <span class="dim">│</span>
+<span class="dim">│</span>   │ DC/DC模块   │  │  └──┘└──┘   │  │  └──┘└──┘   │  │             │          <span class="dim">│</span>
+<span class="dim">│</span>   │ 电能表      │  │  红外传感器   │  │  照度传感器   │  │             │          <span class="dim">│</span>
+<span class="dim">│</span>   └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘          <span class="dim">│</span>
+<span class="dim">│</span>          │ MQTT            │ MQTT            │ MQTT            │ MQTT            <span class="dim">│</span>
+<span class="dim">└──────────┼─────────────────┼─────────────────┼─────────────────┼────────────────┘</span>
+           │                 │                 │                 │
+           ▼                 ▼                 ▼                 ▼
+<span class="dim">┌─────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│</span>                              <span class="hl">PM6-ZM 服务端</span>                                     <span class="dim">│</span>
+<span class="dim">│</span>                                                                                 <span class="dim">│</span>
+<span class="dim">│</span>   ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐ <span class="dim">│</span>
+<span class="dim">│</span>   │ <span class="red">MQTT 处理链</span>  │    │ <span class="pur">缓存体系</span>    │    │ <span class="grn">控制下发链</span>  │    │ <span class="cyn">数据持久化</span>  │ <span class="dim">│</span>
+<span class="dim">│</span>   │              │───▶│  Redis       │◀───│              │───▶│  MySQL       │ <span class="dim">│</span>
+<span class="dim">│</span>   │ 解析→分发→   │    │  Caffeine    │    │ API→组装→    │    │  状态/配置/  │ <span class="dim">│</span>
+<span class="dim">│</span>   │ 更新缓存     │    │              │    │ MQTT/Modbus  │    │  告警/能耗   │ <span class="dim">│</span>
+<span class="dim">│</span>   └──────┬───────┘    └──────────────┘    └──────────────┘    └──────────────┘ <span class="dim">│</span>
+<span class="dim">│</span>          │ WebSocket                                                              <span class="dim">│</span>
+<span class="dim">│</span>          ▼                                                                        <span class="dim">│</span>
+<span class="dim">│</span>   ┌──────────────┐                                                               <span class="dim">│</span>
+<span class="dim">│</span>   │ <span class="ylw">实时推送</span>     │                                                               <span class="dim">│</span>
+<span class="dim">│</span>   └──────────────┘                                                               <span class="dim">│</span>
+<span class="dim">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+           │ WebSocket
+           ▼
+<span class="dim">┌─────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│</span>                            <span class="hl">前端 (Vue 2 + Electron)</span>                             <span class="dim">│</span>
+<span class="dim">│</span>   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐      <span class="dim">│</span>
+<span class="dim">│</span>   │ 设备状态看板  │  │ 照明控制面板  │  │ 场景/定时配置 │  │ 告警/能耗报表│      <span class="dim">│</span>
+<span class="dim">│</span>   └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘      <span class="dim">│</span>
+<span class="dim">└─────────────────────────────────────────────────────────────────────────────────┘</span></div>
+
+<div class="key-box">
+<strong>核心业务抽象：</strong>系统围绕 <code>机柜(Device)</code> → <code>回路(Loop)</code> → <code>分组(Group)</code> → <code>分区(Zone)</code> → <code>场景(Scene)</code> 五级层次构建。一个场景可以控制多个分区，一个分区关联多个分组，一个分组包含多个回路，每个回路属于一台机柜。
+</div>
+</section>
+
+<section id="p1-2">
+<h3>1.2 核心数据流总览 — 四条主干道</h3>
+<p>整个系统的所有代码，本质上服务于四条数据流：</p>
+
+<div class="diagram"><span class="hl">数据流 ①  设备状态上行 (MQTT)</span>
+设备 → EMQX → <span class="red">MqttMessageHandler</span> → <span class="pur">MainChannel</span> → <span class="grn">AddrHandler</span> → Redis缓存 + MySQL + WebSocket推送
+
+<span class="hl">数据流 ②  设备状态上行 (Modbus轮询)</span>
+<span class="cyn">ModbusTCPManager</span> → FC03读寄存器 → <span class="pur">Update03DataService</span> → MySQL
+
+<span class="hl">数据流 ③  控制指令下行</span>
+前端HTTP → <span class="red">WriteControlController</span> → <span class="pur">WriteControlService</span> → MqttPublisher(MQTT) / WriteQueueCache→<span class="grn">WriteBusinessService</span>(Modbus)
+
+<span class="hl">数据流 ④  前端状态查询</span>
+前端HTTP → Controller → <span class="cyn">Key/Cache类</span> → Redis → 组装VO → 返回前端</div>
+
+<table>
+  <tr><th>数据流</th><th>触发方</th><th>通信协议</th><th>核心类</th><th>最终落点</th></tr>
+  <tr><td>① MQTT上行</td><td>设备心跳/数据上报</td><td>MQTT</td><td>MqttMessageHandler → AddrHandler</td><td>Redis + MySQL + WebSocket</td></tr>
+  <tr><td>② Modbus上行</td><td>服务端主动轮询</td><td>Modbus TCP</td><td>TelemeterSendService → Update03DataService</td><td>Redis + MySQL</td></tr>
+  <tr><td>③ 控制下行</td><td>前端用户操作</td><td>MQTT / Modbus</td><td>WriteControlService → MqttPublisher</td><td>设备硬件</td></tr>
+  <tr><td>④ 状态查询</td><td>前端页面加载</td><td>HTTP REST</td><td>Controller → Key/Cache类</td><td>前端展示</td></tr>
+</table>
+</section>
+
+<section id="p1-3">
+<h3>1.3 模块依赖地图 — 谁调用谁？</h3>
+<div class="diagram"><span class="dim">                        ┌──────────────────────────────┐</span>
+<span class="dim">                        │</span>        <span class="hl">Controller 层</span>         <span class="dim">│</span>
+<span class="dim">                        │</span>  WriteControlController     <span class="dim">│</span>
+<span class="dim">                        │</span>  HomeController             <span class="dim">│</span>
+<span class="dim">                        │</span>  LightingController ...     <span class="dim">│</span>
+<span class="dim">                        └─────────────┬────────────────┘</span>
+                                      │ 调用
+<span class="dim">                        ┌─────────────▼────────────────┐</span>
+<span class="dim">                        │</span>        <span class="grn">Service 层</span>           <span class="dim">│</span>
+<span class="dim">                        │</span>  WriteControlService         <span class="dim">│</span>
+<span class="dim">                        │</span>  HomeService                 <span class="dim">│</span>
+<span class="dim">                        │</span>  LightingService ...         <span class="dim">│</span>
+<span class="dim">                        └────┬──────────┬─────────────┘</span>
+                             │          │
+              ┌──────────────▼──┐  ┌────▼──────────────┐
+              │  <span class="red">MQTT 发送层</span>   │  │  <span class="pur">缓存访问层</span>       │
+              │  MqttPublisher  │  │  Key / Keys        │
+              │  PublishKey     │  │  DeviceCache       │
+              └─────────────────┘  │  LightingCache     │
+                                   │  WriteQueueCache   │
+              ┌─────────────────┐  └────────┬──────────┘
+              │  <span class="red">MQTT 接收层</span>   │           │ 读写
+              │  MqttMessage    │  ┌────────▼──────────┐
+              │  Handler        │  │  <span class="cyn">Redis</span>            │
+              │       │         │  │  5种数据类型        │
+              │       ▼         │  │  20+ Key模式       │
+              │  MainChannel    │  └────────┬──────────┘
+              │       │         │           │ 回写
+              │       ▼         │  ┌────────▼──────────┐
+              │  AddrHandler    │  │  <span class="cyn">MySQL</span>            │
+              │  Factory        │  │  Update03DataService│
+              │  (20+ handler)  │  │  Mapper层          │
+              └─────────────────┘  └───────────────────┘
+
+              ┌─────────────────┐
+              │  <span class="ylw">Modbus 层</span>      │
+              │  ModbusTCPMgr   │
+              │  Slave (从站)    │
+              │  WriteBusiness  │
+              │  Service        │
+              └─────────────────┘</div>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    中篇 · 模块深潜                           ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+
+<section id="part2">
+<h2>🔬 中篇 · 模块深潜</h2>
+<p>每个模块按统一结构讲解：<strong>职责 → 入口 → 数据流 → 关键代码 → 设计意图</strong>。让你不仅知道"是什么"，更知道"怎么跑的"。</p>
+</section>
+
+<!-- ──────── 2.1 MQTT 消息处理链 ──────── -->
+<section id="p2-1">
+<h3>2.1 MQTT 消息处理链 — 数据从设备到系统的入口</h3>
+
+<h4>职责</h4>
+<p>接收 EMQX Broker 转发的设备 MQTT 消息，解析 Topic 路由到对应处理逻辑。</p>
+
+<h4>入口类</h4>
+<p><code>MqttMessageHandler</code> <span class="tag tag-r">ruoyi-zm</span> <code>server/ruoyi-zm/src/main/java/com/ruoyi/mqtt/MqttMessageHandler.java</code></p>
+
+<h4>数据流追踪</h4>
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-dot">1</div>
+    <div class="flow-body">
+      <strong>Spring Integration 接收 MQTT 消息</strong><br>
+      <code>@ServiceActivator(inputChannel = "mqttInputChannel")</code> 标注的 <code>handleMqttMessage()</code> 方法被 Spring Integration 自动调用。
+      <div class="file">MqttMessageHandler.java:54</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">2</div>
+    <div class="flow-body">
+      <strong>解析 Topic，提取设备编号</strong><br>
+      Topic 格式: <code>设备类型/网关IP/设备标识/功能后缀</code><br>
+      通过 <code>parts[2]</code> 获取设备 IP，再用 <code>DListUtil.ipMapX()</code> 映射到 <code>deviceNo</code>。
+      <div class="file">MqttMessageHandler.java:56-65</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">3</div>
+    <div class="flow-body">
+      <strong>按功能后缀分发 (handleEvent)</strong><br>
+      <code>event.getEnd()</code> 是 Topic 的最后一段，决定消息类型：
+      <div class="file">MqttMessageHandler.java:74-92</div>
+    </div>
+  </div>
+</div>
+
+<table>
+  <tr><th>Topic 后缀</th><th>含义</th><th>处理方法</th><th>数据去向</th></tr>
+  <tr><td><code>heart</code></td><td>设备心跳</td><td><code>handleHeartbeat()</code></td><td>Redis 缓存 + WebSocket 推送</td></tr>
+  <tr><td><code>holding</code></td><td>保持寄存器数据</td><td><code>MainChannel.handleHoldingRegister()</code></td><td>→ AddrHandlerFactory → 具体 Handler</td></tr>
+  <tr><td><code>coil</code></td><td>线圈状态(遥控反馈)</td><td><code>handleCoilStatus()</code></td><td>→ TelecommandSendSchedule</td></tr>
+  <tr><td><code>connect</code></td><td>连接/断开事件</td><td><code>yz()</code></td><td>设备离线处理 + 告警记录</td></tr>
+  <tr><td><code>request</code></td><td>请求响应</td><td><code>MainChannel.handleRequest()</code></td><td>→ RequestHandlerFactory</td></tr>
+</table>
+
+<h4>心跳处理详解 (handleHeartbeat)</h4>
+<div class="info-box">
+心跳是最频繁的消息类型。每次心跳做三件事：<br>
+① 更新 Redis 中的 <code>DevBaseDeviceTCPVo</code> 缓存（onlineStatus、lastTime、version）<br>
+② 判断设备是否从离线恢复上线，如果是则清理故障缓存<br>
+③ 通过 <code>DeviceStatusPushService</code> 推送 WebSocket 状态变更
+</div>
+
+<pre><span class="dim">// MqttMessageHandler.java:104-172 心跳处理核心逻辑</span>
+<span class="kw">private void</span> handleHeartbeat(Integer deviceNo, String payload) {
+    Heart heart = JSONUtil.toBean(payload, Heart.class);     <span class="dim">// ① 解析心跳JSON</span>
+    DevBaseDeviceTCPVo tcp = tcpManager.getOneByCache(deviceNo); <span class="dim">// ② 从Redis取设备缓存</span>
+
+    <span class="kw">boolean</span> wasOffline = tcp.getOnlineStatus() == <span class="hl">0</span>;
+    <span class="kw">boolean</span> shouldGoOnline = heart.getData().getOnline();
+
+    <span class="kw">if</span> (wasOffline && shouldGoOnline) {
+        <span class="dim">// 设备从离线恢复 → 完整更新缓存 + 清理故障</span>
+        tcp.setOnlineStatus(<span class="hl">1</span>);
+        redisTemplate.opsForValue().set(<span class="grn">"zm:create-tcp:"</span> + deviceNo, tcp, <span class="hl">2</span>, DAYS);
+        redisTemplate.delete(<span class="grn">"zm:fault:"</span> + deviceNo + <span class="grn">":0xAAAA"</span>);
+    } <span class="kw">else</span> {
+        <span class="dim">// 设备已在线 → 仅刷新 lastTime</span>
+        tcp.setLastTime(<span class="kw">new</span> Date());
+        redisTemplate.opsForValue().set(<span class="grn">"zm:create-tcp:"</span> + deviceNo, tcp, <span class="hl">2</span>, DAYS);
+    }
+
+    deviceStatusPushService.pushDeviceStatus(deviceNo, tcp); <span class="dim">// ③ WebSocket推送</span>
+}</pre>
+
+<h4>离线处理详解 (yz 方法 — connect 事件)</h4>
+<p>当设备 MQTT 连接断开时，<code>yz()</code> 方法处理离线逻辑：</p>
+<ul>
+  <li>设置 <code>onlineStatus = 0</code>，更新 Redis 缓存</li>
+  <li>清除该设备的所有故障告警缓存 (<code>SCAN</code> 替代 <code>KEYS</code> 避免阻塞)</li>
+  <li>写入离线告警到 <code>DevFaultRecord</code> 数据库表</li>
+  <li>WebSocket 推送离线状态 + 告警</li>
+</ul>
+</section>
+
+<!-- ──────── 2.2 AddrHandler 工厂分发 ──────── -->
+<section id="p2-2">
+<h3>2.2 AddrHandler 工厂分发 — 按寄存器地址路由处理</h3>
+
+<h4>职责</h4>
+<p>将设备上报的保持寄存器数据，按寄存器地址分发到对应的处理器，更新缓存。</p>
+
+<h4>核心设计模式：Spring 自动注入 + 工厂</h4>
+<div class="diagram"><span class="hl">MQTT 消息到达 (holding 类型)</span>
+        │
+        ▼
+<span class="red">MainChannel.handleHoldingRegister()</span>          <span class="dim">// MainChannel.java:20</span>
+        │
+        │ 解析 JSON → 提取 addr 字段 (如 "0x001A")
+        │ 去掉 "0x" 前缀 → "001A"
+        ▼
+<span class="pur">AddrHandlerFactory.getHandler("001A")</span>          <span class="dim">// AddrHandlerFactory.java:14</span>
+        │
+        │ Spring 自动注入: Map&lt;String, AddrHandler&gt; handlers
+        │ 查找 key = "Addr" + "001A" + "Handler" = <span class="grn">"Addr001AHandler"</span>
+        │
+        ▼
+<span class="grn">Addr0x001AHandler.handle(deviceNo, payload)</span>    <span class="dim">// Addr0x001AHandler.java:26</span>
+        │
+        │ 解析数据 → 批量写入 Redis
+        │ Key格式: "zm:queue:zm:cache:3:{ip}:{deviceNo}:{addr}"
+        ▼
+<span class="cyn">Redis multiSet</span>  (批量更新缓存)</div>
+
+<div class="key-box">
+<strong>设计精髓：</strong><code>AddrHandlerFactory</code> 利用 Spring 的 <code>Map&lt;String, AddrHandler&gt;</code> 自动注入。所有 <code>@Service("Addr001AHandler")</code> 注解的实现类自动注册到 Map 中，Key 就是 Bean 名称。新增地址处理器只需新建一个类加 <code>@Service</code> 注解即可，<strong>零修改工厂代码</strong>。
+</div>
+
+<h4>三个典型 Handler 对比</h4>
+<table>
+  <tr><th>Handler</th><th>地址</th><th>数据格式</th><th>处理逻辑</th><th>落点</th></tr>
+  <tr>
+    <td><code>Addr0x0000Handler</code></td>
+    <td>0x0000</td>
+    <td>功率 + 损耗</td>
+    <td>解析为 power/loss，对比缓存变更后写入</td>
+    <td>Redis: <code>zm:power:power:{id}</code></td>
+  </tr>
+  <tr>
+    <td><code>Addr0x001AHandler</code></td>
+    <td>0x001A</td>
+    <td>批量寄存器值</td>
+    <td>将 Data 列表转为 Map，<code>multiSet</code> 批量写入</td>
+    <td>Redis: <code>zm:queue:zm:cache:3:{ip}:{id}:{addr}</code></td>
+  </tr>
+  <tr>
+    <td><code>Addr0x0004Handler</code></td>
+    <td>0x0004</td>
+    <td>能耗记录</td>
+    <td>按 type 分类(日/周/月/季/年)，去重后写入</td>
+    <td>MySQL: <code>dev_base_power</code> 表</td>
+  </tr>
+</table>
+
+<h4>Handler 实现清单 (20+ 个)</h4>
+<div class="card-grid">
+  <div class="card"><h4>0x0000</h4><p>总功率 / 损耗</p></div>
+  <div class="card"><h4>0x0004</h4><p>能耗记录 (日/周/月/季/年)</p></div>
+  <div class="card"><h4>0x001A</h4><p>母线电压/电流等批量数据</p></div>
+  <div class="card"><h4>0x0022</h4><p>调光回路数量</p></div>
+  <div class="card"><h4>0x0025-0x0028</h4><p>模块数量配置</p></div>
+  <div class="card"><h4>0x0600</h4><p>馈线支路名称</p></div>
+  <div class="card"><h4>0x2100</h4><p>照度传感器配置</p></div>
+  <div class="card"><h4>0x23B4</h4><p>分组信息</p></div>
+  <div class="card"><h4>0xA483</h4><p>场景名称</p></div>
+  <div class="card"><h4>0xA5AE</h4><p>分区-分组映射</p></div>
+  <div class="card"><h4>0xA80A</h4><p>普通时控配置</p></div>
+  <div class="card"><h4>0xB715</h4><p>远程控制模式状态</p></div>
+</div>
+</section>
+
+<!-- ──────── 2.3 缓存体系 ──────── -->
+<section id="p2-3">
+<h3>2.3 缓存体系 — 系统的"记忆"</h3>
+
+<h4>职责</h4>
+<p>用 Redis 缓存所有高频读取的设备数据，避免每次都查 MySQL。<code>Key</code> 类是整个缓存体系的<strong>统一访问入口</strong>。</p>
+
+<h4>Redis Key 五层结构</h4>
+<div class="diagram"><span class="hl">zm:create-tcp:{deviceNo}</span>               <span class="dim">← 设备连接信息 (DevBaseDeviceTCPVo)</span>
+<span class="grn">zm:queue:zm:cache:1:{ip}:{id}:0x0000</span>  <span class="dim">← 遥控数据 (boolean[] 线圈状态数组, 845位)</span>
+<span class="cyn">zm:queue:zm:cache:3:{ip}:{id}:{addr}</span>  <span class="dim">← 遥测数据 (BigDecimal/short[]/List)</span>
+<span class="pur">zm:queue:zm:cache:63:{ip}:{id}:{addr}</span> <span class="dim">← 遥调数据 (配置参数、控制参数)</span>
+<span class="ylw">zm:fault:{deviceNo}:{addr}</span>             <span class="dim">← 故障告警缓存</span>
+<span class="red">zm:power:power:{deviceNo}</span>              <span class="dim">← 功率缓存</span>
+<span class="red">zm:power:loss:{deviceNo}</span>               <span class="dim">← 损耗缓存</span>
+<span class="dim">zm:order:{deviceNo}:1:{addr}</span>           <span class="dim">← 待发送指令标记</span>
+<span class="dim">zm:select:group:{deviceNo}</span>             <span class="dim">← 分组选择状态</span>
+<span class="dim">zm:select:loop:{deviceNo}</span>              <span class="dim">← 回路选择状态</span>
+<span class="dim">zm:workModule</span>                          <span class="dim">← 工作模式 (Hash)</span>
+<span class="dim">zm:global:module:select</span>                <span class="dim">← 全局模式 ("on-the-line" = 远程控制中)</span>
+<span class="dim">zm:global:scene:select</span>                 <span class="dim">← 全局场景选择</span></div>
+
+<h4>Key 类 — 统一缓存访问入口</h4>
+<p><code>Key</code> 类 (<span class="tag tag-p">ruoyi-zm/cache/Key.java</span>) 封装了所有 Redis 读取操作，是整个系统使用最频繁的类：</p>
+
+<pre><span class="dim">// Key.java 核心方法</span>
+<span class="kw">public static final</span> String TCP_KEY       = <span class="grn">"zm:create-tcp:"</span>;
+<span class="kw">public static final</span> String TELEMETER_KEY  = <span class="grn">"zm:queue:zm:cache:3:"</span>;  <span class="dim">// 遥测</span>
+<span class="kw">public static final</span> String TELECOMMAND_KEY = <span class="grn">"zm:queue:zm:cache:1:"</span>;  <span class="dim">// 遥控</span>
+<span class="kw">public static final</span> String REMOTE_KEY     = <span class="grn">"zm:queue:zm:cache:63:"</span>; <span class="dim">// 遥调</span>
+
+<span class="dim">// 读取设备连接信息 (先查Redis，未命中则查MySQL并回填)</span>
+<span class="kw">public</span> DevBaseDeviceTCPVo getCreateTCP(Integer deviceNo) { ... }
+
+<span class="dim">// 读取遥测数据 (寄存器值)</span>
+<span class="kw">public</span> Object getTelemeter(Integer deviceId, String addr) {
+    <span class="kw">return</span> redisTemplate.opsForValue()
+        .get(TELEMETER_KEY + getCreateTCP(deviceId).getIp() + <span class="grn">":"</span> + deviceId + <span class="grn">":"</span> + addr);
+}
+
+<span class="dim">// 读取遥控数据 (线圈状态 boolean[])</span>
+<span class="kw">public boolean</span>[] getTelecommand(Integer deviceId) {
+    <span class="kw">return</span> booleanArrayRedisTemplate.opsForValue()
+        .get(TELECOMMAND_KEY + getCreateTCP(deviceId).getIp() + <span class="grn">":"</span> + deviceId + <span class="grn">":0x0000"</span>);
+}
+
+<span class="dim">// 读取单个线圈状态 (下标访问)</span>
+<span class="kw">public int</span> getTelecommand(Integer deviceId, <span class="kw">int</span> index) {
+    <span class="kw">boolean</span>[] booleans = getTelecommand(deviceId);
+    <span class="kw">return</span> (booleans == <span class="kw">null</span>) ? <span class="hl">0</span> : (booleans[index] ? <span class="hl">1</span> : <span class="hl">0</span>);
+}</pre>
+
+<h4>WriteQueueCache — 指令队列缓存</h4>
+<p><code>WriteQueueCache</code> 管理控制指令的缓存，包括待发送队列、分组选择、工作模式等：</p>
+<ul>
+  <li><code>pushInstruction()</code> — 将指令推入 Redis List 队列</li>
+  <li><code>setQueueCache()</code> — 缓存遥调配置参数</li>
+  <li><code>setGroupSelect() / setLoopSelect()</code> — 缓存用户选择的分组/回路</li>
+  <li><code>setWorkModule()</code> — 设置当前工作模式</li>
+</ul>
+
+<h4>ModuleGuard — 远程控制模式守卫</h4>
+<p>当 Redis 中 <code>zm:global:module:select</code> 值为 <code>"on-the-line"</code> 时，所有控制指令下发接口返回警告，防止远程调试期间误操作。</p>
+</section>
+
+<!-- ──────── 2.4 控制指令下行流 ──────── -->
+<section id="p2-4">
+<h3>2.4 控制指令下行流 — 从用户点击到设备执行</h3>
+
+<h4>职责</h4>
+<p>将前端用户的控制操作（开关灯、调光、切场景等）转化为设备可识别的指令并发送。</p>
+
+<h4>完整链路追踪：分区开关灯</h4>
+<div class="flow">
+  <div class="flow-step">
+    <div class="flow-dot">1</div>
+    <div class="flow-body">
+      <strong>前端 HTTP 请求</strong><br>
+      <code>GET /zm/write/control/updateZoneLightSwitch?type=1&amp;value=1</code>
+      <div class="file">WriteControlController.java:55</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">2</div>
+    <div class="flow-body">
+      <strong>ModuleGuard 安全检查</strong><br>
+      检查 Redis <code>zm:global:module:select</code>，如果是 <code>"on-the-line"</code> 则拒绝。
+      <div class="file">WriteControlController.java:56 → ModuleGuard.java:17</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">3</div>
+    <div class="flow-body">
+      <strong>WriteControlService 组装指令</strong><br>
+      ① 更新分区开关状态到 MySQL (<code>districtService.insertOrUpdate</code>)<br>
+      ② 查询分区关联的分组列表 (<code>zoneUtilCache.getGroupByZone</code>)<br>
+      ③ 确保设备处于手动模式 (<code>workModule → selectHandModule</code>)<br>
+      ④ 组装分组控制指令 (<code>groupControlSwitch</code>)
+      <div class="file">WriteControlService.java:254-287</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">4</div>
+    <div class="flow-body">
+      <strong>MQTT 发送</strong><br>
+      <code>MqttPublisher.publish()</code> 将指令序列化为 JSON，发送到 MQTT Broker。<br>
+      Topic: <code>设备类型/{ip末段}/设备ID/控制类型</code>，QoS=2（确保送达）。
+      <div class="file">MqttPublisher.java:27-43</div>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="flow-dot">5</div>
+    <div class="flow-body">
+      <strong>记录写入指令</strong><br>
+      <code>MqttPublisher.save()</code> 异步将指令写入 <code>dev_write_instruct</code> 表，用于审计追踪。
+      <div class="file">MqttPublisher.java:45-55</div>
+    </div>
+  </div>
+</div>
+
+<h4>WriteControlService 核心方法矩阵</h4>
+<table>
+  <tr><th>方法</th><th>功能</th><th>PublishKey</th></tr>
+  <tr><td><code>updateSimpleControl()</code></td><td>普通时控配置下发</td><td>普通时控</td></tr>
+  <tr><td><code>groupControlSwitch()</code></td><td>分组总开关</td><td>分组控制总开关</td></tr>
+  <tr><td><code>groupControlLux()</code></td><td>分组调光</td><td>分组控制总开关</td></tr>
+  <tr><td><code>loopControlSwitch()</code></td><td>单回路开关</td><td>回路总开关</td></tr>
+  <tr><td><code>loopControlLux()</code></td><td>单回路调光</td><td>回路总开关</td></tr>
+  <tr><td><code>updateAcControl()</code></td><td>交流开关控制</td><td>交流开关</td></tr>
+  <tr><td><code>updateAcDc() / updateDcDc()</code></td><td>AC/DC / DC/DC 输出电压设置</td><td>模块输出设置</td></tr>
+  <tr><td><code>workModule()</code></td><td>切换工作模式 (自动/手动)</td><td>工作模式</td></tr>
+  <tr><td><code>selectHandModule()</code></td><td>选择手动模式类型 (回路/分组/场景)</td><td>模式选择</td></tr>
+  <tr><td><code>updateZoneLightSwitchInternal()</code></td><td>分区开关灯 (遍历所有设备)</td><td>分组控制总开关</td></tr>
+</table>
+</section>
+
+<!-- ──────── 2.5 Modbus TCP 通信 ──────── -->
+<section id="p2-5">
+<h3>2.5 Modbus TCP 通信 — 工业协议通道</h3>
+
+<h4>职责</h4>
+<p>作为 Modbus TCP 主站主动连接设备读写数据，同时作为从站供 BAS 等第三方系统集成。</p>
+
+<h4>ModbusTCPManager — 连接池管理</h4>
+<p><span class="tag tag-b">ruoyi-zm/config/ModbusTCPManager.java</span> 管理所有设备的 Modbus TCP 连接：</p>
+<ul>
+  <li><code>ConcurrentHashMap&lt;Integer, ModbusMaster&gt; masterPool</code> — 连接池</li>
+  <li><code>getSlave(slaveId)</code> — 获取或创建连接（per-key 锁避免并发问题）</li>
+  <li><code>isMasterValid()</code> — 连接健康检查（3次重试）</li>
+  <li><code>getOneByCache()</code> — 先查 Redis，未命中则查 MySQL 并回填</li>
+</ul>
+
+<h4>从站模式 (BAS 集成)</h4>
+<p><code>Slave</code> 类在端口 1504 启动 Modbus TCP Slave，第三方系统可通过标准 Modbus 协议读取系统数据。</p>
+
+<h4>WriteBusinessService — Modbus 写入执行</h4>
+<p>处理指令队列中的 Modbus 写入操作：</p>
+<pre><span class="dim">// WriteBusinessService.java:36-88</span>
+<span class="kw">public void</span> Business(List&lt;DevInstruct&gt; instructs, ModbusMaster tcp, <span class="kw">int</span> slaveId) {
+    instructs.forEach(in -> {
+        <span class="kw">switch</span> (in.getCode()) {
+            <span class="kw">case</span> <span class="hl">5</span>:  <span class="dim">// FC05 — 写线圈 (开关控制)</span>
+                WriteCoilsResponse c = (WriteCoilsResponse) tcp.send(
+                    <span class="kw">new</span> WriteCoilsRequest(slaveId, addr, writeValue));
+                <span class="kw">break</span>;
+            <span class="kw">case</span> <span class="hl">6</span>:  <span class="dim">// FC06 — 写寄存器 (参数设置)</span>
+                WriteRegistersResponse r = (WriteRegistersResponse) tcp.send(
+                    <span class="kw">new</span> WriteRegistersRequest(slaveId, addr, writeValue));
+                <span class="kw">break</span>;
+        }
+    });
+    insertWriteInstruct(insertBatch);  <span class="dim">// 记录成功写入</span>
+    updateWriteInstruct(updateBatch);  <span class="dim">// 更新写入结果</span>
+}</pre>
+</section>
+
+<!-- ──────── 2.6 数据持久化 ──────── -->
+<section id="p2-6">
+<h3>2.6 数据持久化 — 从缓存到数据库</h3>
+
+<h4>职责</h4>
+<p>将设备上报的数据写入 MySQL 持久化存储。<code>Update03DataService</code> 是最大的数据持久化类（1480行），按寄存器地址分发写入逻辑。</p>
+
+<h4>核心设计：巨型 Switch-Case</h4>
+<p><code>Update03DataService.updateData(DevInstruct instruct, Object data)</code> 方法接收一条指令和数据，根据 <code>instruct.getAddr()</code> 路由到对应的写入逻辑：</p>
+
+<table>
+  <tr><th>地址范围</th><th>数据类型</th><th>目标表</th><th>写入方式</th></tr>
+  <tr><td><code>0x001A-0x002A</code></td><td>设备参数 (母线电压/电流/温度等)</td><td><code>dev_base_device</code></td><td><code>updateById</code></td></tr>
+  <tr><td><code>0x000E-0x0019</code></td><td>AC 回路状态 (Uab/Ubc/Uca/Ia/Ib/Ic)</td><td><code>dev_status_ac</code></td><td><code>insertOrUpdate</code></td></tr>
+  <tr><td><code>0x0400-0x0438</code></td><td>ACDC/DCDC 故障电压电流</td><td><code>dev_fault_acdc/dcdc</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0x04A0-0x0540</code></td><td>DC 回路状态 (亮度/电压/电流/温度)</td><td><code>dev_status_dcc_loop</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0x0600-0x0876</code></td><td>馈线支路名称 (64条)</td><td><code>dev_base_branch</code></td><td><code>insertOrUpdate</code></td></tr>
+  <tr><td><code>0xA000</code></td><td>设备时间</td><td><code>dev_config_time</code></td><td><code>insertOrUpdate</code></td></tr>
+  <tr><td><code>0xA1F0-0xA286</code></td><td>分组名称 (16组)</td><td><code>dev_config_group</code></td><td><code>insertOrUpdate</code></td></tr>
+  <tr><td><code>0xA483-0xA4DD</code></td><td>场景名称 (10个)</td><td><code>dev_base_scene</code></td><td><code>insertOrUpdate</code></td></tr>
+  <tr><td><code>0xA5AE</code></td><td>分区-分组映射</td><td><code>dev_config_district</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0xA80A-0xA89C</code></td><td>普通时控配置 (3套)</td><td><code>dev_config_time_control</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0xAAEE-0xAB6E</code></td><td>场景时控配置 (3套)</td><td><code>dev_config_time_control_scene</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0xAE7A-0xAE8F</code></td><td>红外/照度传感器配置</td><td><code>dev_config_infrared/illuminance_sensor</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0x2000</code></td><td>主监控版本</td><td><code>dev_base_device</code></td><td><code>updateById</code></td></tr>
+  <tr><td><code>0x23B4</code></td><td>分组信息</td><td><code>dev_config_group</code></td><td><code>insertOrUpdateBatch</code></td></tr>
+  <tr><td><code>0x23F5-0x264D</code></td><td>分组回路编号 (16组)</td><td><code>dev_group_loop</code></td><td><code>insertOrUpdate</code></td></tr>
+</table>
+
+<h4>能耗数据的多粒度存储</h4>
+<p><code>0x0000</code> 地址的能耗数据按时间粒度分别存储：</p>
+<ul>
+  <li><strong>日耗电</strong> → <code>dev_energy_meter_day</code>（每天一条，保留366天）</li>
+  <li><strong>周耗电</strong> → <code>dev_energy_meter_week</code>（每周一写入，保留10条）</li>
+  <li><strong>月耗电</strong> → <code>dev_energy_meter_month</code>（每月1号写入，保留10条）</li>
+  <li><strong>季耗电</strong> → <code>dev_energy_meter_quarter</code>（每季度首月1号，保留10条）</li>
+  <li><strong>年耗电</strong> → <code>dev_energy_meter_year</code>（每年1月1号，保留10条）</li>
+</ul>
+</section>
+
+<!-- ──────── 2.7 设备在线检测 ──────── -->
+<section id="p2-7">
+<h3>2.7 设备在线检测 — 心跳保活机制</h3>
+
+<h4>职责</h4>
+<p>定时扫描 Redis 中所有设备缓存，将超时未心跳的设备标记为离线。</p>
+
+<h4>双保险机制</h4>
+<div class="diagram"><span class="hl">机制一：MQTT 心跳 (主动上报)</span>
+设备每 N 秒发送 heart 消息 → MqttMessageHandler.handleHeartbeat() → 刷新 lastTime
+
+<span class="hl">机制二：定时扫描 (被动检测)</span>
+DeviceOnlineCheckTask (每30秒) → SCAN zm:create-tcp:* → 检查 lastTime
+                    │
+                    ├── lastTime 超过 60秒 → 二次确认(重新读Redis) → 标记离线
+                    └── lastTime 未超时 → 跳过</div>
+
+<p><code>DeviceOnlineCheckTask</code> (<span class="tag tag-r">ruoyi-zm/mqtt/DeviceOnlineCheckTask.java</span>) 使用 <code>SCAN</code> 遍历替代 <code>KEYS</code>，避免阻塞 Redis。离线阈值 60 秒，采用二次确认防止竞态条件。</p>
+</section>
+
+<!-- ──────── 2.8 WebSocket 实时推送 ──────── -->
+<section id="p2-8">
+<h3>2.8 WebSocket 实时推送 — 前端实时感知</h3>
+
+<h4>职责</h4>
+<p>设备状态变更时，通过 STOMP over WebSocket 实时推送到前端。</p>
+
+<h4>DeviceStatusPushService 推送通道</h4>
+<table>
+  <tr><th>方法</th><th>推送目标</th><th>触发时机</th></tr>
+  <tr><td><code>pushDeviceStatus()</code></td><td><code>/topic/device/status/{deviceNo}</code><br><code>/topic/device/status/all</code></td><td>设备心跳、上线、离线</td></tr>
+  <tr><td><code>pushDeviceAlarm()</code></td><td><code>/topic/device/alarm/{deviceNo}</code></td><td>设备故障、离线告警</td></tr>
+  <tr><td><code>pushPowerData()</code></td><td><code>/topic/device/power</code></td><td>能耗数据更新</td></tr>
+</table>
+</section>
+
+<!-- ╔══════════════════════════════════════════════════════════════╗ -->
+<!-- ║                    下篇 · 融会贯通                           ║ -->
+<!-- ╚══════════════════════════════════════════════════════════════╝ -->
+
+<section id="part3">
+<h2>🔗 下篇 · 融会贯通</h2>
+</section>
+
+<section id="p3-1">
+<h3>3.1 Redis Key 全景表 — 缓存的完整地图</h3>
+<table>
+  <tr><th>Key 模式</th><th>数据类型</th><th>写入方</th><th>读取方</th><th>用途</th></tr>
+  <tr><td><code>zm:create-tcp:{id}</code></td><td>DevBaseDeviceTCPVo</td><td>心跳/Modbus连接</td><td>Key.getCreateTCP()</td><td>设备连接信息(IP/端口/在线状态)</td></tr>
+  <tr><td><code>zm:queue:zm:cache:1:{ip}:{id}:0x0000</code></td><td>boolean[845]</td><td>MQTT coil消息</td><td>Key.getTelecommand()</td><td>遥控状态(845个线圈位)</td></tr>
+  <tr><td><code>zm:queue:zm:cache:3:{ip}:{id}:{addr}</code></td><td>BigDecimal/short[]</td><td>AddrHandler</td><td>Key.getTelemeter()</td><td>遥测数据(寄存器值)</td></tr>
+  <tr><td><code>zm:queue:zm:cache:63:{ip}:{id}:{addr}</code></td><td>Object</td><td>WriteQueueCache</td><td>Key.getRemote()</td><td>遥调数据(配置参数)</td></tr>
+  <tr><td><code>zm:fault:{id}:{addr}</code></td><td>DevFaultRecordVo</td><td>离线/故障处理</td><td>HomeController</td><td>故障告警缓存</td></tr>
+  <tr><td><code>zm:power:power:{id}</code></td><td>PowerTimeRespVo</td><td>Addr0x0000Handler</td><td>PowerController</td><td>实时功率</td></tr>
+  <tr><td><code>zm:order:{id}:1:{addr}</code></td><td>标记</td><td>指令队列</td><td>调度任务</td><td>待发送指令标记</td></tr>
+  <tr><td><code>zm:select:group:{id}</code></td><td>int[]</td><td>WriteControlService</td><td>前端查询</td><td>当前选中的分组</td></tr>
+  <tr><td><code>zm:workModule</code></td><td>Hash</td><td>WriteControlService</td><td>前端查询</td><td>各设备工作模式</td></tr>
+  <tr><td><code>zm:global:module:select</code></td><td>String</td><td>远程控制</td><td>ModuleGuard</td><td>全局模式守卫</td></tr>
+</table>
+</section>
+
+<section id="p3-2">
+<h3>3.2 完整链路追踪 — 一个操作的完整旅程</h3>
+
+<h4>场景：用户在前端点击"分区1 开灯"</h4>
+<div class="diagram"><span class="hl">前端 Vue</span>
+  │ 用户点击开灯按钮
+  │ axios.get('/zm/write/control/updateZoneLightSwitch', {type:'1', value:'1'})
+  ▼
+<span class="red">WriteControlController.updateZoneLightSwitch()</span>          <span class="dim">:55</span>
+  │ ① ModuleGuard.isInRemoteMode() → 检查远程模式
+  │ ② zoneId=1, swStatus=0 (开灯=0, 关灯=1, 注意反转)
+  ▼
+<span class="red">WriteControlService.updateZoneLightSwitchInternal()</span>      <span class="dim">:254</span>
+  │ ① districtService.insertOrUpdate() → MySQL 更新分区状态
+  │ ② zoneUtilCache.getGroupByZone(deviceNo, [zoneId]) → 查分区关联的分组
+  │ ③ key.getTelecommand(deviceNo, 164) → 检查当前是否手动模式
+  │    └── 如果不是手动 → workModule(deviceNo, 1) → MQTT 切换到手动
+  │ ④ selectHandModule(deviceNo, 2) → MQTT 选择分组模式
+  │ ⑤ groupControlSwitch(vo) → 组装分组控制指令
+  ▼
+<span class="red">WriteControlService.groupControlSwitch()</span>                  <span class="dim">:70</span>
+  │ ① 构建 LoopControlVO {module:1, addr:"0xC046", groupArr:[...], value:0}
+  │ ② mqttPublisher.publish(deviceId, PublishKey.分组控制总开关, vo)
+  │ ③ writeQueueCache.setGroupSelect() → 缓存分组选择
+  ▼
+<span class="red">MqttPublisher.publish()</span>                                   <span class="dim">:27</span>
+  │ ① JSONUtil.toJsonStr(payload) → 序列化
+  │ ② topic = PublishKey.分组控制总开关.getTopic(ip末段)
+  │ ③ mqttOutboundChannel.send() → QoS=2 发送到 EMQX
+  │ ④ save() → 异步写入 dev_write_instruct 表
+  ▼
+<span class="cyn">EMQX Broker</span>
+  │ 转发到设备订阅的 Topic
+  ▼
+<span class="grn">设备硬件</span>
+  │ 执行开关灯操作
+  │ 上报 coil 状态变更
+  ▼
+<span class="red">MqttMessageHandler.handleCoilStatus()</span>                     <span class="dim">:244</span>
+  │ → TelecommandSendSchedule 更新遥控缓存
+  ▼
+<span class="cyn">Redis boolean[] 更新</span>  →  <span class="ylw">WebSocket 推送</span>  →  <span class="grn">前端灯状态刷新</span></div>
+</section>
+
+<section id="p3-3">
+<h3>3.3 架构设计模式总结</h3>
+
+<div class="card-grid">
+  <div class="card">
+    <h4>🏭 工厂模式</h4>
+    <p>AddrHandlerFactory + Spring 自动注入，20+ 地址处理器按名称路由，新增零侵入</p>
+  </div>
+  <div class="card">
+    <h4>📦 代理/门面模式</h4>
+    <p>Key 类封装全部 Redis 操作，上层代码无需关心 Key 格式和 Redis API</p>
+  </div>
+  <div class="card">
+    <h4>🔄 发布/订阅模式</h4>
+    <p>MQTT 本身就是 Pub/Sub，设备上报 → 服务端订阅处理；控制下发 → 发布到设备</p>
+  </div>
+  <div class="card">
+    <h4>📋 命令队列模式</h4>
+    <p>WriteQueueCache + Redis List 实现指令队列，异步解耦控制指令与发送</p>
+  </div>
+  <div class="card">
+    <h4>🛡️ 守卫模式</h4>
+    <p>ModuleGuard 在每个控制入口检查远程模式，防止误操作</p>
+  </div>
+  <div class="card">
+    <h4>💾 缓存穿透保护</h4>
+    <p>Key.getCreateTCP() 先查 Redis，未命中查 MySQL 并回填，避免缓存穿透</p>
+  </div>
+</div>
+</section>
+
+</div><!-- .content -->
+</div><!-- .main-grid -->
+</div><!-- .container -->
+
+<footer class="footer">
+  <div class="container">
+    <p>PM6-ZM 直流照明监控系统 · 深度学习文档 · 生成于 2026-06-06</p>
+    <p>基于源码深度分析生成 · 总分总结构 · 数据流驱动</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.toc a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    document.querySelectorAll('.toc a').forEach(x => x.classList.remove('on'));
+    a.classList.add('on');
+  });
+});
+const sections = document.querySelectorAll('section[id]');
+const tocLinks = document.querySelectorAll('.toc a');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      tocLinks.forEach(a => a.classList.remove('on'));
+      const active = document.querySelector(`.toc a[href="#${e.target.id}"]`);
+      if (active) active.classList.add('on');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+sections.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
