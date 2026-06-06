@@ -72,18 +72,16 @@ public class DevBaseSceneServiceImpl implements IDevBaseSceneService {
     public Boolean insertByBo(DevBaseSceneBo bo) {
         DevBaseScene add = new DevBaseScene();
         add.setName(bo.getName());
-        LambdaQueryWrapper<DevBaseScene> lqw = new LambdaQueryWrapper<>();
-        lqw.orderByDesc(DevBaseScene::getId);
-        DevBaseScene scene = baseMapper.selectOne(lqw);
-        Long id = 1L;
-        if (scene != null && scene.getId() != null) {
-            add.setId(scene.getId() + 1);
-            add.setSceneId((int) (scene.getId() + 1));
-        } else {
-            add.setId(id);
-            add.setSceneId(Math.toIntExact(id));
+        // 让数据库自增主键生效，不手动设置ID，避免并发竞争条件
+        boolean flag = baseMapper.insert(add) > 0;
+        if (flag) {
+            // 插入后从自增ID回写sceneId
+            add.setSceneId(Math.toIntExact(add.getId()));
+            baseMapper.updateById(add);
+            bo.setId(add.getId());
+            bo.setSceneId(add.getSceneId());
         }
-        return baseMapper.insert(add) > 0;
+        return flag;
     }
 
     /**

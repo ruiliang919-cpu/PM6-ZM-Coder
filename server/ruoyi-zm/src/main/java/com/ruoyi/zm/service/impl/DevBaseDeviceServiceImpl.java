@@ -128,11 +128,9 @@ public class DevBaseDeviceServiceImpl implements IDevBaseDeviceService {
         device.setDelFlag("0");
         int insert = baseMapper.insert(device);
         if (insert > 0) {
-            LambdaQueryWrapper<DevBaseDevice> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(DevBaseDevice::getIp, bo.getIp());
-            DevBaseDevice devBaseDevice = baseMapper.selectOne(lqw);
-            devBaseDevice.setDeviceNo(devBaseDevice.getId());
-            insert = baseMapper.insert(devBaseDevice);
+            // 将自动生成的ID回写到deviceNo字段，使用update而非insert避免重复数据
+            device.setDeviceNo(device.getId());
+            insert = baseMapper.updateById(device);
         }
         return insert > 0;
     }
@@ -181,16 +179,20 @@ public class DevBaseDeviceServiceImpl implements IDevBaseDeviceService {
         return baseMapper.deleteReality(ids) > 0;
     }
 
-    private List<DevBaseDevice> deviceList = null;
+    private volatile List<DevBaseDevice> deviceList = null;
+    private final Object deviceListLock = new Object();
 
     @Override
     public List<DevBaseDevice> getListFromCache() {
-        // List<DevBaseDevice> result = (List<DevBaseDevice>) redisTemplate.opsForValue().get("zm:dev_base_devices:list");
         List<DevBaseDevice> result = deviceList;
         if (ObjectUtils.isEmpty(result)) {
-            result = baseMapper.selectList();
-            // redisTemplate.opsForValue().set("zm:dev_base_devices:list", result, 1, TimeUnit.DAYS);
-            deviceList = result;
+            synchronized (deviceListLock) {
+                result = deviceList;
+                if (ObjectUtils.isEmpty(result)) {
+                    result = baseMapper.selectList();
+                    deviceList = result;
+                }
+            }
         }
         return result;
     }
@@ -227,7 +229,7 @@ public class DevBaseDeviceServiceImpl implements IDevBaseDeviceService {
             LambdaQueryWrapper<DevBaseRegion> lqw = new LambdaQueryWrapper<>();
             lqw.eq(DevBaseRegion::getId, item.getRegionId());
             DevBaseRegion region = regionMapper.selectOne(lqw);
-            resp.setArea(region.getName());
+            resp.setArea(region != null ? region.getName() : "未知区域");
             LambdaQueryWrapper<DevDeviceRemoteRead> lqw1 = new LambdaQueryWrapper<>();
             lqw1.eq(DevDeviceRemoteRead::getDeviceId, item.getDeviceNo());
             DevDeviceRemoteRead devDeviceRemoteRead = remoteReadMapper.selectOne(lqw1);

@@ -36,8 +36,7 @@ public class DevStatusDccServiceImpl implements IDevStatusDccService {
      */
     @Override
     public DevStatusDccVo queryById(Long id){
-        //return baseMapper.selectVoById(id);
-        return null;
+        return baseMapper.selectVoById(id);
     }
 
     /**

@@ -55,7 +55,8 @@ public class DevConfigTimeControlServiceImpl implements IDevConfigTimeControlSer
     public List<DevConfigTimeControlVo> queryList(DevConfigTimeControlBo bo) {
         LambdaQueryWrapper<DevConfigTimeControl> lqw = buildQueryWrapper(bo);
         lqw.orderByAsc(DevConfigTimeControl::getId);
-        lqw.groupBy(DevConfigTimeControl::getTimeControlId);
+        // 使用 select distinct 替代 groupBy 无聚合，避免MySQL非确定性返回
+        lqw.select(DevConfigTimeControl::getTimeControlId).groupBy(DevConfigTimeControl::getTimeControlId);
         return baseMapper.selectVoList(lqw);
     }
 

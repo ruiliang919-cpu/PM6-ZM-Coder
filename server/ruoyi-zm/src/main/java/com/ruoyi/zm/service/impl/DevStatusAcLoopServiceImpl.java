@@ -36,8 +36,7 @@ public class DevStatusAcLoopServiceImpl implements IDevStatusAcLoopService {
      */
     @Override
     public DevStatusAcLoopVo queryById(Long id){
-        //return baseMapper.selectVoById(id);
-        return null;
+        return baseMapper.selectVoById(id);
     }
 
     /**

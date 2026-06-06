@@ -88,6 +88,9 @@ public class DevBaseDeviceController extends BaseController {
     public R<DevBaseDeviceVo> getInfo(@NotNull(message = "主键不能为空")
                                       @PathVariable Long id) {
         DevBaseDeviceVo devBaseDeviceVo = iDevBaseDeviceService.queryById(id);
+        if (devBaseDeviceVo == null) {
+            return R.fail("设备不存在");
+        }
         devBaseDeviceVo.setDeviceNo(Long.valueOf(devBaseDeviceVo.getDeviceId()));
         return R.ok(devBaseDeviceVo);
     }
@@ -109,16 +112,23 @@ public class DevBaseDeviceController extends BaseController {
         LambdaQueryWrapper<DevBaseDevice> lqw = new LambdaQueryWrapper<>();
         lqw.eq(DevBaseDevice::getDeviceNo, deviceId);
         DevBaseDevice devBaseDevice = baseMapper.selectOne(lqw);
+        if (devBaseDevice == null) {
+            return R.fail("设备不存在");
+        }
         DeviceOtherMsgRespVo vo = new DeviceOtherMsgRespVo();
         vo.setName(devBaseDevice.getDeviceName());
         vo.setDeviceId(Math.toIntExact(devBaseDevice.getId()));
         vo.setIp(devBaseDevice.getIp());
         vo.setHost(devBaseDevice.getDeviceId());
-        vo.setZoneId(Math.toIntExact(devBaseDevice.getRegionId()));
-        LambdaQueryWrapper<DevBaseRegion> lqw1 = new LambdaQueryWrapper<>();
-        lqw1.eq(DevBaseRegion::getId, devBaseDevice.getRegionId());
-        DevBaseRegion region = regionMapper.selectOne(lqw1);
-        vo.setArea(region.getName());
+        if (devBaseDevice.getRegionId() != null) {
+            vo.setZoneId(Math.toIntExact(devBaseDevice.getRegionId()));
+            LambdaQueryWrapper<DevBaseRegion> lqw1 = new LambdaQueryWrapper<>();
+            lqw1.eq(DevBaseRegion::getId, devBaseDevice.getRegionId());
+            DevBaseRegion region = regionMapper.selectOne(lqw1);
+            vo.setArea(region != null ? region.getName() : "未知区域");
+        } else {
+            vo.setArea("未知区域");
+        }
         return R.ok(vo);
     }
 

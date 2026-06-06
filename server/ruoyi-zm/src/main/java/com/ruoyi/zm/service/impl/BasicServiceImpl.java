@@ -54,7 +54,13 @@ public class BasicServiceImpl implements BasicService {
 
     @Override
     public List<BaseDeviceResp> getCabinetList(PageQuery pageQuery) {
-        List<DevBaseDevice> page = deviceMapper.selectList();
+        // 使用分页参数查询，避免全量查询导致性能问题
+        List<DevBaseDevice> page;
+        if (pageQuery != null && pageQuery.getPageSize() != null && pageQuery.getPageSize() > 0) {
+            page = deviceMapper.selectPage(pageQuery.build(), new com.baomidou.mybatisplus.core.conditions.query.QueryWrapper<>()).getRecords();
+        } else {
+            page = deviceMapper.selectList();
+        }
         List<BaseDeviceResp> respList = new ArrayList<>();
         page.forEach(item -> {
             BaseDeviceResp resp = new BaseDeviceResp();

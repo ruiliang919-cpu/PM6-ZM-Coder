@@ -52,7 +52,7 @@ public class LightingServiceImpl implements LightingService {
             }
             if (deviceVo.getRegionId() != null) {
                 DevBaseRegionVo devBaseRegionVo = iDevBaseRegionService.queryById(deviceVo.getRegionId());
-                if (devBaseRegionVo.getName() != null) {
+                if (devBaseRegionVo != null && devBaseRegionVo.getName() != null) {
                     webLightStatusRespVO.setRegionName(devBaseRegionVo.getName());
                 }
             }
@@ -76,8 +76,8 @@ public class LightingServiceImpl implements LightingService {
                 // 交流关灯回路数
                 webLightStatusRespVO.setAcTurnOffNum(acOff);
                 webLightStatusRespVO.setAcList(getAcListBySlaveId(deviceVo.getDeviceNo(), deviceVo.getAcLoopNum()));
-                transformedList.add(webLightStatusRespVO);
             }
+            transformedList.add(webLightStatusRespVO);
         }
         lightPageList.setRows(transformedList);
         return lightPageList;

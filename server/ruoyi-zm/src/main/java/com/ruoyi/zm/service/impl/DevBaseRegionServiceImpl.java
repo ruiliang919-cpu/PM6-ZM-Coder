@@ -71,15 +71,8 @@ public class DevBaseRegionServiceImpl implements IDevBaseRegionService {
      */
     @Override
     public Boolean insertByBo(DevBaseRegionBo bo) {
-        LambdaQueryWrapper<DevBaseRegion> lqw = new LambdaQueryWrapper<>();
-        lqw.orderByDesc(DevBaseRegion::getId);
-        List<DevBaseRegion> devBaseRegions = baseMapper.selectList(lqw);
-        long id = 1;
-        if (devBaseRegions != null && !devBaseRegions.isEmpty()) {
-            id = devBaseRegions.get(0).getId() + 1;
-        }
         DevBaseRegion add = BeanUtil.toBean(bo, DevBaseRegion.class);
-        add.setId(id);
+        // 让数据库自增主键生效，不手动设置ID，避免并发竞争条件
         boolean flag = baseMapper.insert(add) > 0;
         if (flag) {
             bo.setId(add.getId());

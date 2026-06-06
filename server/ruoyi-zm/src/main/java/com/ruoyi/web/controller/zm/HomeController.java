@@ -22,7 +22,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -78,7 +77,7 @@ public class HomeController {
         return r;
     }
 
-    @PostConstruct
+    // 移除 @PostConstruct，避免与 @Scheduled 重复触发；@Scheduled 会在启动后自动首次执行
     @Scheduled(fixedDelay = 30000)
     public void initPower() {
         R<List<PowerRespVo>> all = getEnergyData(1);
@@ -95,7 +94,8 @@ public class HomeController {
             if (type == 1) {
                 nos.forEach(item -> {
                     try {
-                        if (key.getTelecommand(Math.toIntExact(item))[822]) {
+                        boolean[] telecmd = key.getTelecommand(Math.toIntExact(item));
+                        if (telecmd != null && telecmd.length > 822 && telecmd[822]) {
                             PowerTimeRespVo power = (PowerTimeRespVo) redisTemplate.opsForValue().get("zm:power:power:" + item);
                             PowerRespVo vo = new PowerRespVo();
                             vo.setDeviceId(Math.toIntExact(item));
@@ -111,7 +111,8 @@ public class HomeController {
             } else if (type == 2) {
                 nos.forEach(item -> {
                     try {
-                        if (key.getTelecommand(Math.toIntExact(item))[822]) {
+                        boolean[] telecmd = key.getTelecommand(Math.toIntExact(item));
+                        if (telecmd != null && telecmd.length > 822 && telecmd[822]) {
                             DevBasePower power = powerMapper.selectOne(new LambdaQueryWrapper<DevBasePower>()
                                 .eq(DevBasePower::getDeviceId, item)
                                 .eq(DevBasePower::getType, type)
@@ -143,7 +144,6 @@ public class HomeController {
         return deviceService.getCabinetList(pageQuery);
     }
 
-    @PostConstruct
     @Scheduled(fixedDelay = 5000)
     public void cabinetListCache() {
         PageQuery pageQuery = new PageQuery();

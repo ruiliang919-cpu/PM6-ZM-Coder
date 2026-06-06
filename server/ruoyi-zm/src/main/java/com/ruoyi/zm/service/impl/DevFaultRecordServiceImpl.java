@@ -61,11 +61,10 @@ public class DevFaultRecordServiceImpl implements IDevFaultRecordService {
         LambdaQueryWrapper<DevFaultRecord> lqw = Wrappers.lambdaQuery();
         lqw.eq(bo.getDeviceId() != null, DevFaultRecord::getDeviceId, bo.getDeviceId());
         lqw.like(StringUtils.isNotBlank(bo.getMessage()), DevFaultRecord::getMessage, bo.getMessage());
-        if (bo.getStime() != null) {
-            lqw.ge(DevFaultRecord::getStime, bo.getStime());
-        }
         if (bo.getStime() != null && bo.getEtime() != null) {
             lqw.between(DevFaultRecord::getStime, bo.getStime(), bo.getEtime());
+        } else if (bo.getStime() != null) {
+            lqw.ge(DevFaultRecord::getStime, bo.getStime());
         }
 
         lqw.eq(bo.getShowType() != null, DevFaultRecord::getShowType, bo.getShowType());
