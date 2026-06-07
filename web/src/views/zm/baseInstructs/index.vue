@@ -48,7 +48,7 @@
 </template>
 
 <script>
-import {getInstructs} from '@/api/zm/device/instructs'
+import {getInstructs} from '@/api/zm/baseInstructs'
 import { parseTime } from '@/utils/ruoyi'
 
 export default {

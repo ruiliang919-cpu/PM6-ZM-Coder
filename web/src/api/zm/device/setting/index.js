@@ -649,7 +649,6 @@ export function getIllBaseLux(data = {
   deviceId: undefined,
   moduleId: undefined
 }) {
-  console.log(data)
   return request({
     url: '/zm/sensorModule/getIllBaseLux',
     method: 'get',
