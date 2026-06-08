@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM6-ZM 前端结构分析 — 页面布局与组件详解</title>
+<style>
+:root {
+  --primary: #1a73e8;
+  --primary-light: #e8f0fe;
+  --primary-dark: #0d47a1;
+  --accent: #4fc3f7;
+  --bg: #f5f8ff;
+  --card: #ffffff;
+  --border: #d2e3fc;
+  --text: #1a1a2e;
+  --muted: #5f6368;
+  --success: #34a853;
+  --warning: #fbbc04;
+  --danger: #ea4335;
+  --code-bg: #f0f4ff;
+  --shadow: 0 2px 12px rgba(26,115,232,0.08);
+  --shadow-hover: 0 6px 24px rgba(26,115,232,0.15);
+  --radius: 12px;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.8;
+  padding: 0;
+}
+/* Header */
+.header {
+  background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--accent));
+  color: white;
+  padding: 3rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
+  animation: pulse 8s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.header h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.header p {
+  font-size: 1rem;
+  opacity: 0.9;
+  position: relative;
+}
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+/* Stats */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2.5rem;
+}
+.stat {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.2rem;
+  text-align: center;
+  box-shadow: var(--shadow);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+.stat .num {
+  font-size: 2.2rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.2;
+}
+.stat .label {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 0.2rem;
+}
+/* Nav */
+.nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+.nav a {
+  padding: 0.4rem 1rem;
+  background: var(--primary-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+.nav a:hover {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+/* Section */
+.section {
+  margin-bottom: 2.5rem;
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+  padding-bottom: 0.8rem;
+  border-bottom: 2px solid var(--border);
+}
+.section-title .icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+.section-title h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.section-title .badge {
+  margin-left: auto;
+  background: var(--primary-light);
+  color: var(--primary);
+  padding: 0.2rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+/* Card */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  margin-bottom: 1.5rem;
+  transition: box-shadow 0.2s;
+}
+.card:hover {
+  box-shadow: var(--shadow-hover);
+}
+.card-header {
+  background: linear-gradient(135deg, var(--primary-light), #f0f7ff);
+  padding: 0.8rem 1.2rem;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--primary-dark);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.card-body {
+  padding: 1.2rem;
+}
+/* Layout Diagram */
+.layout-demo {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.2rem;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.82rem;
+  line-height: 1.7;
+  overflow-x: auto;
+  white-space: pre;
+  color: var(--text);
+  margin: 1rem 0;
+}
+/* Code Block */
+.code-block {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  font-family: 'Fira Code', 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.8;
+  overflow-x: auto;
+  margin: 1rem 0;
+  position: relative;
+}
+.code-block .tag {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.8rem;
+  background: rgba(255,255,255,0.1);
+  color: #94a3b8;
+  padding: 0.1rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.65rem;
+}
+.code-block .keyword { color: #c084fc; }
+.code-block .string { color: #86efac; }
+.code-block .tag-name { color: #f472b6; }
+.code-block .attr { color: #7dd3fc; }
+.code-block .comment { color: #64748b; }
+.code-block .func { color: #fbbf24; }
+.code-block .number { color: #fb923c; }
+/* Table */
+.tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 1rem 0;
+}
+.tbl th {
+  text-align: left;
+  padding: 0.6rem 1rem;
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  font-weight: 600;
+  font-size: 0.8rem;
+  border-bottom: 2px solid var(--border);
+}
+.tbl td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(210,227,252,0.5);
+  vertical-align: top;
+}
+.tbl tr:hover td {
+  background: rgba(26,115,232,0.03);
+}
+.tbl .path {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.78rem;
+  color: var(--primary);
+}
+/* Flow Arrow */
+.flow {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.8rem 0;
+}
+.flow-step {
+  background: var(--primary-light);
+  border: 1px solid var(--border);
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--primary-dark);
+}
+.flow-arrow {
+  color: var(--accent);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+/* Tags */
+.tag-get { background: rgba(52,168,83,0.12); color: var(--success); }
+.tag-post { background: rgba(26,115,232,0.12); color: var(--primary); }
+.tag-tab { background: rgba(251,188,4,0.12); color: #b06c00; }
+.tag-card { background: rgba(168,85,247,0.12); color: #7c3aed; }
+.tag-badge {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+/* Accordion */
+details {
+  margin: 0.8rem 0;
+}
+details summary {
+  cursor: pointer;
+  padding: 0.6rem 1rem;
+  background: var(--primary-light);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--primary);
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
+}
+details summary:hover {
+  background: #d2e3fc;
+}
+details summary::before {
+  content: '▶';
+  font-size: 0.65rem;
+  transition: transform 0.2s;
+}
+details[open] summary::before {
+  transform: rotate(90deg);
+}
+details[open] summary {
+  border-radius: 8px 8px 0 0;
+}
+.details-body {
+  padding: 1rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+}
+/* Two Column */
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+@media (max-width: 768px) {
+  .two-col { grid-template-columns: 1fr; }
+}
+/* Footer */
+.footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-top: 3rem;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+}
+/* Tree */
+.tree {
+  font-family: 'Fira Code', monospace;
+  font-size: 0.8rem;
+  line-height: 1.9;
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  overflow-x: auto;
+  white-space: pre;
+}
+.tree .folder { color: var(--primary); font-weight: 600; }
+.tree .file { color: var(--text); }
+.tree .desc { color: var(--muted); font-style: italic; }
+/* Compare */
+.compare-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+@media (max-width: 768px) {
+  .compare-grid { grid-template-columns: 1fr; }
+}
+.compare-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.compare-item .title {
+  padding: 0.5rem 1rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+.compare-item .content {
+  padding: 0.8rem;
+  font-size: 0.82rem;
+}
+/* Highlight Box */
+.highlight {
+  background: linear-gradient(135deg, var(--primary-light), #f0f7ff);
+  border-left: 4px solid var(--primary);
+  padding: 1rem 1.2rem;
+  border-radius: 0 8px 8px 0;
+  margin: 1rem 0;
+  font-size: 0.9rem;
+}
+.highlight strong {
+  color: var(--primary-dark);
+}
+/* Search */
+.search-box {
+  margin-bottom: 1.5rem;
+}
+.search-box input {
+  width: 100%;
+  padding: 0.7rem 1.2rem;
+  background: var(--card);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-box input:focus {
+  border-color: var(--primary);
+}
+.search-box input::placeholder {
+  color: #a0aec0;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>PM6-ZM 前端结构分析</h1>
+  <p>直流照明监控系统 · Vue 2 + Element UI · 页面布局与组件详解</p>
+</div>
+
+<div class="container">
+
+<!-- ==================== 概览 ==================== -->
+<div class="stats">
+  <div class="stat"><div class="num">15</div><div class="label">页面总数</div></div>
+  <div class="stat"><div class="num">4</div><div class="label">布局类型</div></div>
+  <div class="stat"><div class="num">56+</div><div class="label">Vue 组件</div></div>
+  <div class="stat"><div class="num">16</div><div class="label">API 文件</div></div>
+  <div class="stat"><div class="num">120+</div><div class="label">接口函数</div></div>
+  <div class="stat"><div class="num">7</div><div class="label">Tab 页面</div></div>
+</div>
+
+<div class="search-box">
+  <input type="text" id="searchBox" placeholder="🔍 搜索页面、组件、文件路径..." oninput="filterContent(this.value)">
+</div>
+
+<div class="nav">
+  <a href="#overview">目录总览</a>
+  <a href="#structure">文件结构</a>
+  <a href="#layout1">布局一：CRUD</a>
+  <a href="#layout2">布局二：Tab</a>
+  <a href="#layout3">布局三：卡片</a>
+  <a href="#layout4">布局四：图表</a>
+  <a href="#layout5">布局五：纯表格</a>
+  <a href="#component">组件关系</a>
+  <a href="#code">代码模板</a>
+  <a href="#dataflow">数据流转</a>
+  <a href="#summary">总结</a>
+</div>
+
+<!-- ==================== 目录总览 ==================== -->
+<div class="section" id="overview">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(26,115,232,0.12);color:var(--primary)">📋</div>
+    <h2>页面目录总览</h2>
+    <span class="badge">15 个页面</span>
+  </div>
+
+  <table class="tbl">
+    <tr><th>页面名称</th><th>文件路径</th><th>布局类型</th><th>复杂度</th></tr>
+    <tr>
+      <td>首页</td>
+      <td class="path">views/index.vue</td>
+      <td><span class="tag-badge tag-card">图表型</span></td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>区域管理</td>
+      <td class="path">views/zm/baseRegion/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>分区管理</td>
+      <td class="path">views/zm/baseDistrict/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>场景管理</td>
+      <td class="path">views/zm/baseScene/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>机柜配置</td>
+      <td class="path">views/zm/baseDevice/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>照明控制</td>
+      <td class="path">views/zm/baseControl/index.vue</td>
+      <td><span class="tag-badge tag-tab">Tab 型</span></td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>照明状态</td>
+      <td class="path">views/zm/baseStatus/index.vue</td>
+      <td><span class="tag-badge tag-card">卡片型</span></td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>指令管理</td>
+      <td class="path">views/zm/baseInstructs/index.vue</td>
+      <td><span class="tag-badge" style="background:rgba(100,116,139,0.12);color:#475569">纯表格</span></td>
+      <td>⭐</td>
+    </tr>
+    <tr>
+      <td>告警列表</td>
+      <td class="path">views/zm/alarm/list/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>运行记录</td>
+      <td class="path">views/zm/history/event/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>故障记录</td>
+      <td class="path">views/zm/history/record/index.vue</td>
+      <td><span class="tag-badge tag-get">CRUD 型</span></td>
+      <td>⭐⭐</td>
+    </tr>
+    <tr>
+      <td>机柜信息</td>
+      <td class="path">views/zm/device/dev/index.vue</td>
+      <td><span class="tag-badge tag-tab">Tab 型</span></td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>机柜控制</td>
+      <td class="path">views/zm/device/dev-control/index.vue</td>
+      <td><span class="tag-badge tag-tab">Tab 型</span></td>
+      <td>⭐⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>机柜记录</td>
+      <td class="path">views/zm/device/record/index.vue</td>
+      <td><span class="tag-badge tag-tab">Tab 型</span></td>
+      <td>⭐⭐⭐</td>
+    </tr>
+    <tr>
+      <td>机柜设置</td>
+      <td class="path">views/zm/device/setting/index.vue</td>
+      <td><span class="tag-badge tag-tab">Tab 型</span></td>
+      <td>⭐⭐⭐⭐⭐</td>
+    </tr>
+  </table>
+</div>
+
+<!-- ==================== 文件结构 ==================== -->
+<div class="section" id="structure">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(52,168,83,0.12);color:var(--success)">📁</div>
+    <h2>前端文件结构</h2>
+    <span class="badge">核心目录说明</span>
+  </div>
+
+  <div class="highlight">
+    <strong>核心结论：</strong>前端文件夹虽多，你只需要关注两个目录：<code>api/</code>（接口定义）和 <code>views/</code>（页面代码）。其他都是框架文件，基本不用动。
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <div class="card-header">📁 src/ 根目录</div>
+      <div class="card-body">
+        <div class="tree"><span class="folder">src/</span>
+├── <span class="file">main.js</span>          <span class="desc">← 程序入口，不用动</span>
+├── <span class="file">App.vue</span>          <span class="desc">← 根组件，不用动</span>
+├── <span class="file">permission.js</span>    <span class="desc">← 权限控制，不用动</span>
+├── <span class="file">settings.js</span>      <span class="desc">← 配置项，不用动</span>
+├── <span class="folder">router/</span>          <span class="desc">← 路由配置</span>
+├── <span class="folder">store/</span>           <span class="desc">← 全局状态</span>
+├── <span class="folder">utils/</span>           <span class="desc">← 工具函数</span>
+├── <span class="folder">components/</span>      <span class="desc">← 公共组件</span>
+├── <span class="folder">layout/</span>          <span class="desc">← 页面布局</span>
+├── <span class="folder">plugins/</span>         <span class="desc">← 插件</span>
+├── <span class="folder">mixins/</span>          <span class="desc">← 混入</span>
+├── <span class="folder">directive/</span>       <span class="desc">← 指令</span>
+├── <span class="folder">assets/</span>          <span class="desc">← 图片/样式</span>
+├── <span class="folder" style="color:var(--danger)">api/</span>             <span class="desc">← ⭐ 接口定义</span>
+└── <span class="folder" style="color:var(--danger)">views/</span>           <span class="desc">← ⭐ 页面代码</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">📁 views/zm/ 业务页面</div>
+      <div class="card-body">
+        <div class="tree"><span class="folder">views/</span>
+├── <span class="file">index.vue</span>         <span class="desc">← 首页（图表）</span>
+├── <span class="file">login.vue</span>         <span class="desc">← 登录页</span>
+└── <span class="folder">zm/</span>               <span class="desc">← 业务页面</span>
+    ├── <span class="folder">baseRegion/</span>     <span class="desc">← 区域管理</span>
+    ├── <span class="folder">baseDistrict/</span>   <span class="desc">← 分区管理</span>
+    ├── <span class="folder">baseScene/</span>      <span class="desc">← 场景管理</span>
+    ├── <span class="folder">baseDevice/</span>     <span class="desc">← 机柜配置</span>
+    ├── <span class="folder">baseControl/</span>    <span class="desc">← 照明控制</span>
+    ├── <span class="folder">baseStatus/</span>     <span class="desc">← 照明状态</span>
+    ├── <span class="folder">baseInstructs/</span>  <span class="desc">← 指令管理</span>
+    ├── <span class="folder">alarm/</span>          <span class="desc">← 告警列表</span>
+    ├── <span class="folder">history/</span>        <span class="desc">← 历史记录</span>
+    └── <span class="folder">device/</span>         <span class="desc">← 机柜详情</span>
+        ├── <span class="folder">dev/</span>          <span class="desc">← 机柜信息</span>
+        ├── <span class="folder">dev-control/</span>  <span class="desc">← 机柜控制</span>
+        ├── <span class="folder">record/</span>       <span class="desc">← 机柜记录</span>
+        └── <span class="folder">setting/</span>      <span class="desc">← 机柜设置</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📁 api/zm/ 接口定义文件</div>
+    <div class="card-body">
+      <div class="tree"><span class="folder">api/zm/</span>
+├── <span class="file">baseRegion.js</span>       <span class="desc">← listBaseRegion, addBaseRegion, updateBaseRegion, delBaseRegion</span>
+├── <span class="file">baseDistrict.js</span>     <span class="desc">← listBaseDistrict, addBaseDistrict, updateBaseDistrict, delBaseDistrict</span>
+├── <span class="file">baseScene.js</span>        <span class="desc">← listBaseScene, getBaseScene, addBaseScene, updateBaseScene, delBaseScene</span>
+├── <span class="file">baseDevice.js</span>       <span class="desc">← listBaseDevice, getBaseDevice, baseDeviceInit</span>
+├── <span class="file">baseControl.js</span>      <span class="desc">← zoneControlList, updateSimpleControl</span>
+├── <span class="file">baseStatus.js</span>       <span class="desc">← lightList</span>
+├── <span class="file">alarm.js</span>            <span class="desc">← getFaultSeven, getNews</span>
+├── <span class="file">history.js</span>          <span class="desc">← getRecordSeven, getFaultAll, exportRecord</span>
+├── <span class="file">device/info.js</span>      <span class="desc">← acList, dccList, busInfo</span>
+├── <span class="file">device/control.js</span>   <span class="desc">← updateSimpleControl, loopControlSwitch</span>
+├── <span class="file">device/record.js</span>    <span class="desc">← getRecordOne, getFaultSeven</span>
+├── <span class="file">device/setting.js</span>   <span class="desc">← getStatus, setStatus</span>
+└── ...</div>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <strong>一个页面 = 两个文件：</strong><br>
+    <code>views/zm/baseScene/index.vue</code> → 页面长什么样（表格、按钮、弹窗）<br>
+    <code>api/zm/baseScene.js</code> → 调用哪些接口（list、add、edit、delete）
+  </div>
+</div>
+
+<!-- ==================== 布局一：CRUD ==================== -->
+<div class="section" id="layout1">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(52,168,83,0.12);color:var(--success)">📊</div>
+    <h2>布局一：搜索 + 表格 + 弹窗（CRUD 型）</h2>
+    <span class="badge">7 个页面使用 · 最常见</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 布局示意图</div>
+    <div class="card-body">
+      <div class="layout-demo">┌──────────────────────────────────────────────────────┐
+│  ┌──────────────────────────────────────────────┐    │
+│  │  [搜索输入框]  [日期选择]  [搜索按钮] [重置按钮]  │    │  ← 搜索表单区
+│  └──────────────────────────────────────────────┘    │
+├──────────────────────────────────────────────────────┤
+│  [新增]  [修改]  [删除]  [导出]                       │  ← 操作按钮区
+├──────────────────────────────────────────────────────┤
+│  ┌──────┬────────┬────────┬────────┐                │
+│  │ 序号  │  名称   │  状态   │  操作   │                │
+│  ├──────┼────────┼────────┼────────┤                │
+│  │  1   │ 场景1   │   开    │ 修改 删除│                │  ← 数据表格区
+│  │  2   │ 场景2   │   关    │ 修改 删除│                │
+│  │  3   │ 场景3   │   开    │ 修改 删除│                │
+│  └──────┴────────┴────────┴────────┘                │
+├──────────────────────────────────────────────────────┤
+│  共 100 条  第 1/10 页  [1] [2] [3] ... [10]         │  ← 分页区
+└──────────────────────────────────────────────────────┘
+
+  点击 [新增] 或 [修改] → 弹出对话框
+  ┌────────────────────────────────┐
+  │  添加场景                    ✕ │
+  ├────────────────────────────────┤
+  │  场景名称：[____________]      │  ← 弹窗表单
+  │                                │
+  │           [确 定]  [取 消]      │
+  └────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 使用此布局的页面</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>页面</th><th>文件路径</th><th>搜索字段</th><th>操作按钮</th></tr>
+        <tr>
+          <td>区域管理</td>
+          <td class="path">views/zm/baseRegion/index.vue</td>
+          <td>区域名称</td>
+          <td>新增 / 修改 / 删除 / 导出</td>
+        </tr>
+        <tr>
+          <td>分区管理</td>
+          <td class="path">views/zm/baseDistrict/index.vue</td>
+          <td>名称</td>
+          <td>分区控制组合设置 / 新增 / 修改 / 删除 / 导出</td>
+        </tr>
+        <tr>
+          <td>场景管理</td>
+          <td class="path">views/zm/baseScene/index.vue</td>
+          <td>场景名称</td>
+          <td>修改 / 导出（新增删除被注释）</td>
+        </tr>
+        <tr>
+          <td>机柜配置</td>
+          <td class="path">views/zm/baseDevice/index.vue</td>
+          <td>设备名称</td>
+          <td>新增 / 修改 / 删除 / 导出</td>
+        </tr>
+        <tr>
+          <td>告警列表</td>
+          <td class="path">views/zm/alarm/list/index.vue</td>
+          <td>时间 / 箱柜名称 / 告警名称</td>
+          <td>导出</td>
+        </tr>
+        <tr>
+          <td>运行记录</td>
+          <td class="path">views/zm/history/event/index.vue</td>
+          <td>时间 / 机器名称 / 事件名称</td>
+          <td>导出</td>
+        </tr>
+        <tr>
+          <td>故障记录</td>
+          <td class="path">views/zm/history/record/index.vue</td>
+          <td>时间 / 机器名称 / 告警名称</td>
+          <td>导出</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <details>
+    <summary>📝 代码示例：baseScene/index.vue 核心结构</summary>
+    <div class="details-body">
+      <div class="code-block"><span class="tag">template</span>
+<span class="tag-name">&lt;template&gt;</span>
+  <span class="tag-name">&lt;div</span> <span class="attr">class</span>=<span class="string">"app-container"</span><span class="tag-name">&gt;</span>
+
+    <span class="comment">&lt;!-- ① 搜索表单区 --&gt;</span>
+    <span class="tag-name">&lt;el-form</span> <span class="attr">:model</span>=<span class="string">"queryParams"</span> <span class="attr">ref</span>=<span class="string">"queryForm"</span> <span class="attr">:inline</span>=<span class="string">"true"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;el-form-item</span> <span class="attr">label</span>=<span class="string">"场景名称"</span><span class="tag-name">&gt;</span>
+        <span class="tag-name">&lt;el-input</span> <span class="attr">v-model</span>=<span class="string">"queryParams.name"</span> <span class="attr">placeholder</span>=<span class="string">"请输入场景名称"</span> <span class="tag-name">/&gt;</span>
+      <span class="tag-name">&lt;/el-form-item&gt;</span>
+      <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"handleQuery"</span><span class="tag-name">&gt;</span>搜索<span class="tag-name">&lt;/el-button&gt;</span>
+      <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"resetQuery"</span><span class="tag-name">&gt;</span>重置<span class="tag-name">&lt;/el-button&gt;</span>
+    <span class="tag-name">&lt;/el-form&gt;</span>
+
+    <span class="comment">&lt;!-- ② 操作按钮区 --&gt;</span>
+    <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"handleAdd"</span><span class="tag-name">&gt;</span>新增<span class="tag-name">&lt;/el-button&gt;</span>
+    <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"handleUpdate"</span><span class="tag-name">&gt;</span>修改<span class="tag-name">&lt;/el-button&gt;</span>
+    <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"handleDelete"</span><span class="tag-name">&gt;</span>删除<span class="tag-name">&lt;/el-button&gt;</span>
+
+    <span class="comment">&lt;!-- ③ 数据表格区 --&gt;</span>
+    <span class="tag-name">&lt;el-table</span> <span class="attr">:data</span>=<span class="string">"baseSceneList"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;el-table-column</span> <span class="attr">label</span>=<span class="string">"序号"</span> <span class="attr">prop</span>=<span class="string">"id"</span> <span class="tag-name">/&gt;</span>
+      <span class="tag-name">&lt;el-table-column</span> <span class="attr">label</span>=<span class="string">"场景名称"</span> <span class="attr">prop</span>=<span class="string">"name"</span> <span class="tag-name">/&gt;</span>
+      <span class="tag-name">&lt;el-table-column</span> <span class="attr">label</span>=<span class="string">"操作"</span><span class="tag-name">&gt;</span>
+        <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"handleUpdate(scope.row)"</span><span class="tag-name">&gt;</span>修改<span class="tag-name">&lt;/el-button&gt;</span>
+      <span class="tag-name">&lt;/el-table-column&gt;</span>
+    <span class="tag-name">&lt;/el-table&gt;</span>
+
+    <span class="comment">&lt;!-- ④ 分页 --&gt;</span>
+    <span class="tag-name">&lt;pagination</span> <span class="attr">:total</span>=<span class="string">"total"</span> <span class="attr">@pagination</span>=<span class="string">"getList"</span> <span class="tag-name">/&gt;</span>
+
+    <span class="comment">&lt;!-- ⑤ 弹窗表单 --&gt;</span>
+    <span class="tag-name">&lt;el-dialog</span> <span class="attr">:title</span>=<span class="string">"title"</span> <span class="attr">:visible.sync</span>=<span class="string">"open"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;el-form</span> <span class="attr">:model</span>=<span class="string">"form"</span> <span class="attr">:rules</span>=<span class="string">"rules"</span><span class="tag-name">&gt;</span>
+        <span class="tag-name">&lt;el-form-item</span> <span class="attr">label</span>=<span class="string">"场景名称"</span><span class="tag-name">&gt;</span>
+          <span class="tag-name">&lt;el-input</span> <span class="attr">v-model</span>=<span class="string">"form.name"</span> <span class="tag-name">/&gt;</span>
+        <span class="tag-name">&lt;/el-form-item&gt;</span>
+      <span class="tag-name">&lt;/el-form&gt;</span>
+      <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"submitForm"</span><span class="tag-name">&gt;</span>确 定<span class="tag-name">&lt;/el-button&gt;</span>
+      <span class="tag-name">&lt;el-button</span> <span class="attr">@click</span>=<span class="string">"cancel"</span><span class="tag-name">&gt;</span>取 消<span class="tag-name">&lt;/el-button&gt;</span>
+    <span class="tag-name">&lt;/el-dialog&gt;</span>
+
+  <span class="tag-name">&lt;/div&gt;</span>
+<span class="tag-name">&lt;/template&gt;</span></div>
+    </div>
+  </details>
+</div>
+
+<!-- ==================== 布局二：Tab ==================== -->
+<div class="section" id="layout2">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(251,188,4,0.12);color:#b06c00">📑</div>
+    <h2>布局二：Tab 切换型</h2>
+    <span class="badge">5 个页面使用 · 复杂页面</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 布局示意图</div>
+    <div class="card-body">
+      <div class="layout-demo">┌──────────────────────────────────────────────────────┐
+│  [Tab1]  [Tab2]  [Tab3]  [Tab4]  [Tab5]              │  ← Tab 标签栏
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  ┌────────────────────────────────────────────────┐  │
+│  │                                                │  │
+│  │         点哪个 Tab 就显示哪个内容                 │  │  ← 内容区
+│  │                                                │  │
+│  │    Tab1 → 显示组件A + 组件B                     │  │
+│  │    Tab2 → 显示组件C                             │  │
+│  │    Tab3 → 显示组件D                             │  │
+│  │                                                │  │
+│  └────────────────────────────────────────────────┘  │
+│                                                      │
+└──────────────────────────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 使用此布局的页面</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>页面</th><th>文件路径</th><th>Tab 数量</th><th>Tab 列表</th></tr>
+        <tr>
+          <td>机柜信息</td>
+          <td class="path">views/zm/device/dev/index.vue</td>
+          <td>5</td>
+          <td>回路信息 / 直流信息 / 绝缘信息 / 交流信息 / 传感器信息</td>
+        </tr>
+        <tr>
+          <td>机柜控制</td>
+          <td class="path">views/zm/device/dev-control/index.vue</td>
+          <td>4</td>
+          <td>照明控制 / 模块控制 / 其他开关控制 / 交流开关控制</td>
+        </tr>
+        <tr>
+          <td>机柜设置</td>
+          <td class="path">views/zm/device/setting/index.vue</td>
+          <td>6</td>
+          <td>回路分组 / 场景设置 / 时控模式 / 传感器模式 / 交流开关 / 其他设置</td>
+        </tr>
+        <tr>
+          <td>机柜记录</td>
+          <td class="path">views/zm/device/record/index.vue</td>
+          <td>2</td>
+          <td>运行记录 / 耗电统计</td>
+        </tr>
+        <tr>
+          <td>照明控制</td>
+          <td class="path">views/zm/baseControl/index.vue</td>
+          <td>3</td>
+          <td>分区控制 / 场景控制 / 全亮/全灭</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <details>
+    <summary>📝 代码示例：dev/index.vue Tab 切换核心代码</summary>
+    <div class="details-body">
+      <div class="code-block"><span class="tag">template</span>
+<span class="tag-name">&lt;template&gt;</span>
+  <span class="tag-name">&lt;div</span> <span class="attr">class</span>=<span class="string">"app-container table"</span><span class="tag-name">&gt;</span>
+
+    <span class="comment">&lt;!-- ① Tab 栏：tabs 数组定义标签名，currentIndex 记录选中哪个 --&gt;</span>
+    <span class="tag-name">&lt;Tabs</span> <span class="attr">:list</span>=<span class="string">"tabs"</span> <span class="attr">v-model</span>=<span class="string">"currentIndex"</span> <span class="attr">@change</span>=<span class="string">"handleCurrentIndexChange"</span> <span class="tag-name">/&gt;</span>
+
+    <span class="comment">&lt;!-- ② 根据 currentIndex 显示不同组件 --&gt;</span>
+    <span class="tag-name">&lt;template</span> <span class="attr">v-if</span>=<span class="string">"currentIndex === 0"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;JiaoLiuHuiLu/&gt;</span>    <span class="comment">&lt;!-- 交流回路组件 --&gt;</span>
+      <span class="tag-name">&lt;ZhiLiuHuiLu/&gt;</span>     <span class="comment">&lt;!-- 直流回路组件 --&gt;</span>
+    <span class="tag-name">&lt;/template&gt;</span>
+
+    <span class="tag-name">&lt;template</span> <span class="attr">v-if</span>=<span class="string">"currentIndex === 1"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;MuXian/&gt;</span>           <span class="comment">&lt;!-- 母线组件 --&gt;</span>
+      <span class="tag-name">&lt;DC/&gt;</span>               <span class="comment">&lt;!-- 直流组件 --&gt;</span>
+    <span class="tag-name">&lt;/template&gt;</span>
+
+    <span class="comment">&lt;!-- ... 更多 Tab ... --&gt;</span>
+
+  <span class="tag-name">&lt;/div&gt;</span>
+<span class="tag-name">&lt;/template&gt;</span>
+
+<span class="tag">script</span>
+<span class="keyword">export default</span> {
+  <span class="func">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="attr">currentIndex</span>: <span class="number">0</span>,   <span class="comment">// 当前选中的 Tab（0=第一个）</span>
+      <span class="attr">tabs</span>: [<span class="string">'回路信息'</span>, <span class="string">'直流信息'</span>, <span class="string">'绝缘信息'</span>, <span class="string">'交流信息'</span>, <span class="string">'传感器信息'</span>]
+    }
+  }
+}</div>
+    </div>
+  </details>
+
+  <div class="card">
+    <div class="card-header">🖥️ 机柜信息页面 Tab 与组件对应关系</div>
+    <div class="card-body">
+      <div class="layout-demo">dev/index.vue（机柜信息页面）
+│
+├── Tab "回路信息" (currentIndex=0)
+│   ├── components/JiaoLiuHuiLu/index.vue    ← 交流回路表格
+│   └── components/ZhiLiuHuiLu/index.vue     ← 直流回路表格
+│
+├── Tab "直流信息" (currentIndex=1)
+│   ├── components/MuXian/index.vue           ← 母线信息
+│   └── components/DC/index.vue              ← 直流模块信息
+│
+├── Tab "绝缘信息" (currentIndex=2)
+│   └── components/JueYuan/index.vue          ← 绝缘阻值信息
+│
+├── Tab "交流信息" (currentIndex=3)
+│   └── components/JiaoLiuXinXi/index.vue     ← 交流输入信息
+│       ├── table_left.vue                    ← 左侧表格
+│       └── table_right.vue                   ← 右侧表格
+│
+└── Tab "传感器信息" (currentIndex=4)
+    └── components/ChuanGanQiXinXi/index.vue  ← 传感器数据</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 布局三：卡片 ==================== -->
+<div class="section" id="layout3">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(168,85,247,0.12);color:#7c3aed">🃏</div>
+    <h2>布局三：卡片列表型</h2>
+    <span class="badge">1 个页面使用</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 布局示意图</div>
+    <div class="card-body">
+      <div class="layout-demo">┌──────────────────────────────────────────────────────┐
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ 机柜1     │  │ 机柜2     │  │ 机柜3     │          │
+│  │ 状态: 开   │  │ 状态: 关   │  │ 状态: 开   │          │
+│  │ 亮度: 80%  │  │ 亮度: 0%   │  │ 亮度: 60%  │          │
+│  └──────────┘  └──────────┘  └──────────┘          │
+│  ┌──────────┐  ┌──────────┐  ┌──────────┐          │
+│  │ 机柜4     │  │ 机柜5     │  │ 机柜6     │          │
+│  │ ...       │  │ ...       │  │ ...       │          │
+│  └──────────┘  └──────────┘  └──────────┘          │
+│                                                      │
+│  共 61 条  第 1/7 页  [1] [2] [3] ... [7]            │
+└──────────────────────────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 使用此布局的页面</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>页面</th><th>文件路径</th><th>说明</th></tr>
+        <tr>
+          <td>照明状态</td>
+          <td class="path">views/zm/baseStatus/index.vue</td>
+          <td>用卡片展示每台设备的照明状态，每页 9 个卡片，支持分页</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <details>
+    <summary>📝 代码示例：baseStatus/index.vue 核心代码</summary>
+    <div class="details-body">
+      <div class="code-block"><span class="tag-name">&lt;template&gt;</span>
+  <span class="tag-name">&lt;div</span> <span class="attr">class</span>=<span class="string">"app-container table"</span><span class="tag-name">&gt;</span>
+
+    <span class="comment">&lt;!-- 卡片列表：用 v-for 循环渲染每个卡片 --&gt;</span>
+    <span class="tag-name">&lt;div</span> <span class="attr">class</span>=<span class="string">"status_cards"</span> <span class="attr">v-loading</span>=<span class="string">"loading"</span><span class="tag-name">&gt;</span>
+      <span class="tag-name">&lt;div</span> <span class="attr">v-for</span>=<span class="string">"item in demoList"</span> <span class="attr">:key</span>=<span class="string">"item.id"</span><span class="tag-name">&gt;</span>
+        <span class="tag-name">&lt;card</span> <span class="attr">:data</span>=<span class="string">"item"</span> <span class="tag-name">/&gt;</span>        <span class="comment">&lt;!-- 每个卡片组件 --&gt;</span>
+      <span class="tag-name">&lt;/div&gt;</span>
+    <span class="tag-name">&lt;/div&gt;</span>
+
+    <span class="comment">&lt;!-- 无数据提示 --&gt;</span>
+    <span class="tag-name">&lt;el-empty</span> <span class="attr">v-if</span>=<span class="string">"!demoList.length"</span> <span class="attr">description</span>=<span class="string">"无数据"</span> <span class="tag-name">/&gt;</span>
+
+    <span class="comment">&lt;!-- 分页 --&gt;</span>
+    <span class="tag-name">&lt;pagination</span> <span class="attr">:total</span>=<span class="string">"total"</span> <span class="attr">@pagination</span>=<span class="string">"getList"</span> <span class="tag-name">/&gt;</span>
+
+  <span class="tag-name">&lt;/div&gt;</span>
+<span class="tag-name">&lt;/template&gt;</span>
+
+<span class="keyword">import</span> card <span class="keyword">from</span> <span class="string">'./components/card/index.vue'</span>
+
+<span class="keyword">export default</span> {
+  <span class="attr">components</span>: { card },
+  <span class="func">data</span>() {
+    <span class="keyword">return</span> {
+      <span class="attr">demoList</span>: [],     <span class="comment">// 卡片数据数组</span>
+      <span class="attr">queryParams</span>: {
+        <span class="attr">pageNum</span>: <span class="number">1</span>,
+        <span class="attr">pageSize</span>: <span class="number">9</span>      <span class="comment">// 每页 9 个卡片</span>
+      }
+    }
+  }
+}</div>
+    </div>
+  </details>
+</div>
+
+<!-- ==================== 布局四：图表 ==================== -->
+<div class="section" id="layout4">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(234,88,12,0.12);color:#ea580c">📈</div>
+    <h2>布局四：图表型（首页）</h2>
+    <span class="badge">1 个页面使用</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 布局示意图</div>
+    <div class="card-body">
+      <div class="layout-demo">┌──────────────────────────────────────────────────────┐
+│  ┌─────────────────────┬─────────────────────┐      │
+│  │                     │                     │      │
+│  │    机柜总耗电量       │    机柜当天电量       │      │
+│  │    (ECharts 柱状图)   │    (ECharts 饼图)    │      │
+│  │                     │                     │      │
+│  └─────────────────────┴─────────────────────┘      │
+│                                                      │
+│  ┌──────────────────────────────────────────────┐   │
+│  │              机柜综合信息表格                    │   │
+│  │  ┌────┬──────┬──────┬──────┬──────┐         │   │
+│  │  │编号│ 名称  │ 状态  │ 功率  │ 操作  │         │   │
+│  │  ├────┼──────┼──────┼──────┼──────┤         │   │
+│  │  │ 1  │机柜1  │ 正常  │2.5kW │ 详情  │         │   │
+│  │  └────┴──────┴──────┴──────┴──────┘         │   │
+│  └──────────────────────────────────────────────┘   │
+└──────────────────────────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 使用此布局的页面</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>页面</th><th>文件路径</th><th>包含内容</th></tr>
+        <tr>
+          <td>首页</td>
+          <td class="path">views/index.vue</td>
+          <td>柱状图（总耗电量）+ 饼图（当天电量）+ 机柜综合信息表格</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 布局五：纯表格 ==================== -->
+<div class="section" id="layout5">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(100,116,139,0.12);color:#475569">📃</div>
+    <h2>布局五：纯表格型（只读展示）</h2>
+    <span class="badge">1 个页面使用</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 布局示意图</div>
+    <div class="card-body">
+      <div class="layout-demo">┌──────────────────────────────────────────────────────┐
+│  没有搜索框，没有操作按钮，只有表格 + 分页              │
+│                                                      │
+│  ┌──────┬──────┬────────┬────────┬──────┬──────┐    │
+│  │ 编号  │  IP  │ 功能码  │ 寄存器  │ 反馈  │ 时间  │    │
+│  ├──────┼──────┼────────┼────────┼──────┼──────┤    │
+│  │ #1   │ ...  │   03   │  0x10  │ 正常  │ ...  │    │
+│  │ #2   │ ...  │   06   │  0x20  │ 异常  │ ...  │    │
+│  └──────┴──────┴────────┴────────┴──────┴──────┘    │
+│                                                      │
+│  共 500 条  第 1/50 页  [1] [2] [3] ... [50]         │
+└──────────────────────────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 使用此布局的页面</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>页面</th><th>文件路径</th><th>说明</th></tr>
+        <tr>
+          <td>指令管理</td>
+          <td class="path">views/zm/baseInstructs/index.vue</td>
+          <td>只展示 Modbus 通信指令记录，不能增删改，纯只读</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 组件关系 ==================== -->
+<div class="section" id="component">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(14,165,233,0.12);color:#0284c7">🧩</div>
+    <h2>组件关系：页面 vs 子组件</h2>
+  </div>
+
+  <div class="highlight">
+    <strong>核心概念：</strong>一个页面（index.vue）可以包含多个子组件（components/xxx/index.vue）。子组件不是独立页面，而是页面里的一块区域。
+  </div>
+
+  <div class="card">
+    <div class="card-header">📐 页面与组件的关系</div>
+    <div class="card-body">
+      <div class="layout-demo">一个页面 (index.vue)
+│
+├── 子组件A (components/A/index.vue)    ← 页面里的一块区域
+│   └── 子子组件 (components/A/table.vue)  ← 区域里的小块
+│
+├── 子组件B (components/B/index.vue)    ← 页面里的另一块区域
+│
+└── 子组件C (components/C/index.vue)    ← 页面里的又一块区域
+
+举例：机柜信息页面
+┌────────────────────────────────────────────┐
+│  ┌──────────────┐  ┌──────────────┐       │
+│  │  JiaoLiuHuiLu │  │  ZhiLiuHuiLu │       │  ← Tab "回路信息" 里的两个子组件
+│  │  交流回路表格   │  │  直流回路表格   │       │
+│  └──────────────┘  └──────────────┘       │
+└────────────────────────────────────────────┘</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📁 device/dev/ 组件目录结构</div>
+    <div class="card-body">
+      <div class="tree"><span class="folder">device/dev/</span>
+├── <span class="file">index.vue</span>                      <span class="desc">← 主页面（Tab 容器）</span>
+└── <span class="folder">components/</span>
+    ├── <span class="folder">JiaoLiuHuiLu/</span>              <span class="desc">← 交流回路（Tab 0）</span>
+    │   └── <span class="file">index.vue</span>
+    ├── <span class="folder">ZhiLiuHuiLu/</span>               <span class="desc">← 直流回路（Tab 0）</span>
+    │   └── <span class="file">index.vue</span>
+    ├── <span class="folder">MuXian/</span>                    <span class="desc">← 母线信息（Tab 1）</span>
+    │   └── <span class="file">index.vue</span>
+    ├── <span class="folder">DC/</span>                        <span class="desc">← 直流模块（Tab 1）</span>
+    │   └── <span class="file">index.vue</span>
+    ├── <span class="folder">JueYuan/</span>                   <span class="desc">← 绝缘信息（Tab 2）</span>
+    │   └── <span class="file">index.vue</span>
+    ├── <span class="folder">JiaoLiuXinXi/</span>              <span class="desc">← 交流信息（Tab 3）</span>
+    │   ├── <span class="file">index.vue</span>
+    │   ├── <span class="file">table_left.vue</span>           <span class="desc">← 左侧表格子组件</span>
+    │   └── <span class="file">table_right.vue</span>          <span class="desc">← 右侧表格子组件</span>
+    └── <span class="folder">ChuanGanQiXinXi/</span>           <span class="desc">← 传感器信息（Tab 4）</span>
+        └── <span class="file">index.vue</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 代码模板 ==================== -->
+<div class="section" id="code">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(168,85,247,0.12);color:#7c3aed">💻</div>
+    <h2>Vue 文件代码模板</h2>
+  </div>
+
+  <div class="highlight">
+    <strong>每个 Vue 文件都是三部分：</strong>template（页面结构）+ script（页面逻辑）+ style（页面样式）
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 Vue 文件基本结构</div>
+    <div class="card-body">
+      <div class="code-block"><span class="comment">&lt;!-- template：页面长什么样 --&gt;</span>
+<span class="tag-name">&lt;template&gt;</span>
+  <span class="tag-name">&lt;div&gt;</span>
+    <span class="comment">&lt;!-- HTML 标签、Element UI 组件 --&gt;</span>
+  <span class="tag-name">&lt;/div&gt;</span>
+<span class="tag-name">&lt;/template&gt;</span>
+
+<span class="comment">&lt;!-- script：页面怎么运作 --&gt;</span>
+<span class="tag-name">&lt;script&gt;</span>
+<span class="keyword">import</span> xxx <span class="keyword">from</span> <span class="string">'./components/xxx'</span>   <span class="comment">// 导入子组件</span>
+
+<span class="keyword">export default</span> {
+  <span class="attr">components</span>: { xxx },                <span class="comment">// 注册子组件</span>
+  <span class="func">data</span>() {                             <span class="comment">// 页面数据</span>
+    <span class="keyword">return</span> { <span class="attr">list</span>: [], <span class="attr">total</span>: <span class="number">0</span> }
+  },
+  <span class="func">created</span>() {                          <span class="comment">// 页面加载时执行</span>
+    <span class="keyword">this</span>.<span class="func">getList</span>()
+  },
+  <span class="attr">methods</span>: {                           <span class="comment">// 页面方法</span>
+    <span class="func">getList</span>() { <span class="comment">/* 调接口获取数据 */</span> },
+    <span class="func">handleAdd</span>() { <span class="comment">/* 点新增按钮 */</span> },
+    <span class="func">handleDelete</span>() { <span class="comment">/* 点删除按钮 */</span> }
+  }
+}
+<span class="tag-name">&lt;/script&gt;</span>
+
+<span class="comment">&lt;!-- style：页面样式 --&gt;</span>
+<span class="tag-name">&lt;style</span> <span class="attr">scoped</span> <span class="attr">lang</span>=<span class="string">"scss"</span><span class="tag-name">&gt;</span>
+<span class="comment">/* CSS 样式，scoped 表示只作用于当前组件 */</span>
+<span class="tag-name">&lt;/style&gt;</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📄 按钮与 API 的三种关系</div>
+    <div class="card-body">
+      <div class="two-col">
+        <div class="compare-item">
+          <div class="title" style="background:rgba(239,68,68,0.08);color:var(--danger)">❌ 按钮不调 API（纯前端操作）</div>
+          <div class="content">
+            <div class="code-block" style="font-size:0.75rem"><span class="func">handleAdd</span>() {
+  <span class="keyword">this</span>.<span class="func">reset</span>()        <span class="comment">// 清空表单</span>
+  <span class="keyword">this</span>.open = <span class="keyword">true</span>    <span class="comment">// 打开弹窗</span>
+  <span class="keyword">this</span>.title = <span class="string">"添加场景"</span>
+}</div>
+            <p style="font-size:0.82rem;margin-top:0.5rem">点击后只是弹出对话框，没有发网络请求。<br>常见：新增（弹窗）、取消（关弹窗）、重置表单。</p>
+          </div>
+        </div>
+        <div class="compare-item">
+          <div class="title" style="background:rgba(52,168,83,0.08);color:var(--success)">✅ 按钮调 1 个 API</div>
+          <div class="content">
+            <div class="code-block" style="font-size:0.75rem"><span class="func">handleExport</span>() {
+  <span class="keyword">this</span>.<span class="func">download</span>(
+    <span class="string">'zm/baseScene/export'</span>,
+    { ...<span class="keyword">this</span>.queryParams }
+  )
+}</div>
+            <p style="font-size:0.82rem;margin-top:0.5rem">只调 1 个接口。<br>常见：导出、搜索、页面加载。</p>
+          </div>
+        </div>
+      </div>
+      <div class="compare-item" style="margin-top:1rem">
+        <div class="title" style="background:rgba(26,115,232,0.08);color:var(--primary)">✅✅ 按钮调多个 API（最常见）</div>
+        <div class="content">
+          <div class="code-block" style="font-size:0.75rem"><span class="func">submitForm</span>() {
+  <span class="keyword">if</span> (<span class="keyword">this</span>.form.id != <span class="keyword">null</span>) {
+    <span class="func">updateBaseScene</span>(<span class="keyword">this</span>.form).<span class="func">then</span>(() => {   <span class="comment">// API 1: 修改</span>
+      <span class="keyword">this</span>.open = <span class="keyword">false</span>
+      <span class="keyword">this</span>.<span class="func">getList</span>()                          <span class="comment">// API 2: 刷新列表</span>
+    })
+  } <span class="keyword">else</span> {
+    <span class="func">addBaseScene</span>(<span class="keyword">this</span>.form).<span class="func">then</span>(() => {       <span class="comment">// API 1: 新增</span>
+      <span class="keyword">this</span>.open = <span class="keyword">false</span>
+      <span class="keyword">this</span>.<span class="func">getList</span>()                          <span class="comment">// API 2: 刷新列表</span>
+    })
+  }
+}</div>
+          <p style="font-size:0.82rem;margin-top:0.5rem">点一次"确定"发 2 个请求：先提交数据，再刷新列表。<br>常见：确定提交、删除（删完再刷新）。</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 数据流转 ==================== -->
+<div class="section" id="dataflow">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(234,88,12,0.12);color:#ea580c">🔄</div>
+    <h2>数据流转：从点击到显示</h2>
+  </div>
+
+  <div class="card">
+    <div class="card-header">🔄 CRUD 页面数据流转（以场景管理为例）</div>
+    <div class="card-body">
+      <div class="layout-demo"><span style="color:var(--primary);font-weight:700">页面加载时：</span>
+
+  created() → this.getList()
+      ↓
+  listBaseScene(queryParams)                    <span style="color:var(--muted)">← api/zm/baseScene.js</span>
+      ↓
+  request({ url: '/zm/baseScene/list', method: 'post' })  <span style="color:var(--muted)">← Axios 发 HTTP 请求</span>
+      ↓
+  POST /zm/baseScene/list → DevBaseSceneController → Service → MySQL
+      ↓
+  返回 { rows: [...], total: 100 }
+      ↓
+  this.baseSceneList = response.rows            <span style="color:var(--muted)">← 赋值给 data</span>
+      ↓
+  &lt;el-table :data="baseSceneList"&gt;              <span style="color:var(--muted)">← 自动渲染表格</span>
+
+
+<span style="color:var(--primary);font-weight:700">用户点击"确定"时：</span>
+
+  submitForm() → this.$refs.form.validate()
+      ↓
+  验证通过 → addBaseScene(this.form)            <span style="color:var(--muted)">← 调新增接口</span>
+      ↓
+  POST /zm/baseScene/add → Controller → Service → MySQL INSERT
+      ↓
+  返回 { code: 200 }
+      ↓
+  this.$modal.msgSuccess("新增成功")             <span style="color:var(--muted)">← 弹成功提示</span>
+      ↓
+  this.getList()                                <span style="color:var(--muted)">← 再调一次 list 刷新表格</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">🔄 Tab 页面数据流转（以机柜信息为例）</div>
+    <div class="card-body">
+      <div class="layout-demo"><span style="color:var(--primary);font-weight:700">页面加载时：</span>
+
+  created() → currentIndex = 0（默认显示第一个 Tab）
+      ↓
+  v-if="currentIndex === 0" 成立
+      ↓
+  加载 &lt;JiaoLiuHuiLu/&gt; 和 &lt;ZhiLiuHuiLu/&gt; 组件
+      ↓
+  每个子组件自己的 created() 里调各自的接口获取数据
+
+
+<span style="color:var(--primary);font-weight:700">用户点击 Tab 时：</span>
+
+  用户点击 "直流信息" Tab
+      ↓
+  currentIndex 变成 1
+      ↓
+  v-if="currentIndex === 1" 成立
+      ↓
+  加载 &lt;MuXian/&gt; 和 &lt;DC/&gt; 组件
+      ↓
+  这两个子组件各自的 created() 里调各自的接口</div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== 总结 ==================== -->
+<div class="section" id="summary">
+  <div class="section-title">
+    <div class="icon" style="background:rgba(26,115,232,0.12);color:var(--primary)">📌</div>
+    <h2>总结</h2>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📌 核心结论</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>问题</th><th>答案</th></tr>
+        <tr><td>前端文件夹那么多，我怎么知道哪个是哪个？</td><td>只关注 <code>api/</code> 和 <code>views/</code>，其他都是框架文件不用动</td></tr>
+        <tr><td>一个 index.vue 对应什么？</td><td>一个 index.vue = 一个页面 = 浏览器里看到的一个界面</td></tr>
+        <tr><td>每个按钮都调 API 吗？</td><td>不一定。30% 不调 API（纯前端），40% 调 1 个，30% 调多个</td></tr>
+        <tr><td>所有页面布局都一样吗？</td><td>不一样。有 4-5 种布局，但 80% 是 CRUD 表格型 或 Tab 切换型</td></tr>
+        <tr><td>组件和页面什么关系？</td><td>组件是页面里的一块区域，不是独立页面</td></tr>
+        <tr><td>Tab 是什么？</td><td>页面顶部的标签栏，点哪个就显示哪个内容</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">📌 布局类型速查</div>
+    <div class="card-body">
+      <table class="tbl">
+        <tr><th>布局类型</th><th>使用数量</th><th>特征</th><th>适用场景</th></tr>
+        <tr>
+          <td><span class="tag-badge tag-get">CRUD 表格型</span></td>
+          <td>7 个页面</td>
+          <td>搜索 + 表格 + 弹窗 + 分页</td>
+          <td>数据管理（区域、分区、场景、机柜、告警、记录）</td>
+        </tr>
+        <tr>
+          <td><span class="tag-badge tag-tab">Tab 切换型</span></td>
+          <td>5 个页面</td>
+          <td>Tab 标签栏 + 多个子组件</td>
+          <td>复杂页面（机柜信息/控制/设置/记录、照明控制）</td>
+        </tr>
+        <tr>
+          <td><span class="tag-badge tag-card">卡片列表型</span></td>
+          <td>1 个页面</td>
+          <td>卡片网格 + 分页</td>
+          <td>状态展示（照明状态）</td>
+        </tr>
+        <tr>
+          <td><span class="tag-badge" style="background:rgba(234,88,12,0.12);color:#ea580c">图表型</span></td>
+          <td>1 个页面</td>
+          <td>图表 + 表格</td>
+          <td>首页概览</td>
+        </tr>
+        <tr>
+          <td><span class="tag-badge" style="background:rgba(100,116,139,0.12);color:#475569">纯表格型</span></td>
+          <td>1 个页面</td>
+          <td>只有表格 + 分页</td>
+          <td>只读数据展示（指令管理）</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="highlight">
+    <strong>开发新页面时：</strong><br>
+    1. 先确定是哪种布局（90% 概率是 CRUD 或 Tab）<br>
+    2. 找一个同类型的现有页面，照着抄<br>
+    3. 改搜索字段、改表格列、改弹窗表单<br>
+    4. 在 api/ 目录下新建接口文件<br>
+    5. 跑通一个页面后，其他页面都是复制粘贴改一改
+  </div>
+</div>
+
+<div class="footer">
+  PM6-ZM 直流照明监控系统 · 前端结构分析报告 · 15 页面 / 4 种布局 / 56+ 组件 / 120+ 接口函数
+</div>
+
+</div>
+
+<script>
+function filterContent(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.tbl tr').forEach(r => {
+    if (r.querySelector('th')) return;
+    const t = r.textContent.toLowerCase();
+    r.style.display = t.includes(q) ? '' : 'none';
+  });
+  document.querySelectorAll('.card').forEach(c => {
+    const t = c.textContent.toLowerCase();
+    c.style.display = t.includes(q) ? '' : 'none';
+  });
+}
+</script>
+</body>
+</html>

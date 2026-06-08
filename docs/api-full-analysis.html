@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM6-ZM 全接口分析 — 数据流转与时序图</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--border:#334155;--text:#e2e8f0;--muted:#94a3b8;--blue:#3b82f6;--green:#22c55e;--purple:#a855f7;--orange:#f97316;--cyan:#06b6d4;--rose:#f43f5e;--yellow:#eab308}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.7;padding:1.5rem}
+.container{max-width:1100px;margin:0 auto}
+h1{text-align:center;font-size:1.8rem;margin-bottom:0.3rem;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{text-align:center;color:var(--muted);font-size:0.85rem;margin-bottom:2rem}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;margin-bottom:2rem}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center}
+.stat .n{font-size:2rem;font-weight:700;line-height:1}
+.stat .l{color:var(--muted);font-size:0.75rem;margin-top:0.2rem}
+.n.cyan{color:var(--cyan)}.n.blue{color:var(--blue)}.n.green{color:var(--green)}.n.purple{color:var(--purple)}.n.orange{color:var(--orange)}.n.rose{color:var(--rose)}
+/* Module */
+.mod{margin-bottom:2rem}
+.mod-h{display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;cursor:pointer;user-select:none}
+.mod-h .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.mod-h .title{font-size:1.1rem;font-weight:600}
+.mod-h .cnt{margin-left:auto;background:rgba(255,255,255,0.06);padding:0.1rem 0.5rem;border-radius:999px;font-size:0.75rem;color:var(--muted)}
+.mod-h .arrow{color:var(--muted);font-size:0.7rem;transition:transform 0.2s}
+.mod-h.open .arrow{transform:rotate(90deg)}
+.mod-body{display:none;background:var(--card);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.mod-h.open+.mod-body{display:block}
+/* API table */
+.api-tbl{width:100%;border-collapse:collapse;font-size:0.82rem}
+.api-tbl th{text-align:left;padding:0.5rem 0.75rem;background:rgba(59,130,246,0.06);color:var(--blue);font-weight:600;border-bottom:1px solid var(--border);font-size:0.75rem;text-transform:uppercase;letter-spacing:0.03em}
+.api-tbl td{padding:0.5rem 0.75rem;border-bottom:1px solid rgba(51,65,85,0.4);vertical-align:top}
+.api-tbl tr:hover td{background:rgba(255,255,255,0.02)}
+.api-tbl .path{font-family:'Fira Code',monospace;font-size:0.78rem;color:var(--text)}
+.badge{display:inline-block;padding:0.1rem 0.45rem;border-radius:4px;font-size:0.68rem;font-weight:700;letter-spacing:0.03em}
+.b-get{background:rgba(34,197,94,0.15);color:var(--green)}
+.b-post{background:rgba(59,130,246,0.15);color:var(--blue)}
+.b-put{background:rgba(249,115,22,0.15);color:var(--orange)}
+.b-del{background:rgba(244,63,94,0.15);color:var(--rose)}
+.b-req{background:rgba(168,85,247,0.15);color:var(--purple)}
+/* Sequence */
+.seq{padding:1rem 1.25rem;font-size:0.85rem}
+.seq h4{color:var(--cyan);margin-bottom:0.5rem;font-size:0.9rem}
+.seq-diagram{background:rgba(0,0,0,0.2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin:0.75rem 0;overflow-x:auto;font-family:'Fira Code',monospace;font-size:0.78rem;line-height:1.8;white-space:pre;color:var(--muted)}
+.seq-diagram .hl{color:var(--cyan);font-weight:600}
+.seq-diagram .fe{color:var(--green)}
+.seq-diagram .be{color:var(--blue)}
+.seq-diagram .hw{color:var(--purple)}
+.seq-diagram .db{color:var(--orange)}
+.seq-diagram .err{color:var(--rose)}
+.flow-label{display:inline-block;padding:0.15rem 0.5rem;border-radius:4px;font-size:0.72rem;margin-right:0.3rem}
+.fl-fe{background:rgba(34,197,94,0.12);color:var(--green)}
+.fl-be{background:rgba(59,130,246,0.12);color:var(--blue)}
+.fl-db{background:rgba(249,115,22,0.12);color:var(--orange)}
+.fl-hw{background:rgba(168,85,247,0.12);color:var(--purple)}
+/* Search */
+.search{margin-bottom:1.5rem}
+.search input{width:100%;padding:0.6rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.9rem;outline:none}
+.search input:focus{border-color:var(--cyan)}
+.search input::placeholder{color:var(--muted)}
+/* Nav */
+.nav{display:flex;flex-wrap:wrap;gap:0.4rem;margin-bottom:1.5rem}
+.nav a{padding:0.3rem 0.7rem;background:var(--card);border:1px solid var(--border);border-radius:6px;font-size:0.78rem;color:var(--muted);text-decoration:none;transition:all 0.15s}
+.nav a:hover{border-color:var(--cyan);color:var(--cyan)}
+.footer{text-align:center;color:var(--muted);font-size:0.75rem;margin-top:2.5rem;padding-top:1rem;border-top:1px solid var(--border)}
+details{margin:0.5rem 0}
+details summary{cursor:pointer;padding:0.4rem 0.6rem;background:rgba(255,255,255,0.03);border-radius:6px;font-size:0.82rem;color:var(--cyan);list-style:none;display:flex;align-items:center;gap:0.4rem}
+details summary::before{content:'▶';font-size:0.6rem;transition:transform 0.2s}
+details[open] summary::before{transform:rotate(90deg)}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>PM6-ZM 全接口分析</h1>
+<p class="sub">直流照明监控系统 · 44 个 Controller · 200+ API 端点 · 数据流转与时序图</p>
+
+<div class="stats">
+<div class="stat"><div class="n cyan">44</div><div class="l">Controller 总数</div></div>
+<div class="stat"><div class="n blue">200+</div><div class="l">API 端点</div></div>
+<div class="stat"><div class="n green">16</div><div class="l">前端 API 文件</div></div>
+<div class="stat"><div class="n purple">120+</div><div class="l">前端调用函数</div></div>
+<div class="stat"><div class="n orange">56+</div><div class="l">Vue 页面组件</div></div>
+<div class="stat"><div class="n rose">7</div><div class="l">核心数据库表</div></div>
+</div>
+
+<div class="search"><input type="text" id="searchBox" placeholder="🔍 搜索接口路径、方法名、Controller..." oninput="filterAPIs(this.value)"></div>
+
+<div class="nav">
+<a href="#home">首页</a><a href="#base">基本资料</a><a href="#lighting">照明控制</a><a href="#device">机柜管理</a>
+<a href="#alarm">告警</a><a href="#history">历史</a><a href="#power">电量</a><a href="#sensor">传感器</a>
+<a href="#protocol">协议配置</a><a href="#status">状态数据</a><a href="#write">写入控制</a><a href="#task">任务调度</a>
+</div>
+
+<!-- ==================== 首页 ==================== -->
+<div class="mod" id="home">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(6,182,212,0.15);color:var(--cyan)">🏠</div><span class="title">首页概览</span><span class="cnt">HomeController · 4 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>数据流转</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/home/version</td><td>获取系统版本号</td><td>读 application.yml → 返回 version 字符串</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/home/powersByAll</td><td>获取所有设备总功率</td><td>Redis 缓存 → 聚合计算 → 返回总功率</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/home/powersByDay</td><td>获取今日功率趋势</td><td>MySQL power_record → 按小时聚合 → 返回数组</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/home/cabinetList</td><td>首页机柜概览列表</td><td>MySQL dev_base_device → 联表查询状态 → 返回列表</td></tr>
+</table>
+<details><summary>📊 时序图：首页加载</summary>
+<div class="seq-diagram">
+<span class="fe">Vue首页(Index)</span>          <span class="be">HomeController</span>        <span class="db">MySQL/Redis</span>
+    │                            │                        │
+    ├── GET /zm/home/version ──→ │                        │
+    │                            ├── 读 application.yml ─→│
+    │                            │←─ 返回版本号 ──────────┤
+    │←── {version:"V0.3.1"} ────┤                        │
+    │                            │                        │
+    ├── GET /zm/home/powersByAll→│                        │
+    │                            ├── Redis.get("power") ─→│
+    │                            │←─ 聚合功率数据 ────────┤
+    │←── {totalPower: 12.5kW} ──┤                        │
+    │                            │                        │
+    ├── POST /zm/home/cabinetList→                        │
+    │                            ├── SELECT * FROM dev_base_device
+    │                            │   LEFT JOIN dev_status  │
+    │                            │←─ 机柜列表+状态 ───────┤
+    │←── [{id,name,status}...] ─┤                        │
+</div></details>
+</div></div>
+
+<!-- ==================== 基本资料 ==================== -->
+<div class="mod" id="base">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(34,197,94,0.15);color:var(--green)">📋</div><span class="title">基本资料</span><span class="cnt">5 Controller · 35+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>设备区域 (DevBaseRegionController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseRegion/list</td><td>分页查询区域列表</td><td>listBaseRegion() → baseRegion.js</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseRegion/noPageList</td><td>不分页查询全部区域</td><td>listBaseRegionNoPage() → 下拉选择器</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseRegion/export</td><td>导出区域 Excel</td><td>—</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseRegion/{id}</td><td>查询单个区域详情</td><td>getBaseRegion(id)</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseRegion/add</td><td>新增区域</td><td>addBaseRegion(data)</td></tr>
+<tr><td><span class="badge b-put">PUT</span></td><td class="path">/zm/baseRegion/edit</td><td>修改区域</td><td>updateBaseRegion(data)</td></tr>
+<tr><td><span class="badge b-del">DEL</span></td><td class="path">/zm/baseRegion/{ids}</td><td>删除区域（支持批量）</td><td>delBaseRegion(id)</td></tr>
+</table>
+
+<div class="seq"><h4>分区设置 (DevBaseDistrictController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDistrict/list</td><td>分页查询分区</td><td>listBaseDistrict()</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDistrict/export</td><td>导出分区</td><td>—</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseDistrict/{id}</td><td>查询单个分区</td><td>getBaseDistrict(id)</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDistrict/add</td><td>新增分区</td><td>addBaseDistrict(data)</td></tr>
+<tr><td><span class="badge b-put">PUT</span></td><td class="path">/zm/baseDistrict/edit</td><td>修改分区</td><td>updateBaseDistrict(data)</td></tr>
+<tr><td><span class="badge b-del">DEL</span></td><td class="path">/zm/baseDistrict/{ids}</td><td>删除分区</td><td>delBaseDistrict(id)</td></tr>
+</table>
+
+<div class="seq"><h4>场景设置 (DevBaseSceneController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseScene/list</td><td>分页查询场景</td><td>listBaseScene()</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseScene/{id}</td><td>查询单个场景</td><td>getBaseScene(id)</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseScene/add</td><td>新增场景</td><td>addBaseScene(data)</td></tr>
+<tr><td><span class="badge b-put">PUT</span></td><td class="path">/zm/baseScene/edit</td><td>修改场景</td><td>updateBaseScene(data)</td></tr>
+<tr><td><span class="badge b-del">DEL</span></td><td class="path">/zm/baseScene/{ids}</td><td>删除场景</td><td>delBaseScene(id)</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseScene/getSceneSelectList</td><td>场景下拉列表</td><td>getSceneSelectList()</td></tr>
+</table>
+
+<div class="seq"><h4>机柜配置 (DevBaseDeviceController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDevice/list</td><td>分页查询机柜</td><td>listBaseDevice()</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDevice/export</td><td>导出机柜 Excel</td><td>—</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseDevice/{id}</td><td>查询单台机柜详情</td><td>getBaseDevice(id)</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseDevice/init</td><td>初始化机柜数据</td><td>baseDeviceInit()</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/baseDevice/otherMsg</td><td>获取机柜附加信息</td><td>otherMsg()</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/baseDevice/acSwitchControlList</td><td>交流开关控制列表</td><td>acSwitchControlList()</td></tr>
+</table>
+
+<details><summary>📊 时序图：新增区域</summary>
+<div class="seq-diagram">
+<span class="fe">baseRegion.vue</span>         <span class="be">DevBaseRegionController</span>  <span class="be">DevBaseRegionService</span>   <span class="db">MySQL</span>
+    │                           │                          │                     │
+    ├── addBaseRegion(data) ──→ │                          │                     │
+    │   POST /zm/baseRegion/add │                          │                     │
+    │                           ├── 参数校验 ─────────────→│                     │
+    │                           │   (@Valid)               │                     │
+    │                           │                          ├── INSERT INTO ─────→│
+    │                           │                          │   dev_base_region   │
+    │                           │                          │←─ 返回影响行数 ────┤
+    │                           │←─ AjaxResult.success ───┤                     │
+    │←── 弹窗"新增成功" ───────┤                          │                     │
+    │                           │                          │                     │
+    │── 自动刷新 list() ──────→ │                          │                     │
+    │                           ├── POST /zm/baseRegion/list                     │
+    │                           │                          ├── SELECT ... FROM ─→│
+    │                           │                          │   dev_base_region   │
+    │                           │                          │   WHERE del_flag=0  │
+    │                           │←─ TableDataInfo ────────┤                     │
+    │←── 表格更新 ─────────────┤                          │                     │
+</div></details>
+
+<details><summary>📊 数据流转：区域 CRUD 全链路</summary>
+<div class="seq">
+<p><span class="flow-label fl-fe">前端</span> baseRegion.vue → 用户点击"新增"按钮 → 弹出对话框 → 填写表单 → 调用 <code>addBaseRegion(data)</code></p>
+<p><span class="flow-label fl-be">API层</span> baseRegion.js → <code>request({ url: '/zm/baseRegion/add', method: 'post', data })</code> → Axios 发送 HTTP POST</p>
+<p><span class="flow-label fl-be">控制层</span> DevBaseRegionController → <code>@PostMapping("/add")</code> → <code>@Valid</code> 参数校验 → 调用 Service</p>
+<p><span class="flow-label fl-be">业务层</span> DevBaseRegionServiceImpl → <code>insertBaseRegion(region)</code> → 设置 createBy/createTime → 调用 Mapper</p>
+<p><span class="flow-label fl-db">数据层</span> DevBaseRegionMapper → MyBatis-Plus → <code>INSERT INTO dev_base_region</code> → 返回 affected rows</p>
+<p><span class="flow-label fl-db">数据库</span> dev_base_region 表 → 新增一行记录（id, name, del_flag='0'）</p>
+</div></details>
+</div></div>
+
+<!-- ==================== 照明控制 ==================== -->
+<div class="mod" id="lighting">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(249,115,22,0.15);color:var(--orange)">💡</div><span class="title">照明状态 & 控制</span><span class="cnt">4 Controller · 25+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>照明状态 (LightingController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/lighting/zoneControlList</td><td>分区控制状态列表</td><td>zoneControlList() → baseControl.js</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/lighting/lightList</td><td>照明状态列表</td><td>lightList() → baseStatus.js</td></tr>
+</table>
+
+<div class="seq"><h4>控制分区 (LightZoneController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/light/zone/leftList</td><td>左侧分区列表</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/light/zone/set</td><td>设置分区参数</td></tr>
+</table>
+
+<div class="seq"><h4>场景控制 (SceneController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/scene/getSceneNames</td><td>获取场景名称列表</td></tr>
+</table>
+
+<div class="seq"><h4>照明写入控制 (WriteControlController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>数据流</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/control/updateSimpleControl</td><td>单路照明控制</td><td>前端 → Controller → Modbus 05 写线圈 → 机柜</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/control/updateSimpleControlToAll</td><td>批量照明控制</td><td>前端 → 遍历设备 → 并发 Modbus 05 → 多台机柜</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/control/updateZoneLightSwitch</td><td>分区开关控制</td><td>前端 → 分区映射设备 → Modbus 05</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/control/updateZoneLightLux</td><td>分区调光控制</td><td→ 前端 → Modbus 06 写寄存器 → 亮度值</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/control/updateAcControl</td><td>交流回路控制</td><td>前端 → Modbus 05 → AC 开关</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/control/updateAcDc</td><td>AC/DC 输出电压设置</td><td>前端 → Modbus 06 → 电压寄存器</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/control/updateDcDc</td><td>DC/DC 输出电压设置</td><td>前端 → Modbus 06 → 电压寄存器</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/control/loopControlLux</td><td>回路调光</td><td>前端 → Modbus 06 → 调光寄存器</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/control/loopControlSwitch</td><td>回路开关</td><td>前端 → Modbus 05 → 开关线圈</td></tr>
+</table>
+
+<details><summary>📊 时序图：照明控制（核心流程）</summary>
+<div class="seq-diagram">
+<span class="fe">baseControl.vue</span>       <span class="be">WriteControlController</span>  <span class="be">WriteControlService</span>   <span class="hw">Modbus TCP</span>     <span class="hw">机柜主控板</span>
+    │                          │                         │                    │               │
+    ├── 点击"开灯" ──────────→ │                         │                    │               │
+    │  updateSimpleControl()   │                         │                    │               │
+    │  POST /zm/write/control/ │                         │                    │               │
+    │  updateSimpleControl     │                         │                    │               │
+    │                          ├── 参数校验 ────────────→│                    │               │
+    │                          │  {deviceId,loopId,      │                    │               │
+    │                          │   action:"on"}          │                    │               │
+    │                          │                         ├── 从连接池获取连接 →│               │
+    │                          │                         │   pool.getConnection│               │
+    │                          │                         │                    │               │
+    │                          │                         ├── 写单个线圈(FC05)→│──────────────→│
+    │                          │                         │   writeCoil(addr,T) │  TCP:502      │
+    │                          │                         │                    │               │
+    │                          │                         │                    │←─ 响应确认 ───┤
+    │                          │                         │←─ 写入成功 ───────┤               │
+    │                          │                         │                    │               │
+    │                          │                         ├── 更新 Redis 缓存  │               │
+    │                          │                         │   SET device:1:zone0│               │
+    │                          │                         │   = "on"           │               │
+    │                          │                         │                    │               │
+    │                          │←─ AjaxResult.success ──┤                    │               │
+    │←── 弹窗"控制成功" ──────┤                         │                    │               │
+    │                          │                         │                    │               │
+    │── 自动刷新状态列表 ────→ │                         │                    │               │
+</div></details>
+</div></div>
+
+<!-- ==================== 直流机柜 ==================== -->
+<div class="mod" id="device">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(168,85,247,0.15);color:var(--purple)">🖥️</div><span class="title">直流机柜</span><span class="cnt">4 Controller · 30+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>机柜信息 (CabinetInformationController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/cabinetInfo/getDeviceList</td><td>获取设备列表</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/cabinetInfo/acList</td><td>交流模块状态列表</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/cabinetInfo/dccList</td><td>直流模块状态列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/cabinetInfo/busInfo</td><td>母线信息（电压/电流/绝缘）</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/cabinetInfo/dcAc</td><td>DC/AC 数据</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/cabinetInfo/getBusInsulation</td><td>母线绝缘阻值</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/cabinetInfo/getAlternating</td><td>交流输入数据</td></tr>
+</table>
+
+<div class="seq"><h4>机柜记录 (RecordFaultController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getFaultSeven</td><td>近7天故障统计</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getRecordOne</td><td>单台设备记录</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getRecordSeven</td><td>近7天运行记录</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getFaultAll</td><td>全部故障记录</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/record/getNews</td><td>最新告警消息</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/exportRecord</td><td>导出运行记录</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/exportFault</td><td>导出故障记录</td></tr>
+</table>
+
+<div class="seq"><h4>机柜设置 (DevConfigGroupController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/getDistrictList</td><td>获取分区列表</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/configGroup/list</td><td>配置组列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/getDistrictByGroupId</td><td>按组查分区</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/configGroup/getLoopsByGroup</td><td>按组查回路</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/configGroup/getLoopsByFree</td><td>查空闲回路</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/insertLoopToGroup</td><td>添加回路到组</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/deleteLoopFromGroup</td><td>从组移除回路</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/configGroup/getSceneParamsList</td><td>场景参数列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/getGroupName</td><td>获取组名</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/configGroup/getDistrictNames</td><td>获取分区名</td></tr>
+</table>
+
+<div class="seq"><h4>机柜控制 (DeviceProcessorController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/process/lightControlList</td><td>照明控制列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/process/moduleControlList</td><td>模块控制列表</td></tr>
+</table>
+
+<details><summary>📊 时序图：机柜状态查询</summary>
+<div class="seq-diagram">
+<span class="fe">dev.vue(机柜信息页)</span>    <span class="be">CabinetInformationController</span>  <span class="be">Mapper</span>       <span class="db">MySQL</span>
+    │                            │                              │             │
+    ├── acList({deviceId:1}) ──→ │                              │             │
+    │   POST /zm/cabinetInfo/    │                              │             │
+    │   acList                   │                              │             │
+    │                            ├── 查询交流模块状态 ────────→│             │
+    │                            │                              ├── SELECT ──→│
+    │                            │                              │  dev_status_ac│
+    │                            │                              │  WHERE dev_id │
+    │                            │                              │  = 1          │
+    │                            │                              │←─ 结果集 ───┤
+    │                            │←─ 包装为 TableDataInfo ─────┤             │
+    │←── {rows:[...],total:N} ──┤                              │             │
+    │                            │                              │             │
+    ├── busInfo({deviceId:1}) ──→│                              │             │
+    │   GET /zm/cabinetInfo/     │                              │             │
+    │   busInfo                  │                              │             │
+    │                            ├── 查询母线数据 ────────────→│             │
+    │                            │   (电压/电流/绝缘阻值)       │             │
+    │                            │                              ├── SELECT ──→│
+    │                            │                              │  dev_base_   │
+    │                            │                              │  device      │
+    │                            │←─ 设备实时数据 ─────────────┤             │
+    │←── {dcBusVoltage, ...} ───┤                              │             │
+</div></details>
+</div></div>
+
+<!-- ==================== 告警 ==================== -->
+<div class="mod" id="alarm">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(244,63,94,0.15);color:var(--rose)">🚨</div><span class="title">当前告警</span><span class="cnt">1 API · 告警列表</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getFaultSeven</td><td>近7天故障统计</td><td>getFaultSeven() → alarm/list.js</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/record/getNews</td><td>最新告警推送</td><td>getNews() → 告警铃铛图标</td></tr>
+</table>
+<details><summary>📊 时序图：告警产生流程</summary>
+<div class="seq-diagram">
+<span class="hw">机柜主控板</span>         <span class="be">Modbus采集线程</span>      <span class="be">AlarmService</span>       <span class="db">MySQL</span>         <span class="fe">前端轮询</span>
+    │                    │                    │                   │               │
+    │←─ 定时读取(3s) ────┤                    │                   │               │
+    │  FC03 读保持寄存器  │                    │                   │               │
+    │── 返回寄存器值 ───→│                    │                   │               │
+    │                    │                    │                   │               │
+    │                    ├── 解析寄存器值     │                   │               │
+    │                    │  电压=253V         │                   │               │
+    │                    │  阈值=242V         │                   │               │
+    │                    │  判断: 过压!       │                   │               │
+    │                    │                    │                   │               │
+    │                    ├── 触发告警 ──────→│                   │               │
+    │                    │                    ├── INSERT INTO ──→│               │
+    │                    │                    │   record_fault    │               │
+    │                    │                    │   {type:"过压",   │               │
+    │                    │                    │    value:253}     │               │
+    │                    │                    │                   │               │
+    │                    │                    │                   │  GET /zm/record│
+    │                    │                    │                   │  /getNews ←──┤
+    │                    │                    │                   │── 返回最新 ─→│
+    │                    │                    │                   │  告警消息     │
+    │                    │                    │                   │               │
+    │                    │                    │                   │  前端弹窗通知  │
+</div></details>
+</div></div>
+
+<!-- ==================== 历史记录 ==================== -->
+<div class="mod" id="history">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(168,85,247,0.15);color:var(--purple)">📚</div><span class="title">历史记录</span><span class="cnt">3 页面 · 10+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th><th>前端调用</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getRecordSeven</td><td>近7天运行记录</td><td>getRecordSeven() → history/event.js</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/getFaultAll</td><td>全部故障历史</td><td>getFaultAll() → history/record.js</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/exportRecord</td><td>导出运行记录</td><td>—</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/record/exportFault</td><td>导出故障记录</td><td>—</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 电量统计 ==================== -->
+<div class="mod" id="power">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(234,179,8,0.15);color:var(--yellow)">⚡</div><span class="title">电量统计</span><span class="cnt">3 Controller · 25+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>功率记录 (PowerController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-req">REQ</span></td><td class="path">/zm/powerRecord/getOneTotalPower</td><td>单台总功率</td></tr>
+<tr><td><span class="badge b-req">REQ</span></td><td class="path">/zm/powerRecord/getOneTotalElectricByDeviceId</td><td>单台总电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/getYear</td><td>年度功率数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/getQuarter</td><td>季度功率数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/getMonth</td><td>月度功率数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/getWeek</td><td>周功率数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/getDay</td><td>日功率数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/powerRecord/exportExcel</td><td>导出功率 Excel</td></tr>
+</table>
+
+<div class="seq"><h4>电量计算 - 按机柜 (CabinetCalculationController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/total</td><td>机柜总电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/year</td><td>机柜年度电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/quarter</td><td>机柜季度电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/month</td><td>机柜月度电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/week</td><td>机柜周电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/cabinet/day</td><td>机柜日电量</td></tr>
+</table>
+
+<div class="seq"><h4>电量计算 - 按分区 (GroupCalculationController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/total</td><td>分区总电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/year</td><td>分区年度电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/month</td><td>分区月度电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/list</td><td>分区电量列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/calculation/zone/zoneList</td><td>分区下拉列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/calculation/zone/getOne</td><td>单个分区详情</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/set</td><td>设置分区电量</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/calculation/zone/add</td><td>新增分区电量</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/calculation/zone/delete</td><td>删除分区电量</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 传感器 ==================== -->
+<div class="mod" id="sensor">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(6,182,212,0.15);color:var(--cyan)">📡</div><span class="title">传感器模块</span><span class="cnt">3 Controller · 20+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>传感器信息 (SensorInfoController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensor/infraredList</td><td>红外传感器列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensor/illustrationList</td><td>照度传感器列表</td></tr>
+</table>
+
+<div class="seq"><h4>传感器模块 (SensorModuleController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-req">REQ</span></td><td class="path">/zm/sensorModule/infraredSelectList</td><td>红外选择列表</td></tr>
+<tr><td><span class="badge b-req">REQ</span></td><td class="path">/zm/sensorModule/illuminanceSelectList</td><td>照度选择列表</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensorModule/infraredParams</td><td>红外参数</td></tr>
+<tr><td><span class="badge b-req">REQ</span></td><td class="path">/zm/sensorModule/illuminanceEnabled</td><td>照度启用状态</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensorModule/illuminanceParams</td><td>照度参数</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/sensorModule/infraredGroupSelect</td><td>红外分组选择</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/sensorModule/illuminanceGroupSelect</td><td>照度分组选择</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensorModule/getIllLux</td><td>获取照度亮度</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensorModule/getIllBaseLux</td><td>获取基础照度</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/sensorModule/getAddress</td><td>获取传感器地址</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 协议配置 ==================== -->
+<div class="mod" id="protocol">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(59,130,246,0.15);color:var(--blue)">🔌</div><span class="title">协议配置</span><span class="cnt">4 Controller · 24 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<p style="color:var(--muted);font-size:0.85rem;padding:0.5rem 1rem;">4 个协议 Controller 结构相同（01/03/05/06 对应 Modbus 功能码），每个提供标准 CRUD：</p>
+<table class="api-tbl"><tr><th>方法</th><th>路径模板</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/protocol{01|03|05|06}/list</td><td>分页查询协议配置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/protocol{01|03|05|06}/export</td><td>导出协议配置</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/protocol{01|03|05|06}/{id}</td><td>查询单条协议</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/protocol{01|03|05|06}</td><td>新增协议</td></tr>
+<tr><td><span class="badge b-put">PUT</span></td><td class="path">/zm/protocol{01|03|05|06}</td><td>修改协议</td></tr>
+<tr><td><span class="badge b-del">DEL</span></td><td class="path">/zm/protocol{01|03|05|06}/{ids}</td><td>删除协议</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 状态数据 ==================== -->
+<div class="mod" id="status">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(34,197,94,0.15);color:var(--green)">📊</div><span class="title">状态数据（AC/DC）</span><span class="cnt">4 Controller · 24 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<p style="color:var(--muted);font-size:0.85rem;padding:0.5rem 1rem;">4 个状态 Controller 结构相同，分别管理交流状态(AC)、交流回路(AC Loop)、直流状态(DCC)、直流回路(DCC Loop)：</p>
+<table class="api-tbl"><tr><th>方法</th><th>路径模板</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}/list</td><td>分页查询状态数据</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}/export</td><td>导出状态数据</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}/{id}</td><td>查询单条状态</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}</td><td>新增状态</td></tr>
+<tr><td><span class="badge b-put">PUT</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}</td><td>修改状态</td></tr>
+<tr><td><span class="badge b-del">DEL</span></td><td class="path">/zm/status{Ac|AcLoop|Dcc|DccLoop}/{ids}</td><td>删除状态</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 写入控制(总) ==================== -->
+<div class="mod" id="write">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(249,115,22,0.15);color:var(--orange)">🎛️</div><span class="title">写入控制（总入口）</span><span class="cnt">WriteController · 25+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<p style="color:var(--muted);font-size:0.85rem;padding:0.5rem 1rem;">WriteController 是旧版统一控制入口，新版已拆分为 WriteControl/WriteDevice/WriteGroup/WriteModule/WriteScene 五个子控制器。以下为 WriteController 中的接口：</p>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/groupName</td><td>设置分组名称</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateLoop</td><td>更新回路配置</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/updateZoneLightSwitch</td><td>分区开关</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/updateZoneLightLux</td><td>分区调光</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/intoScenes</td><td>进入场景</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/intoScene</td><td>进入单个场景</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateSceneParams</td><td>更新场景参数</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/sceneName</td><td>设置场景名</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateSimpleControl</td><td>单路控制</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateSimpleControlToAll</td><td>批量控制</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateSceneControl</td><td>场景控制</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateSceneControlToAll</td><td>批量场景控制</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateInfraredParams</td><td>红外参数设置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateIlluminanceParams</td><td>照度参数设置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/deviceSave</td><td>保存设备配置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/communicateSave</td><td>保存通信配置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/timeSave</td><td>保存时间配置</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/updateAcControl</td><td>交流控制</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/updateAcDc</td><td>AC/DC 电压</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/updateDcDc</td><td>DC/DC 电压</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/systemSwitch</td><td>系统开关</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/write/workModule</td><td>工作模块</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/loopControlLux</td><td>回路调光</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/loopControlSwitch</td><td>回路开关</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/groupControlLux</td><td>分组调光</td></tr>
+<tr><td><span class="badge b-post">POST</span></td><td class="path">/zm/write/groupControlSwitch</td><td>分组开关</td></tr>
+</table>
+
+<details><summary>📊 完整数据流转：从点击到硬件</summary>
+<div class="seq-diagram">
+<span class="hl">【照明控制全链路数据流转】</span>
+
+<span class="fe">① 前端层 (Vue + Element UI)</span>
+    baseControl.vue → 用户点击"开灯"按钮
+    → 调用 baseControl.js 的 updateSimpleControl()
+    → Axios POST /zm/write/control/updateSimpleControl
+    → 请求体: { deviceId: 1, loopId: 3, action: "on" }
+        │
+        ▼
+<span class="be">② 控制层 (Spring Boot Controller)</span>
+    WriteControlController.updateSimpleControl()
+    → @Valid 参数校验（deviceId 非空、loopId 范围合法）
+    → 提取 Sa-Token 中的当前用户信息
+    → 调用 WriteControlService
+        │
+        ▼
+<span class="be">③ 业务层 (Service)</span>
+    WriteControlService.updateSimpleControl()
+    → 查询设备信息: deviceMapper.selectById(deviceId)
+    → 获取设备 IP 和端口
+    → 从 ModbusConnectionPool 获取 TCP 连接
+    → 计算线圈地址: baseAddr + loopId
+        │
+        ▼
+<span class="hw">④ 通信层 (Modbus TCP)</span>
+    ModbusMaster.writeSingleCoil(slaveId, coilAddress, true)
+    → 构建 Modbus TCP 报文: [事务ID][协议ID][长度][单元ID][功能码05][地址][值]
+    → 通过 TCP Socket 发送到机柜 IP:502
+    → 等待机柜响应（超时 2s）
+        │
+        ▼
+<span class="hw">⑤ 硬件层 (机柜主控板)</span>
+    主控板收到 FC05 写单个线圈指令
+    → 执行继电器动作 → 灯亮
+    → 返回响应报文: [事务ID][协议ID][长度][单元ID][功能码05][地址][FF00]
+        │
+        ▼
+<span class="be">⑥ 结果处理 (回传)</span]
+    ModbusMaster 解析响应 → 写入成功
+    → 更新 Redis 缓存: HSET device:1:loop 3 "on"
+    → 记录操作日志: operLogService.record("照明控制", "开灯")
+    → 返回 AjaxResult.success("控制成功")
+        │
+        ▼
+<span class="fe">⑦ 前端响应</span>
+    收到 200 响应 → Message.success("控制成功")
+    → 自动刷新 zoneControlList() → 表格更新状态
+</div></details>
+</div></div>
+
+<!-- ==================== 任务调度 ==================== -->
+<div class="mod" id="task">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(148,163,184,0.15);color:var(--muted)">⏱️</div><span class="title">任务调度 & 其他</span><span class="cnt">8 Controller · 20+ 接口</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<div class="seq"><h4>任务控制 (TaskController)</h4></div>
+<table class="api-tbl"><tr><th>方法</th><th>路径</th><th>说明</th></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/task/start</td><td>启动采集任务</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/task/startAuto</td><td>启动自动采集</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/task/stop</td><td>停止采集任务</td></tr>
+<tr><td><span class="badge b-get">GET</span></td><td class="path">/zm/task/stopAll</td><td>停止所有任务</td></tr>
+</table>
+
+<div class="seq"><h4>其他控制器</h4></div>
+<table class="api-tbl"><tr><th>Controller</th><th>路径</th><th>说明</th></tr>
+<tr><td>ACSController</td><td class="path">/acs/getTable, /acs/on, /acs/off, /acs/allOn, /acs/allOff</td><td>交流开关控制</td></tr>
+<tr><td>OtherSwitchController</td><td class="path">/otherSwitch/getTable, /otherSwitch/on, /otherSwitch/off, /otherSwitch/allOn, /otherSwitch/allOff</td><td>其他开关控制</td></tr>
+<tr><td>FullyBrightController</td><td class="path">/full/bright/status, /full/bright/set</td><td>全亮状态与设置</td></tr>
+<tr><td>LeakageController</td><td class="path">/leakage/getTable</td><td>漏电数据</td></tr>
+<tr><td>RecoverController</td><td class="path">/recover/issued, /recover/read</td><td>密码恢复</td></tr>
+<tr><td>BranchController</td><td class="path">/zm/branch/getList</td><td>馈线支路列表</td></tr>
+<tr><td>PointController</td><td class="path">/zm/point/getStatus, /zm/point/setStatus, /zm/point/setModule, /zm/point/getModule...</td><td>点位状态控制（13个接口）</td></tr>
+<tr><td>TimeControlController</td><td class="path">/zm/timeControl/simpleList, /zm/timeControl/sceneList, /zm/timeControl/acSwitchList...</td><td>时控配置（12个接口）</td></tr>
+<tr><td>FileController</td><td class="path">/zm/file/import01Data</td><td>导入协议01数据</td></tr>
+<tr><td>MethodTimeController</td><td class="path">/method/time/status, /method/time/thread</td><td>方法执行时间监控</td></tr>
+</table>
+</div></div>
+
+<!-- ==================== 数据库表 ==================== -->
+<div class="mod">
+<div class="mod-h" onclick="toggle(this)"><div class="icon" style="background:rgba(249,115,22,0.15);color:var(--orange)">🗄️</div><span class="title">数据库核心表</span><span class="cnt">7+ 张表</span><span class="arrow">▶</span></div>
+<div class="mod-body">
+<table class="api-tbl"><tr><th>表名</th><th>说明</th><th>关联的 Controller</th></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_base_device</td><td>机柜设备主表（61条记录）</td><td>DevBaseDeviceController, CabinetInformationController, HomeController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_base_region</td><td>设备区域表</td><td>DevBaseRegionController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_base_district</td><td>控制分区表（13个分区）</td><td>DevBaseDistrictController, LightZoneController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_base_scene</td><td>场景配置表</td><td>DevBaseSceneController, SceneController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_status_ac / dev_status_ac_loop</td><td>交流状态数据</td><td>DevStatusAcController, CabinetInformationController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">dev_status_dc / dev_status_dc_loop</td><td>直流状态数据</td><td>DevStatusDccController, CabinetInformationController</td></tr>
+<tr><td style="font-family:monospace;color:var(--cyan)">record_fault</td><td>故障/告警记录</td><td>RecordFaultController</td></tr>
+</table>
+</div></div>
+
+<div class="footer">
+PM6-ZM 直流照明监控系统 · 全接口分析报告 · 44 Controller / 200+ API / 120+ 前端函数 / 56+ Vue 组件
+</div>
+</div>
+
+<script>
+function toggle(el){el.classList.toggle('open')}
+function filterAPIs(q){
+  q=q.toLowerCase();
+  document.querySelectorAll('.api-tbl tr').forEach(r=>{
+    if(r.querySelector('th'))return;
+    const t=r.textContent.toLowerCase();
+    r.style.display=t.includes(q)?'':'none';
+  });
+  if(q)document.querySelectorAll('.mod-body').forEach(b=>b.style.display='block');
+}
+</script>
+</body>
+</html>

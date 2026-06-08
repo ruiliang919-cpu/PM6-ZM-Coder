@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技术方案示例 — PM6-ZM 直流照明监控系统</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --border: #334155;
+    --text: #e2e8f0; --muted: #94a3b8;
+    --blue: #3b82f6; --green: #22c55e; --purple: #a855f7;
+    --orange: #f97316; --cyan: #06b6d4; --rose: #f43f5e; --yellow: #eab308;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    background: var(--bg); color: var(--text); line-height:1.7; padding:2rem;
+  }
+  .container { max-width:960px; margin:0 auto; }
+
+  /* Header */
+  .doc-header {
+    text-align:center; padding:3rem 2rem; margin-bottom:2.5rem;
+    background: linear-gradient(135deg, rgba(59,130,246,0.08), rgba(168,85,247,0.08));
+    border: 1px solid var(--border); border-radius:16px;
+  }
+  .doc-header h1 {
+    font-size:2rem; margin-bottom:0.5rem;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .doc-header .meta { color:var(--muted); font-size:0.85rem; }
+  .doc-header .meta span { margin: 0 0.75rem; }
+
+  /* TOC */
+  .toc {
+    background:var(--card); border:1px solid var(--border); border-radius:12px;
+    padding:1.5rem 2rem; margin-bottom:2.5rem;
+  }
+  .toc h3 { font-size:1rem; margin-bottom:0.75rem; color:var(--cyan); }
+  .toc ol { padding-left:1.5rem; }
+  .toc li { margin:0.3rem 0; font-size:0.9rem; }
+  .toc a { color:var(--text); text-decoration:none; }
+  .toc a:hover { color:var(--blue); text-decoration:underline; }
+
+  /* Section */
+  .section { margin-bottom:2.5rem; }
+  .section-title {
+    font-size:1.4rem; font-weight:700; margin-bottom:1rem;
+    padding-bottom:0.5rem; border-bottom:2px solid var(--border);
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  .section-title .num {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:32px; height:32px; border-radius:8px; font-size:0.85rem; font-weight:700;
+    background:rgba(59,130,246,0.15); color:var(--blue);
+  }
+
+  /* Card */
+  .card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:12px; padding:1.5rem; margin-bottom:1rem;
+  }
+  .card h4 { color:var(--cyan); margin-bottom:0.75rem; font-size:1rem; }
+  .card p, .card li { color:var(--muted); font-size:0.9rem; }
+  .card ul, .card ol { padding-left:1.5rem; }
+  .card li { margin:0.3rem 0; }
+
+  /* Info Grid */
+  .info-grid {
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap:1rem; margin-bottom:1.5rem;
+  }
+  .info-item {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:10px; padding:1rem;
+  }
+  .info-item .label { font-size:0.75rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.05em; }
+  .info-item .value { font-size:1.05rem; font-weight:600; margin-top:0.2rem; }
+
+  /* Table */
+  table { width:100%; border-collapse:collapse; font-size:0.88rem; }
+  th {
+    text-align:left; padding:0.75rem 1rem; background:rgba(59,130,246,0.08);
+    color:var(--blue); font-weight:600; border-bottom:1px solid var(--border);
+  }
+  td { padding:0.75rem 1rem; border-bottom:1px solid rgba(51,65,85,0.5); color:var(--muted); }
+  tr:hover td { background:rgba(255,255,255,0.02); }
+
+  /* Code block */
+  .code-block {
+    background:#0d1117; border:1px solid var(--border); border-radius:8px;
+    padding:1rem 1.25rem; margin:0.75rem 0; overflow-x:auto;
+    font-family:'Fira Code','Cascadia Code',monospace; font-size:0.82rem;
+    color:#c9d1d9; line-height:1.6;
+  }
+
+  /* Badge */
+  .badge {
+    display:inline-block; padding:0.15rem 0.6rem; border-radius:999px;
+    font-size:0.72rem; font-weight:600;
+  }
+  .badge.method-get { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+  .badge.method-post { background:rgba(59,130,246,0.15); color:var(--blue); border:1px solid rgba(59,130,246,0.3); }
+  .badge.method-put { background:rgba(249,115,22,0.15); color:var(--orange); border:1px solid rgba(249,115,22,0.3); }
+  .badge.method-delete { background:rgba(244,63,94,0.15); color:var(--rose); border:1px solid rgba(244,63,94,0.3); }
+  .badge.status { background:rgba(34,197,94,0.15); color:var(--green); border:1px solid rgba(34,197,94,0.3); }
+  .badge.priority-high { background:rgba(244,63,94,0.15); color:var(--rose); border:1px solid rgba(244,63,94,0.3); }
+  .badge.priority-mid { background:rgba(249,115,22,0.15); color:var(--orange); border:1px solid rgba(249,115,22,0.3); }
+
+  /* Flow diagram */
+  .flow {
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    gap:0.5rem; padding:1.5rem; margin:1rem 0;
+  }
+  .flow-node {
+    padding:0.6rem 1.2rem; border-radius:8px; font-size:0.85rem; font-weight:500;
+    text-align:center; min-width:100px;
+  }
+  .flow-arrow { color:var(--muted); font-size:1.2rem; }
+  .flow-frontend { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); color:var(--green); }
+  .flow-backend { background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); color:var(--blue); }
+  .flow-db { background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.3); color:var(--orange); }
+  .flow-hw { background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.3); color:var(--purple); }
+
+  /* Timeline */
+  .timeline { position:relative; padding-left:2rem; margin:1rem 0; }
+  .timeline::before {
+    content:''; position:absolute; left:8px; top:0; bottom:0;
+    width:2px; background:var(--border);
+  }
+  .timeline-item { position:relative; margin-bottom:1.5rem; }
+  .timeline-item::before {
+    content:''; position:absolute; left:-1.55rem; top:6px;
+    width:10px; height:10px; border-radius:50%;
+    background:var(--blue); border:2px solid var(--bg);
+  }
+  .timeline-item .time { font-size:0.8rem; color:var(--cyan); font-weight:600; }
+  .timeline-item .desc { font-size:0.88rem; color:var(--muted); }
+
+  .footer {
+    text-align:center; color:var(--muted); font-size:0.8rem;
+    margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Header -->
+<div class="doc-header">
+  <h1>技术方案文档</h1>
+  <p style="font-size:1.1rem; color:var(--text); margin-bottom:0.5rem;">
+    PM6-ZM 直流照明监控系统 — <span style="color:var(--cyan)">Modbus TCP 设备通信模块</span>
+  </p>
+  <div class="meta">
+    <span>📄 文档版本：V1.0</span>
+    <span>👤 作者：后端开发组</span>
+    <span>📅 日期：2025-06-07</span>
+    <span>🟡 状态：评审中</span>
+  </div>
+</div>
+
+<!-- What is 技术方案 -->
+<div class="card" style="border-left:3px solid var(--cyan); margin-bottom:2rem;">
+  <h4>💡 什么是技术方案？</h4>
+  <p>技术方案是开发前的<strong style="color:var(--text);">设计蓝图</strong>，回答三个核心问题：</p>
+  <ul style="margin-top:0.5rem;">
+    <li><strong style="color:var(--text);">做什么</strong> — 明确需求边界和功能范围</li>
+    <li><strong style="color:var(--text);">怎么做</strong> — 架构设计、接口定义、数据模型、时序流程</li>
+    <li><strong style="color:var(--text);">为什么这么做</strong> — 方案对比、技术选型理由、风险评估</li>
+  </ul>
+  <p style="margin-top:0.5rem;">大厂流程中，技术方案在<strong style="color:var(--text);">需求评审之后、编码之前</strong>完成，由开发负责人编写，经架构师/TL 评审通过后才开始写代码。</p>
+</div>
+
+<!-- TOC -->
+<div class="toc">
+  <h3>📑 目录</h3>
+  <ol>
+    <li><a href="#s1">背景与需求</a></li>
+    <li><a href="#s2">整体架构</a></li>
+    <li><a href="#s3">接口设计（API）</a></li>
+    <li><a href="#s4">数据模型</a></li>
+    <li><a href="#s5">核心流程（时序图）</a></li>
+    <li><a href="#s6">技术选型</a></li>
+    <li><a href="#s7">风险与应对</a></li>
+    <li><a href="#s8">排期</a></li>
+  </ol>
+</div>
+
+<!-- 1. 背景与需求 -->
+<div class="section" id="s1">
+  <div class="section-title"><span class="num">1</span> 背景与需求</div>
+  <div class="info-grid">
+    <div class="info-item">
+      <div class="label">业务背景</div>
+      <div class="value">地铁直流照明系统需实时监控 60+ 台机柜</div>
+    </div>
+    <div class="info-item">
+      <div class="label">核心痛点</div>
+      <div class="value">当前轮询效率低，100ms 一轮只能覆盖 20 台</div>
+    </div>
+    <div class="info-item">
+      <div class="label">目标</div>
+      <div class="value">支持 60 台并发通信，延迟 &lt; 500ms</div>
+    </div>
+    <div class="info-item">
+      <div class="label">优先级</div>
+      <div class="value"><span class="badge priority-high">P0 高优</span></div>
+    </div>
+  </div>
+  <div class="card">
+    <h4>功能需求</h4>
+    <ul>
+      <li>支持 Modbus TCP 协议与机柜主控板通信（功能码 01/03/05/06）</li>
+      <li>实时读取机柜状态：母线电压、电流、温度、绝缘阻值</li>
+      <li>远程控制：照明开关、调光亮度、运行模式切换</li>
+      <li>异常告警：过压、过流、绝缘故障、通信超时</li>
+      <li>通信协议可配置，支持后续扩展 MQTT 通道</li>
+    </ul>
+  </div>
+</div>
+
+<!-- 2. 整体架构 -->
+<div class="section" id="s2">
+  <div class="section-title"><span class="num">2</span> 整体架构</div>
+  <div class="flow">
+    <div class="flow-node flow-frontend">Vue 前端</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-backend">Spring Boot<br><small>REST API :8081</small></div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-backend">Modbus TCP<br>连接池管理</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-hw">机柜主控板<br><small>Modbus TCP</small></div>
+  </div>
+  <div class="flow">
+    <div class="flow-node flow-backend">Spring Boot</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-db">MySQL 8.0<br><small>zm 库</small></div>
+    <div class="flow-arrow" style="margin:0 1rem;">&nbsp;</div>
+    <div class="flow-node flow-backend">Spring Boot</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-db">Redis<br><small>设备状态缓存</small></div>
+    <div class="flow-arrow" style="margin:0 1rem;">&nbsp;</div>
+    <div class="flow-node flow-backend">MQTT Client</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-node flow-hw">Mosquitto<br><small>:1883</small></div>
+  </div>
+  <div class="card">
+    <h4>模块划分</h4>
+    <table>
+      <tr><th>模块</th><th>职责</th><th>技术</th></tr>
+      <tr><td>ruoyi-zm</td><td>直流照明业务逻辑（设备管理、状态采集、控制指令）</td><td>Spring Boot + MyBatis-Plus</td></tr>
+      <tr><td>ruoyi-system</td><td>系统管理（用户、角色、菜单、字典）</td><td>RuoYi 框架原生</td></tr>
+      <tr><td>Modbus 通信层</td><td>TCP 连接池、协议编解码、指令队列</td><td>jlibmodbus + Netty</td></tr>
+      <tr><td>MQTT 通信层</td><td>设备上报消息订阅、指令下发</td><td>Eclipse Paho</td></tr>
+      <tr><td>前端 Vue</td><td>设备状态展示、控制操作界面</td><td>Vue 2 + Element UI + ECharts</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 3. 接口设计 -->
+<div class="section" id="s3">
+  <div class="section-title"><span class="num">3</span> 接口设计（API）</div>
+  <div class="card">
+    <h4>设备状态查询</h4>
+    <table>
+      <tr><th style="width:80px">方法</th><th>路径</th><th>说明</th></tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/device/{deviceId}/status</td>
+        <td>查询单台机柜实时状态（电压/电流/温度/绝缘阻值）</td>
+      </tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/device/list</td>
+        <td>查询所有机柜列表及在线状态</td>
+      </tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/lighting/status</td>
+        <td>查询各区域照明状态（开关/亮度）</td>
+      </tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>控制指令下发</h4>
+    <table>
+      <tr><th style="width:80px">方法</th><th>路径</th><th>说明</th></tr>
+      <tr>
+        <td><span class="badge method-post">POST</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/control/switch</td>
+        <td>照明开关控制 <code>{"deviceId":1,"zoneId":0,"action":"on"}</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge method-post">POST</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/control/dimmer</td>
+        <td>调光控制 <code>{"deviceId":1,"zoneId":0,"brightness":80}</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge method-post">POST</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/control/mode</td>
+        <td>运行模式切换 <code>{"deviceId":1,"mode":"auto"}</code></td>
+      </tr>
+      <tr>
+        <td><span class="badge method-post">POST</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/scene/apply/{sceneId}</td>
+        <td>一键应用场景（批量控制多台设备）</td>
+      </tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>告警与历史</h4>
+    <table>
+      <tr><th style="width:80px">方法</th><th>路径</th><th>说明</th></tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/alarm/list</td>
+        <td>当前告警列表（分页、按设备/类型筛选）</td>
+      </tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/history/event</td>
+        <td>历史告警事件查询</td>
+      </tr>
+      <tr>
+        <td><span class="badge method-get">GET</span></td>
+        <td style="font-family:monospace;color:var(--text)">/zm/power/statistics</td>
+        <td>电量统计数据（日/周/月维度）</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- 4. 数据模型 -->
+<div class="section" id="s4">
+  <div class="section-title"><span class="num">4</span> 数据模型</div>
+  <div class="card">
+    <h4>核心表结构</h4>
+    <table>
+      <tr><th>表名</th><th>说明</th><th>关键字段</th></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_base_device</td><td>机柜设备主表</td><td>id, device_name, device_id, region_id, ip, port, online_status, run_status</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_base_region</td><td>设备区域表</td><td>id, region_name</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_base_district</td><td>控制分区表</td><td>id, name, lux, switch_status</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_base_scene</td><td>场景配置表</td><td>id, scene_name</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_status_ac</td><td>交流状态数据</td><td>device_id, voltage, current, power</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">dev_status_dc</td><td>直流状态数据</td><td>device_id, bus_voltage, bus_current, insulation</td></tr>
+      <tr><td style="font-family:monospace;color:var(--cyan)">record_fault</td><td>故障记录表</td><td>device_id, fault_type, fault_time, description</td></tr>
+    </table>
+  </div>
+  <div class="code-block">
+-- 设备主表核心字段
+CREATE TABLE dev_base_device (
+  id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+  device_name  VARCHAR(64)   COMMENT '设备名称',
+  device_id    INT           COMMENT '设备通讯编号',
+  region_id    BIGINT        COMMENT '所在区域',
+  online_status INT DEFAULT 0 COMMENT '通信状态 0离线 1在线',
+  run_status   INT DEFAULT 0 COMMENT '运行开关 0关 1开',
+  run_mode     INT DEFAULT 0 COMMENT '运行模式 0自动 1手动',
+  ip           VARCHAR(25)   COMMENT 'IP地址',
+  port         INT           COMMENT '端口号',
+  del_flag     CHAR(1) DEFAULT '0' COMMENT '删除标志'
+) ENGINE=InnoDB COMMENT='机柜设备表';
+  </div>
+</div>
+
+<!-- 5. 核心流程 -->
+<div class="section" id="s5">
+  <div class="section-title"><span class="num">5</span> 核心流程（时序图）</div>
+  <div class="card">
+    <h4>照明控制指令下发流程</h4>
+    <div class="flow">
+      <div class="flow-node flow-frontend">前端页面<br><small>点击"开灯"</small></div>
+      <div class="flow-arrow">1. POST /zm/control/switch →</div>
+      <div class="flow-node flow-backend">WriteControlController</div>
+      <div class="flow-arrow">2. 校验参数 →</div>
+      <div class="flow-node flow-backend">ControlService</div>
+    </div>
+    <div class="flow">
+      <div class="flow-node flow-backend">ControlService</div>
+      <div class="flow-arrow">3. 从连接池获取连接 →</div>
+      <div class="flow-node flow-backend">ModbusPool</div>
+      <div class="flow-arrow">4. 写单个线圈(05) →</div>
+      <div class="flow-node flow-hw">机柜主控板</div>
+    </div>
+    <div class="flow">
+      <div class="flow-node flow-hw">机柜主控板</div>
+      <div class="flow-arrow">5. 响应 →</div>
+      <div class="flow-node flow-backend">ControlService</div>
+      <div class="flow-arrow">6. 更新 Redis 缓存 →</div>
+      <div class="flow-node flow-db">Redis</div>
+      <div class="flow-arrow">7. 返回结果 →</div>
+      <div class="flow-node flow-frontend">前端刷新状态</div>
+    </div>
+  </div>
+  <div class="card">
+    <h4>设备状态定时采集流程</h4>
+    <div class="code-block">
+@Scheduled(fixedRate = 3000)  // 每3秒轮询
+public void pollDeviceStatus() {
+    // 1. 从连接池获取 Modbus TCP 连接
+    ModbusConnection conn = pool.getConnection(deviceIp, port);
+
+    // 2. 发送功能码 03（读保持寄存器）
+    int[] registers = conn.readHoldingRegisters(slaveId, startAddr, count);
+
+    // 3. 解析寄存器值 → 电压/电流/温度
+    DeviceStatus status = ProtocolParser.parse(registers);
+
+    // 4. 更新 Redis 缓存 + 判断是否触发告警
+    redisTemplate.opsForHash().put("device:" + deviceId, status.toMap());
+    alarmService.checkThreshold(deviceId, status);
+
+    // 5. 异步写入 MySQL（批量合并，减少IO）
+    asyncBatchWriter.add(status);
+}
+    </div>
+  </div>
+</div>
+
+<!-- 6. 技术选型 -->
+<div class="section" id="s6">
+  <div class="section-title"><span class="num">6</span> 技术选型</div>
+  <div class="card">
+    <table>
+      <tr><th>组件</th><th>选型</th><th>备选方案</th><th>选型理由</th></tr>
+      <tr><td>Modbus 通信</td><td style="color:var(--green)">jlibmodbus</td><td>modbus4j, jamod</td><td>社区活跃、支持 TCP/RTU、连接池成熟</td></tr>
+      <tr><td>MQTT 客户端</td><td style="color:var(--green)">Eclipse Paho</td><td>hivemq-client</td><td>Eclipse 官方、Spring 集成好、项目已有依赖</td></tr>
+      <tr><td>连接池</td><td style="color:var(--green)">自研 + HikariCP 模式</td><td>Commons Pool 2</td><td>Modbus TCP 长连接特性，需自定义心跳检测</td></tr>
+      <tr><td>异步写入</td><td style="color:var(--green)">Disruptor 环形队列</td><td>BlockingQueue</td><td>高吞吐、低延迟、GC 友好</td></tr>
+      <tr><td>缓存</td><td style="color:var(--green)">Redis + Caffeine</td><td>纯 Redis</td><td>本地缓存减少网络开销，Redis 做持久化</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- 7. 风险与应对 -->
+<div class="section" id="s7">
+  <div class="section-title"><span class="num">7</span> 风险与应对</div>
+  <div class="card">
+    <table>
+      <tr><th>风险</th><th>影响</th><th>概率</th><th>应对措施</th></tr>
+      <tr>
+        <td>Modbus TCP 连接断开</td>
+        <td><span class="badge priority-high">高</span></td>
+        <td>中</td>
+        <td>连接池自动重连 + 指数退避 + 告警通知</td>
+      </tr>
+      <tr>
+        <td>设备响应超时（>2s）</td>
+        <td><span class="badge priority-mid">中</span></td>
+        <td>高</td>
+        <td>指令队列超时剔除 + 设备标记离线 + 3次重试</td>
+      </tr>
+      <tr>
+        <td>并发控制指令冲突</td>
+        <td><span class="badge priority-mid">中</span></td>
+        <td>低</td>
+        <td>设备级分布式锁（Redisson）+ 指令排队</td>
+      </tr>
+      <tr>
+        <td>寄存器地址变更（固件升级）</td>
+        <td><span class="badge priority-mid">中</span></td>
+        <td>低</td>
+        <td>寄存器地址配置化（数据库存储），支持热更新</td>
+      </tr>
+    </table>
+  </div>
+</div>
+
+<!-- 8. 排期 -->
+<div class="section" id="s8">
+  <div class="section-title"><span class="num">8</span> 排期</div>
+  <div class="card">
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="time">第 1 周</div>
+        <div class="desc">Modbus TCP 连接池 + 协议编解码（功能码 01/03/05/06）</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第 2 周</div>
+        <div class="desc">设备状态定时采集 + Redis 缓存 + 告警阈值判断</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第 3 周</div>
+        <div class="desc">控制指令下发 + 分布式锁 + 前端控制页面联调</div>
+      </div>
+      <div class="timeline-item">
+        <div class="time">第 4 周</div>
+        <div class="desc">异常处理完善 + 性能压测（60台并发）+ 文档</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  PM6-ZM 直流照明监控系统 · 技术方案示例文档 · 仅作演示用途
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PM6-ZM 左侧菜单架构分析</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --card: #1e293b;
+    --border: #334155;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-green: #22c55e;
+    --accent-purple: #a855f7;
+    --accent-orange: #f97316;
+    --accent-cyan: #06b6d4;
+    --accent-rose: #f43f5e;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .container { max-width: 1200px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 2.5rem;
+    font-size: 0.95rem;
+  }
+  /* Summary Cards */
+  .summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .summary-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  .summary-card .num {
+    font-size: 2.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .summary-card .label { color: var(--muted); font-size: 0.85rem; margin-top: 0.3rem; }
+  .num.blue { color: var(--accent-blue); }
+  .num.green { color: var(--accent-green); }
+  .num.purple { color: var(--accent-purple); }
+  .num.orange { color: var(--accent-orange); }
+  /* Section */
+  .section {
+    margin-bottom: 2.5rem;
+  }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.75rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .badge.ruoyi { background: rgba(59,130,246,0.15); color: var(--accent-blue); border: 1px solid rgba(59,130,246,0.3); }
+  .badge.custom { background: rgba(34,197,94,0.15); color: var(--accent-green); border: 1px solid rgba(34,197,94,0.3); }
+  .section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+  }
+  /* Menu Card */
+  .menu-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .menu-card-header {
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .menu-card-header:hover { background: rgba(255,255,255,0.03); }
+  .menu-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+  .menu-card-header .name { font-weight: 600; font-size: 1.05rem; }
+  .menu-card-header .count {
+    margin-left: auto;
+    background: rgba(255,255,255,0.06);
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .menu-items { padding: 0.5rem 0; }
+  .menu-item {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1.5fr auto;
+    align-items: center;
+    padding: 0.6rem 1.5rem;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+    gap: 1rem;
+  }
+  .menu-item:hover { background: rgba(255,255,255,0.02); }
+  .menu-item .item-name { font-weight: 500; }
+  .menu-item .item-path { color: var(--muted); font-family: 'Fira Code', monospace; font-size: 0.8rem; }
+  .menu-item .item-desc { color: var(--muted); font-size: 0.82rem; }
+  .menu-item .item-controller {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.75rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    background: rgba(168,85,247,0.1);
+    color: var(--accent-purple);
+    border: 1px solid rgba(168,85,247,0.2);
+    white-space: nowrap;
+  }
+  .menu-item-header {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr 1.5fr auto;
+    padding: 0.4rem 1.5rem;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--border);
+    gap: 1rem;
+  }
+  /* Color themes for menu icons */
+  .icon-system { background: rgba(59,130,246,0.15); color: var(--accent-blue); }
+  .icon-monitor { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+  .icon-tool { background: rgba(168,85,247,0.15); color: var(--accent-purple); }
+  .icon-guide { background: rgba(148,163,184,0.15); color: var(--muted); }
+  .icon-demo { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+  .icon-base { background: rgba(6,182,212,0.15); color: var(--accent-cyan); }
+  .icon-control { background: rgba(34,197,94,0.15); color: var(--accent-green); }
+  .icon-device { background: rgba(249,115,22,0.15); color: var(--accent-orange); }
+  .icon-alarm { background: rgba(244,63,94,0.15); color: var(--accent-rose); }
+  .icon-history { background: rgba(168,85,247,0.15); color: var(--accent-purple); }
+  /* Pie Chart */
+  .chart-section {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2.5rem;
+  }
+  .pie-container { position: relative; width: 200px; height: 200px; }
+  .pie-container svg { transform: rotate(-90deg); }
+  .pie-legend { display: flex; flex-direction: column; gap: 0.75rem; }
+  .legend-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; }
+  .legend-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  /* Footer */
+  .footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+  /* Responsive */
+  @media (max-width: 768px) {
+    body { padding: 1rem; }
+    .menu-item { grid-template-columns: 1fr; gap: 0.2rem; }
+    .menu-item-header { display: none; }
+    .menu-item .item-controller { justify-self: start; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>PM6-ZM 左侧菜单架构分析</h1>
+<p class="subtitle">直流照明监控系统 — 基于 RuoYi-Vue-Plus v4.8.0 二次开发 · 菜单数据来源：数据库 sys_menu 表</p>
+
+<!-- Summary -->
+<div class="summary">
+  <div class="summary-card">
+    <div class="num blue">10</div>
+    <div class="label">顶级菜单总数</div>
+  </div>
+  <div class="summary-card">
+    <div class="num green">32</div>
+    <div class="label">子菜单总数</div>
+  </div>
+  <div class="summary-card">
+    <div class="num purple">5</div>
+    <div class="label">RuoYi 框架自带</div>
+  </div>
+  <div class="summary-card">
+    <div class="num orange">5</div>
+    <div class="label">PM6-ZM 项目新增</div>
+  </div>
+</div>
+
+<!-- Chart -->
+<div class="chart-section">
+  <div class="pie-container">
+    <svg viewBox="0 0 200 200" width="200" height="200">
+      <!-- RuoYi: 16/32 = 50% -->
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#3b82f6" stroke-width="40"
+        stroke-dasharray="251.33 251.33" stroke-dashoffset="0" opacity="0.8"/>
+      <!-- Custom: 16/32 = 50% -->
+      <circle cx="100" cy="100" r="80" fill="none" stroke="#22c55e" stroke-width="40"
+        stroke-dasharray="251.33 251.33" stroke-dashoffset="-251.33" opacity="0.8"/>
+    </svg>
+  </div>
+  <div class="pie-legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#3b82f6"></div>
+      <span><strong>RuoYi 框架自带</strong> — 5 个顶级 / 16 个子菜单（系统管理、监控、工具、官网、测试）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#22c55e"></div>
+      <span><strong>PM6-ZM 项目新增</strong> — 5 个顶级 / 16 个子菜单（基本资料、照明、机柜、告警、历史）</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background:#64748b"></div>
+      <span>核心业务菜单 100% 为项目新增</span>
+    </div>
+  </div>
+</div>
+
+<!-- RuoYi Section -->
+<div class="section">
+  <div class="section-header">
+    <span class="badge ruoyi">RUOYI 框架</span>
+    <span class="section-title">RuoYi-Vue-Plus 自带菜单</span>
+  </div>
+
+  <!-- 系统管理 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-system">⚙️</div>
+      <span class="name">系统管理</span>
+      <span class="count">11 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>权限标识</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">用户管理</span><span class="item-path">system/user</span><span class="item-desc">用户增删改查、分配角色</span><span class="item-controller">system:user:list</span></div>
+      <div class="menu-item"><span class="item-name">角色管理</span><span class="item-path">system/role</span><span class="item-desc">角色权限配置</span><span class="item-controller">system:role:list</span></div>
+      <div class="menu-item"><span class="item-name">菜单管理</span><span class="item-path">system/menu</span><span class="item-desc">菜单树管理</span><span class="item-controller">system:menu:list</span></div>
+      <div class="menu-item"><span class="item-name">部门管理</span><span class="item-path">system/dept</span><span class="item-desc">组织架构</span><span class="item-controller">system:dept:list</span></div>
+      <div class="menu-item"><span class="item-name">岗位管理</span><span class="item-path">system/post</span><span class="item-desc">岗位维护</span><span class="item-controller">system:post:list</span></div>
+      <div class="menu-item"><span class="item-name">字典管理</span><span class="item-path">system/dict</span><span class="item-desc">数据字典</span><span class="item-controller">system:dict:list</span></div>
+      <div class="menu-item"><span class="item-name">参数设置</span><span class="item-path">system/config</span><span class="item-desc">系统参数</span><span class="item-controller">system:config:list</span></div>
+      <div class="menu-item"><span class="item-name">通知公告</span><span class="item-path">system/notice</span><span class="item-desc">公告管理</span><span class="item-controller">system:notice:list</span></div>
+      <div class="menu-item"><span class="item-name">文件管理</span><span class="item-path">system/oss</span><span class="item-desc">文件上传管理</span><span class="item-controller">system:oss:list</span></div>
+      <div class="menu-item"><span class="item-name">操作日志</span><span class="item-path">monitor/operlog</span><span class="item-desc">操作审计</span><span class="item-controller">monitor:operlog:list</span></div>
+      <div class="menu-item"><span class="item-name">登录日志</span><span class="item-path">monitor/logininfor</span><span class="item-desc">登录记录</span><span class="item-controller">monitor:logininfor:list</span></div>
+    </div>
+  </div>
+
+  <!-- 系统监控 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-monitor">📊</div>
+      <span class="name">系统监控</span>
+      <span class="count">5 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>权限标识</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">在线用户</span><span class="item-path">monitor/online</span><span class="item-desc">当前在线用户</span><span class="item-controller">monitor:online:list</span></div>
+      <div class="menu-item"><span class="item-name">缓存列表</span><span class="item-path">monitor/cache/list</span><span class="item-desc">Redis 缓存查看</span><span class="item-controller">monitor:cache:list</span></div>
+      <div class="menu-item"><span class="item-name">缓存监控</span><span class="item-path">monitor/cache</span><span class="item-desc">Redis 监控</span><span class="item-controller">monitor:cache:list</span></div>
+      <div class="menu-item"><span class="item-name">Admin监控</span><span class="item-path">monitor/admin</span><span class="item-desc">Spring Boot Admin</span><span class="item-controller">monitor:admin:list</span></div>
+      <div class="menu-item"><span class="item-name">任务调度中心</span><span class="item-path">monitor/xxljob</span><span class="item-desc">XXL-JOB 定时任务</span><span class="item-controller">monitor:xxljob:list</span></div>
+    </div>
+  </div>
+
+  <!-- 系统工具 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-tool">🔧</div>
+      <span class="name">系统工具</span>
+      <span class="count">2 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>权限标识</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">表单构建</span><span class="item-path">tool/build</span><span class="item-desc">可视化表单设计器</span><span class="item-controller">tool:build:list</span></div>
+      <div class="menu-item"><span class="item-name">代码生成</span><span class="item-path">tool/gen</span><span class="item-desc">代码生成器</span><span class="item-controller">tool:gen:list</span></div>
+    </div>
+  </div>
+
+  <!-- PLUS官网 & 测试菜单 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-guide">🔗</div>
+      <span class="name">PLUS官网 / 测试菜单</span>
+      <span class="count">外链 + 2 个演示</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>权限标识</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">PLUS官网</span><span class="item-path">https://gitee.com/.../RuoYi-Vue-Plus</span><span class="item-desc">框架官方外链</span><span class="item-controller">—</span></div>
+      <div class="menu-item"><span class="item-name">测试单表</span><span class="item-path">demo/demo</span><span class="item-desc">框架演示-单表CRUD</span><span class="item-controller">demo:demo:list</span></div>
+      <div class="menu-item"><span class="item-name">测试树表</span><span class="item-path">demo/tree</span><span class="item-desc">框架演示-树表CRUD</span><span class="item-controller">demo:tree:list</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Section -->
+<div class="section">
+  <div class="section-header">
+    <span class="badge custom">PM6-ZM 新增</span>
+    <span class="section-title">项目自定义业务菜单</span>
+  </div>
+
+  <!-- 基本资料 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-base">📋</div>
+      <span class="name">基本资料</span>
+      <span class="count">5 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>后端 Controller</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">设备区域</span><span class="item-path">zm/baseRegion</span><span class="item-desc">管理设备所在的物理区域</span><span class="item-controller">DevBaseRegionController</span></div>
+      <div class="menu-item"><span class="item-name">分区设置</span><span class="item-path">zm/baseDistrict</span><span class="item-desc">照明分区划分（分区0~12）</span><span class="item-controller">DevBaseDistrictController</span></div>
+      <div class="menu-item"><span class="item-name">场景设置</span><span class="item-path">zm/baseScene</span><span class="item-desc">照明场景配置</span><span class="item-controller">DevBaseSceneController</span></div>
+      <div class="menu-item"><span class="item-name">机柜配置</span><span class="item-path">zm/baseDevice</span><span class="item-desc">机柜设备注册与参数配置</span><span class="item-controller">DevBaseDeviceController</span></div>
+      <div class="menu-item"><span class="item-name">报文</span><span class="item-path">zm/baseInstructs</span><span class="item-desc">Modbus/MQTT 通信报文查看</span><span class="item-controller">—</span></div>
+    </div>
+  </div>
+
+  <!-- 照明状态&控制 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-control">💡</div>
+      <span class="name">照明状态 & 控制</span>
+      <span class="count">2 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>后端 Controller</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">照明状态</span><span class="item-path">zm/baseStatus</span><span class="item-desc">实时显示各区域照明开关/亮度状态</span><span class="item-controller">LightingController</span></div>
+      <div class="menu-item"><span class="item-name">照明控制</span><span class="item-path">zm/baseControl</span><span class="item-desc">手动控制照明开关、调光</span><span class="item-controller">WriteControlController</span></div>
+    </div>
+  </div>
+
+  <!-- 直流机柜 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-device">🖥️</div>
+      <span class="name">直流机柜</span>
+      <span class="count">4 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>后端 Controller</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">机柜信息</span><span class="item-path">zm/device/dev</span><span class="item-desc">机柜实时运行数据（电压/电流/温度）</span><span class="item-controller">DevBaseDeviceController</span></div>
+      <div class="menu-item"><span class="item-name">机柜记录</span><span class="item-path">zm/device/record</span><span class="item-desc">机柜运行历史记录</span><span class="item-controller">RecordFaultController</span></div>
+      <div class="menu-item"><span class="item-name">机柜设置</span><span class="item-path">zm/device/setting</span><span class="item-desc">机柜参数远程配置</span><span class="item-controller">DevConfigGroupController</span></div>
+      <div class="menu-item"><span class="item-name">机柜控制</span><span class="item-path">zm/device/dev-control</span><span class="item-desc">机柜远程控制（开关/模式切换）</span><span class="item-controller">WriteDeviceController</span></div>
+    </div>
+  </div>
+
+  <!-- 当前告警 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-alarm">🚨</div>
+      <span class="name">当前告警</span>
+      <span class="count">1 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>后端 Controller</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">告警列表</span><span class="item-path">zm/alarm/list</span><span class="item-desc">实时告警（故障/过压/过流/绝缘异常）</span><span class="item-controller">—</span></div>
+    </div>
+  </div>
+
+  <!-- 历史记录 -->
+  <div class="menu-card">
+    <div class="menu-card-header">
+      <div class="menu-icon icon-history">📚</div>
+      <span class="name">历史记录</span>
+      <span class="count">3 个子菜单</span>
+    </div>
+    <div class="menu-item-header">
+      <span>菜单名称</span><span>路径</span><span>说明</span><span>后端 Controller</span>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item"><span class="item-name">历史事件</span><span class="item-path">zm/history/event</span><span class="item-desc">历史告警事件查询</span><span class="item-controller">—</span></div>
+      <div class="menu-item"><span class="item-name">历史记录</span><span class="item-path">zm/history/record</span><span class="item-desc">设备运行历史数据</span><span class="item-controller">—</span></div>
+      <div class="menu-item"><span class="item-name">电量计算</span><span class="item-path">zm/history/powerCalculation</span><span class="item-desc">用电量统计分析</span><span class="item-controller">PowerController</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- Backend Controllers -->
+<div class="section">
+  <div class="section-header">
+    <span class="badge custom">后端</span>
+    <span class="section-title">ZM 模块 Controller 分类（共 45 个）</span>
+  </div>
+  <div class="menu-card">
+    <div class="menu-items" style="padding:1rem 1.5rem;">
+      <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:1rem;">
+        <div>
+          <div style="color:var(--accent-cyan);font-weight:600;margin-bottom:0.5rem;">📦 基础配置类</div>
+          <div style="color:var(--muted);font-size:0.85rem;line-height:1.8;">
+            DevBaseRegionController<br>
+            DevBaseDistrictController<br>
+            DevBaseDeviceController<br>
+            DevBaseSceneController<br>
+            DevConfigGroupController
+          </div>
+        </div>
+        <div>
+          <div style="color:var(--accent-green);font-weight:600;margin-bottom:0.5rem;">📡 状态读取类</div>
+          <div style="color:var(--muted);font-size:0.85rem;line-height:1.8;">
+            LightingController<br>
+            DevStatusAcController / DevStatusDccController<br>
+            SensorInfoController / SensorModuleController<br>
+            PowerController / MeterEnergyController<br>
+            HomeController
+          </div>
+        </div>
+        <div>
+          <div style="color:var(--accent-orange);font-weight:600;margin-bottom:0.5rem;">🎛️ 控制写入类</div>
+          <div style="color:var(--muted);font-size:0.85rem;line-height:1.8;">
+            WriteControlController<br>
+            WriteDeviceController<br>
+            WriteModuleController<br>
+            WriteGroupController<br>
+            WriteSceneController / FullyBrightController
+          </div>
+        </div>
+        <div>
+          <div style="color:var(--accent-purple);font-weight:600;margin-bottom:0.5rem;">🔌 协议解析类</div>
+          <div style="color:var(--muted);font-size:0.85rem;line-height:1.8;">
+            DevProtocol01Controller<br>
+            DevProtocol03Controller<br>
+            DevProtocol05Controller<br>
+            DevProtocol06Controller<br>
+            ACSController
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  PM6-ZM 直流照明监控系统 · 菜单分析报告 · 基于数据库 sys_menu 表 + 前端 views 目录 + 后端 Controller 交叉比对生成
+</div>
+
+</div>
+</body>
+</html>

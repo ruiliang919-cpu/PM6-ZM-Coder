@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技术方案入门 — 大白话版</title>
+<style>
+  :root {
+    --bg: #0f172a; --card: #1e293b; --border: #334155;
+    --text: #e2e8f0; --muted: #94a3b8;
+    --blue: #3b82f6; --green: #22c55e; --purple: #a855f7;
+    --orange: #f97316; --cyan: #06b6d4; --rose: #f43f5e; --yellow: #eab308;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
+    background: var(--bg); color: var(--text); line-height:1.8; padding:2rem;
+  }
+  .container { max-width:860px; margin:0 auto; }
+
+  /* Hero */
+  .hero {
+    text-align:center; padding:3rem 2rem; margin-bottom:2.5rem;
+    background: linear-gradient(135deg, rgba(6,182,212,0.1), rgba(168,85,247,0.1));
+    border:1px solid var(--border); border-radius:20px;
+  }
+  .hero h1 {
+    font-size:2.2rem; margin-bottom:0.5rem;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .hero .tagline { font-size:1.1rem; color:var(--muted); }
+
+  /* Analogy */
+  .analogy {
+    background: linear-gradient(135deg, rgba(34,197,94,0.06), rgba(59,130,246,0.06));
+    border:1px solid var(--border); border-radius:16px;
+    padding:2rem; margin-bottom:2.5rem;
+  }
+  .analogy h2 { font-size:1.3rem; margin-bottom:1rem; color:var(--green); }
+  .analogy-grid {
+    display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;
+  }
+  .analogy-side {
+    background:var(--card); border:1px solid var(--border); border-radius:12px; padding:1.5rem;
+  }
+  .analogy-side h3 { font-size:1rem; margin-bottom:0.75rem; }
+  .analogy-side .emoji { font-size:2rem; margin-bottom:0.5rem; }
+  .analogy-side ul { padding-left:1.2rem; font-size:0.9rem; color:var(--muted); }
+  .analogy-side li { margin:0.3rem 0; }
+  .arrow-center {
+    display:flex; align-items:center; justify-content:center;
+    font-size:2rem; color:var(--muted);
+  }
+  @media(max-width:600px) { .analogy-grid { grid-template-columns:1fr; } }
+
+  /* Big concept cards */
+  .concept {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:2rem; margin-bottom:1.5rem;
+    position:relative; overflow:hidden;
+  }
+  .concept::before {
+    content:''; position:absolute; top:0; left:0; width:4px; height:100%;
+  }
+  .concept.what::before { background:var(--cyan); }
+  .concept.why::before { background:var(--green); }
+  .concept.when::before { background:var(--orange); }
+  .concept.how::before { background:var(--purple); }
+
+  .concept h2 { font-size:1.2rem; margin-bottom:0.75rem; display:flex; align-items:center; gap:0.5rem; }
+  .concept h2 .emoji { font-size:1.5rem; }
+  .concept p { color:var(--muted); font-size:0.95rem; }
+  .concept .highlight { color:var(--text); font-weight:600; }
+
+  /* Steps */
+  .steps {
+    display:flex; flex-direction:column; gap:1rem; margin:1.5rem 0;
+  }
+  .step {
+    display:flex; gap:1rem; align-items:flex-start;
+  }
+  .step-num {
+    width:40px; height:40px; border-radius:12px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    font-weight:700; font-size:1.1rem;
+  }
+  .step-num.s1 { background:rgba(6,182,212,0.15); color:var(--cyan); }
+  .step-num.s2 { background:rgba(59,130,246,0.15); color:var(--blue); }
+  .step-num.s3 { background:rgba(168,85,247,0.15); color:var(--purple); }
+  .step-num.s4 { background:rgba(249,115,22,0.15); color:var(--orange); }
+  .step-num.s5 { background:rgba(34,197,94,0.15); color:var(--green); }
+  .step-num.s6 { background:rgba(244,63,94,0.15); color:var(--rose); }
+  .step-num.s7 { background:rgba(234,179,8,0.15); color:var(--yellow); }
+  .step-num.s8 { background:rgba(148,163,184,0.15); color:var(--muted); }
+  .step-content h4 { font-size:0.95rem; margin-bottom:0.2rem; }
+  .step-content p { font-size:0.88rem; color:var(--muted); }
+
+  /* PM6 Example */
+  .example {
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:2rem; margin-bottom:1.5rem;
+  }
+  .example h2 { font-size:1.2rem; margin-bottom:1rem; color:var(--orange); display:flex; align-items:center; gap:0.5rem; }
+  .example-card {
+    background:rgba(255,255,255,0.02); border:1px solid var(--border);
+    border-radius:10px; padding:1.25rem; margin-bottom:1rem;
+  }
+  .example-card h4 { font-size:0.95rem; margin-bottom:0.5rem; color:var(--cyan); }
+  .example-card p { font-size:0.88rem; color:var(--muted); }
+  .example-card .answer { color:var(--green); font-weight:500; margin-top:0.5rem; }
+
+  /* Big quote */
+  .big-quote {
+    text-align:center; padding:2.5rem 2rem; margin:2rem 0;
+    background: linear-gradient(135deg, rgba(168,85,247,0.08), rgba(6,182,212,0.08));
+    border:1px solid var(--border); border-radius:16px;
+  }
+  .big-quote .quote {
+    font-size:1.4rem; font-weight:600;
+    background: linear-gradient(135deg, var(--cyan), var(--purple));
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  }
+  .big-quote .sub { color:var(--muted); font-size:0.9rem; margin-top:0.5rem; }
+
+  /* Flow simple */
+  .flow-simple {
+    display:flex; align-items:center; justify-content:center; flex-wrap:wrap;
+    gap:0.5rem; margin:1.5rem 0;
+  }
+  .flow-box {
+    padding:0.6rem 1.2rem; border-radius:10px; font-size:0.9rem; font-weight:500;
+    text-align:center;
+  }
+  .flow-box.f1 { background:rgba(6,182,212,0.12); border:1px solid rgba(6,182,212,0.3); color:var(--cyan); }
+  .flow-box.f2 { background:rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.3); color:var(--blue); }
+  .flow-box.f3 { background:rgba(168,85,247,0.12); border:1px solid rgba(168,85,247,0.3); color:var(--purple); }
+  .flow-box.f4 { background:rgba(249,115,22,0.12); border:1px solid rgba(249,115,22,0.3); color:var(--orange); }
+  .flow-box.f5 { background:rgba(34,197,94,0.12); border:1px solid rgba(34,197,94,0.3); color:var(--green); }
+  .flow-arrow { color:var(--muted); font-size:1.5rem; }
+
+  .footer {
+    text-align:center; color:var(--muted); font-size:0.8rem;
+    margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border);
+  }
+
+  /* Toggle */
+  details { margin:1rem 0; }
+  details summary {
+    cursor:pointer; padding:0.75rem 1rem; background:var(--card);
+    border:1px solid var(--border); border-radius:10px;
+    font-weight:500; font-size:0.95rem; list-style:none;
+    display:flex; align-items:center; gap:0.5rem;
+  }
+  details summary::before { content:'▶'; font-size:0.7rem; transition:transform 0.2s; }
+  details[open] summary::before { transform:rotate(90deg); }
+  details .detail-content {
+    padding:1rem; margin-top:0.5rem;
+    background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:10px;
+    font-size:0.9rem; color:var(--muted);
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<!-- Hero -->
+<div class="hero">
+  <h1>技术方案是什么？</h1>
+  <p class="tagline">用大白话解释，保证你看得懂 👇</p>
+</div>
+
+<!-- 一句话总结 -->
+<div class="big-quote">
+  <div class="quote">技术方案 = 写代码之前的"施工图纸"</div>
+  <div class="sub">盖房子要先画图纸，写代码要先写技术方案</div>
+</div>
+
+<!-- 类比 -->
+<div class="analogy">
+  <h2>🏠 盖房子 vs 写代码</h2>
+  <div class="analogy-grid">
+    <div class="analogy-side">
+      <div class="emoji">🏗️</div>
+      <h3 style="color:var(--cyan)">盖房子的流程</h3>
+      <ul>
+        <li>业主说需求："我要盖一栋3层小楼"</li>
+        <li>建筑师画<strong style="color:var(--text)">图纸</strong>：几层、多大、什么结构</li>
+        <li>施工队按图纸<strong style="color:var(--text)">干活</strong></li>
+        <li>监理<strong style="color:var(--text)">验收</strong>：质量合不合格</li>
+      </ul>
+    </div>
+    <div class="analogy-side">
+      <div class="emoji">💻</div>
+      <h3 style="color:var(--green)">写代码的流程</h3>
+      <ul>
+        <li>产品经理说需求："我要一个设备监控功能"</li>
+        <li>开发写<strong style="color:var(--text)">技术方案</strong>：用什么技术、怎么设计</li>
+        <li>程序员按方案<strong style="color:var(--text)">写代码</strong></li>
+        <li>测试<strong style="color:var(--text)">验收</strong>：功能对不对、有没有 Bug</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- 4个核心问题 -->
+<div class="concept what">
+  <h2><span class="emoji">❓</span> 技术方案要回答什么？</h2>
+  <p>一份好的技术方案，只需要说清楚 <span class="highlight">4 件事</span>：</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num s1">1</div>
+      <div class="step-content">
+        <h4 style="color:var(--cyan)">做什么？</h4>
+        <p>这个功能是干嘛的？解决什么问题？</p>
+        <p style="color:var(--text);margin-top:0.3rem">例："给地铁照明系统加一个实时监控功能，能看到每台机柜的电压电流"</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num s2">2</div>
+      <div class="step-content">
+        <h4 style="color:var(--blue)">怎么做？</h4>
+        <p>用什么技术？代码怎么组织？数据怎么存？</p>
+        <p style="color:var(--text);margin-top:0.3rem">例："用 Spring Boot 做后端，每3秒通过 Modbus 协议去读机柜数据，存到 MySQL"</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num s3">3</div>
+      <div class="step-content">
+        <h4 style="color:var(--purple)">会出什么问题？</h4>
+        <p>提前想好可能遇到的坑，怎么应对</p>
+        <p style="color:var(--text);margin-top:0.3rem">例："如果机柜断网了怎么办？→ 自动重连 + 标记离线 + 发告警"</p>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num s4">4</div>
+      <div class="step-content">
+        <h4 style="color:var(--orange)">要多久？</h4>
+        <p>大概需要多少时间，分几步完成</p>
+        <p style="color:var(--text);margin-top:0.3rem">例："第1周写通信模块，第2周写状态采集，第3周联调，第4周测试"</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 大厂流程 -->
+<div class="concept why">
+  <h2><span class="emoji">🏢</span> 大厂开发的完整流程</h2>
+  <p>技术方案在整个流程中的位置：</p>
+  <div class="flow-simple">
+    <div class="flow-box f1">产品经理<br>提需求</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box f2">需求评审<br>大家讨论</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box f3"><strong>写技术方案</strong><br>👈 你在这里</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box f4">方案评审<br>架构师审批</div>
+    <div class="flow-arrow">→</div>
+    <div class="flow-box f5">开始写代码</div>
+  </div>
+  <p style="text-align:center;color:var(--muted);font-size:0.85rem;margin-top:0.5rem;">
+    技术方案评审通过后，才允许开始写代码。这是大厂的质量保障流程。
+  </p>
+</div>
+
+<!-- 实际例子 -->
+<div class="example">
+  <h2>📋 用 PM6-ZM 项目举个例子</h2>
+  <p style="color:var(--muted);margin-bottom:1rem;">假设产品经理提了一个需求：<span style="color:var(--text);font-weight:500;">"我要在系统里加一个功能，能一键开关某条隧道的所有照明灯"</span></p>
+
+  <div class="example-card">
+    <h4>❓ 做什么？</h4>
+    <p>用户在前端页面选择一条隧道，点击"全开"或"全关"，系统自动控制这条隧道下所有机柜的照明。</p>
+  </div>
+
+  <div class="example-card">
+    <h4>🔧 怎么做？</h4>
+    <p><strong style="color:var(--text)">前端：</strong>在照明控制页面加一个"隧道级控制"按钮组，选隧道 → 点全开/全关</p>
+    <p><strong style="color:var(--text)">后端：</strong>新增接口 <code>POST /zm/control/tunnel</code>，收到请求后：</p>
+    <p style="padding-left:1rem;">1. 查数据库：这条隧道下有哪些机柜？<br>
+    2. 遍历每台机柜，通过 Modbus 协议发送开关指令<br>
+    3. 收集所有结果，返回给前端</p>
+    <p><strong style="color:var(--text)">数据库：</strong>不需要新建表，在 <code>dev_base_region</code> 表加一个"隧道"类型即可</p>
+  </div>
+
+  <div class="example-card">
+    <h4>⚠️ 会出什么问题？</h4>
+    <p><strong style="color:var(--rose)">问题1：</strong>一条隧道可能有 20 台机柜，串行控制太慢</p>
+    <p class="answer">✅ 解决：用线程池并发控制，每台机柜一个线程，汇总结果</p>
+    <p style="margin-top:0.5rem;"><strong style="color:var(--rose)">问题2：</strong>如果其中 2 台控制失败怎么办？</p>
+    <p class="answer">✅ 解决：返回部分成功结果，前端标红失败的机柜，支持重试</p>
+  </div>
+
+  <div class="example-card">
+    <h4>📅 要多久？</h4>
+    <p>前端页面改 1 天 + 后端接口 1 天 + 联调测试 1 天 = <strong style="color:var(--green)">共 3 天</strong></p>
+  </div>
+</div>
+
+<!-- 技术方案里常见的模块 -->
+<div class="concept how">
+  <h2><span class="emoji">📄</span> 技术方案一般包含哪些内容？</h2>
+  <p>点击展开看每个模块的通俗解释：</p>
+
+  <details>
+    <summary>📐 架构设计图</summary>
+    <div class="detail-content">
+      <p>就是画一张图，告诉你系统由哪些部分组成，它们之间怎么通信。</p>
+      <p style="margin-top:0.5rem;">PM6-ZM 的架构：<strong>前端(Vue)</strong> → <strong>后端(Spring Boot)</strong> → <strong>机柜(Modbus协议)</strong></p>
+      <p>就像：你(前端) → 打电话给客服(后端) → 客服去仓库查货(机柜)</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🔌 接口设计（API）</summary>
+    <div class="detail-content">
+      <p>接口 = 前端和后端之间的"约定"。前端说"我要什么数据"，后端说"我给你什么格式"。</p>
+      <p style="margin-top:0.5rem;">比如：<code>GET /zm/device/1/status</code> 意思是"告诉我1号机柜的状态"</p>
+      <p>后端返回：<code>{"voltage": 220, "current": 15.5, "temperature": 35}</code></p>
+      <p>就像点外卖：你说"要一份宫保鸡丁"(请求)，店家给你一份菜(响应)。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🗄️ 数据模型（数据库表设计）</summary>
+    <div class="detail-content">
+      <p>就是设计数据库里要有哪些表，每张表存什么数据。</p>
+      <p style="margin-top:0.5rem;">比如 PM6-ZM 有一张"机柜表"，存了每台机柜的：名字、IP地址、在线状态、运行模式...</p>
+      <p>就像 Excel 表格：每一行是一台机柜，每一列是一个属性。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🔄 核心流程（时序图）</summary>
+    <div class="detail-content">
+      <p>用图或文字描述一个功能"从头到尾"是怎么跑的。</p>
+      <p style="margin-top:0.5rem;">比如"开灯"流程：用户点按钮 → 前端发请求 → 后端收到 → 后端通过 Modbus 告诉机柜 → 机柜开灯 → 返回结果 → 前端显示成功</p>
+      <p>就像快递流程：你下单 → 商家发货 → 快递运输 → 送到你手上 → 你确认收货。</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>🛠️ 技术选型</summary>
+    <div class="detail-content">
+      <p>选择用什么技术工具来实现。就像装修选材料：用什么牌子的油漆、什么材质的地板。</p>
+      <p style="margin-top:0.5rem;">PM6-ZM 的选择：</p>
+      <p>• 通信协议：选 Modbus TCP（因为机柜只支持这个）</p>
+      <p>• 后端框架：选 Spring Boot（因为 RuoYi 框架基于这个）</p>
+      <p>• 缓存：选 Redis（因为要快速读取设备状态）</p>
+    </div>
+  </details>
+
+  <details>
+    <summary>⚠️ 风险评估</summary>
+    <div class="detail-content">
+      <p>提前想好"可能出什么问题"以及"出了问题怎么办"。</p>
+      <p style="margin-top:0.5rem;">就像出门前看天气预报：可能下雨 → 带伞。可能堵车 → 提前出门。</p>
+      <p>PM6-ZM 的风险：机柜可能断网 → 自动重连。并发控制冲突 → 加锁排队。</p>
+    </div>
+  </details>
+</div>
+
+<!-- 总结 -->
+<div class="big-quote">
+  <div class="quote">先想清楚再动手，比写了一半推倒重来强 100 倍</div>
+  <div class="sub">这就是大厂要求写技术方案的原因 — 节省时间、减少返工、保证质量</div>
+</div>
+
+<div class="footer">
+  PM6-ZM 直流照明监控系统 · 技术方案入门 · 大白话版
+</div>
+
+</div>
+</body>
+</html>
