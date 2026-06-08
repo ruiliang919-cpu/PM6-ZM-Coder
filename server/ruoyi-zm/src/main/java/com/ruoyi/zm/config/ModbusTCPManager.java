@@ -229,6 +229,7 @@ public class ModbusTCPManager {
             modbusInfo = new DevBaseDeviceTCPVo();
             if (!ObjectUtils.isEmpty(source)) {
                 BeanCopyUtils.copy(source, modbusInfo);
+                modbusInfo.setId(source.getDeviceNo()); // id 字段存储的是 deviceNo（业务键），非数据库主键
                 redisTemplate.opsForValue().set("zm:create-tcp:" + slaveId, modbusInfo, modbusProperties.getConnectionTtl(), TimeUnit.SECONDS);
             }
         }

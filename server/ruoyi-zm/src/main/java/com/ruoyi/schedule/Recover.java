@@ -40,7 +40,7 @@ public class Recover {
                 if (device != null && device.getLastTime() != null) {
                     try {
                         device.setLastTime(null);
-                        redisTemplate.opsForValue().set("zm:create-tcp:" + device.getId(), device, 1, TimeUnit.DAYS);
+                        redisTemplate.opsForValue().set("zm:create-tcp:" + base.getDeviceNo(), device, 1, TimeUnit.DAYS);
                         recover(device);
                     } catch (Exception e) {
                         // e.printStackTrace();

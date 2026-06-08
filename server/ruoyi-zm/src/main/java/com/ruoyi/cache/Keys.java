@@ -2,6 +2,7 @@ package com.ruoyi.cache;
 
 import com.ruoyi.common.core.domain.PageQuery;
 import com.ruoyi.common.core.page.TableDataInfo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.ruoyi.zm.domain.DevBaseDevice;
 import com.ruoyi.zm.domain.vo.DevBaseDeviceTCPVo;
 import com.ruoyi.zm.mapper.DevBaseDeviceMapper;
@@ -38,7 +39,8 @@ public class Keys {
     public DevBaseDeviceTCPVo getCreateTCP(Integer deviceId) {
         DevBaseDeviceTCPVo tcpVo = (DevBaseDeviceTCPVo) this.redisTemplate.opsForValue().get(TCP_KEY + deviceId);
         if (ObjectUtils.isEmpty(tcpVo)) {
-            DevBaseDevice device = this.deviceMapper.selectById(deviceId);
+            DevBaseDevice device = this.deviceMapper.selectOne(new LambdaQueryWrapper<DevBaseDevice>()
+                .eq(DevBaseDevice::getDeviceNo, deviceId));
             if (device == null) {
                 log.warn("Keys.getCreateTCP device not found, deviceId={}", deviceId);
                 return new DevBaseDeviceTCPVo();
