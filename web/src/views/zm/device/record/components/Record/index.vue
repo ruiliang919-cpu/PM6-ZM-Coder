@@ -125,9 +125,12 @@ export default {
     },
     _get() {
       getRecordOne(this.queryParams).then((response) => {
-        this.demoList = response.rows || response.data.rows || response.data || []
-        this.total = response.total || response.data.total || 0
-
+        const data = response?.data ?? response
+        this.demoList = data?.rows ?? []
+        this.total = data?.total ?? 0
+      }).catch(() => {
+        this.demoList = []
+        this.total = 0
       }).finally(() => {
         this.loading = false
       })

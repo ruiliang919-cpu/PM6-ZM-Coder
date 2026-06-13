@@ -66,7 +66,6 @@
 import { getCodeImg } from '@/api/login'
 import Cookies from 'js-cookie'
 import { encrypt, decrypt } from '@/utils/jsencrypt'
-import path from 'path'
 import { CookiesInElectron, isInElectron } from '@/utils/ruoyi'
 
 export default {
@@ -97,8 +96,7 @@ export default {
       captchaEnabled: false,
       // 注册开关
       register: false,
-      redirect: undefined,
-      path: '/'
+      redirect: undefined
     }
   },
   watch: {
@@ -114,9 +112,6 @@ export default {
     this.getCookie()
   },
   methods: {
-    path() {
-      return path
-    },
     getCode() {
       getCodeImg().then(res => {
         this.captchaEnabled = res.data.captchaEnabled === undefined ? true : res.data.captchaEnabled
